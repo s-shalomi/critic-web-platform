@@ -59,7 +59,8 @@ describe('Notes Domain Tests', () => {
 
     const conversionResult = await convertNoteToNode(note.id);
     expect(conversionResult.success).toBe(true);
-    expect(conversionResult.conceptNodeId).toBeDefined();
+    expect(conversionResult.conceptNode).toBeDefined();
+    expect(conversionResult.conceptNode?.id).toBeDefined();
 
     const notes = await getNotesForModule(moduleId);
     const convertedNote = notes.find((n) => n.id === note.id);

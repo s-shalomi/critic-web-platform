@@ -31,54 +31,9 @@ export async function getConceptualiseData(moduleId: string): Promise<{
   nodes: ConceptNode[];
   links: ConceptLink[];
 }> {
-  const nodes = memoryNodesStore.get(moduleId) || [
-    {
-      id: 'node-1',
-      moduleId,
-      text: 'record cold snow',
-      positionX: 250,
-      positionY: 120,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-    {
-      id: 'node-2',
-      moduleId,
-      text: 'key concept',
-      positionX: 220,
-      positionY: 340,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-    {
-      id: 'node-3',
-      moduleId,
-      text: 'key concept',
-      positionX: 450,
-      positionY: 200,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-  ];
-
-  const links = memoryLinksStore.get(moduleId) || [
-    {
-      id: 'link-1',
-      moduleId,
-      fromNodeId: 'node-1',
-      toNodeId: 'node-2',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-    {
-      id: 'link-2',
-      moduleId,
-      fromNodeId: 'node-1',
-      toNodeId: 'node-3',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-  ];
+  // Start with empty nodes/links if not present (no hardcoded mockup example nodes)
+  const nodes = memoryNodesStore.get(moduleId) || [];
+  const links = memoryLinksStore.get(moduleId) || [];
 
   if (!memoryNodesStore.has(moduleId)) {
     memoryNodesStore.set(moduleId, nodes);

@@ -18,19 +18,49 @@ interface ConceptLink {
   toNodeId: string;
 }
 
+interface Source {
+  id: string;
+  topicId: string;
+  title: string;
+  content: {
+    type: string;
+    authorName?: string;
+    text: string;
+    comments?: Array<{ author: string; text: string }>;
+  };
+}
+
+interface Note {
+  id: string;
+  sourceId: string;
+  highlightedText: string;
+  noteText: string;
+  convertedToNode: boolean;
+}
+
 export default function ConceptualiseStagePage() {
   const router = useRouter();
   const params = useParams();
   const moduleId = (params?.moduleId as string) || 'mod_climate_change_demo';
 
+  // Concept Canvas State
   const [nodes, setNodes] = useState<ConceptNode[]>([]);
   const [links, setLinks] = useState<ConceptLink[]>([]);
   const [showIntroModal, setShowIntroModal] = useState<boolean>(true);
   const [agentSpeech, setAgentSpeech] = useState<string | null>(null);
 
-  // Tools & Canvas State
+  // Left Source & Notes State
+  const [sources, setSources] = useState<Source[]>([]);
+  const [selectedSourceId, setSelectedSourceId] = useState<string>('');
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [hoveredNoteId, setHoveredNoteId] = useState<string | null>(null);
+  const [pinnedNoteId, setPinnedNoteId] = useState<string | null>(null);
+
+  // Node Edit Modal / Tool state
   const [activeTool, setActiveTool] = useState<'pan' | 'add_node' | 'link'>('pan');
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
+  const [editNodeText, setEditNodeText] = useState<string>('');
   const [linkSourceNodeId, setLinkSourceNodeId] = useState<string | null>(null);
   const [zoomLevel, setZoomLevel] = useState<number>(1);
   const [showAddNodeModal, setShowAddNodeModal] = useState<boolean>(false);
@@ -39,27 +69,44 @@ export default function ConceptualiseStagePage() {
   // Physics Drag State
   const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
   const dragOffsetRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
-  const canvasRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Check localStorage fallback first for instant offline reload persistence
+    // 1. Fetch Sources
+    fetch('/api/topics/climate-change/sources')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.sources && data.sources.length > 0) {
+          setSources(data.sources);
+          setSelectedSourceId(data.sources[0].id);
+        }
+      });
+
+    // 2. Fetch Notes (with localStorage fallback)
+    const localSavedNotes = localStorage.getItem(`critic_notes_${moduleId}`);
+    if (localSavedNotes) {
+      try { setNotes(JSON.parse(localSavedNotes)); } catch (e) { console.error(e); }
+    }
+    fetch(`/api/modules/${moduleId}/notes`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.notes && data.notes.length > 0) setNotes(data.notes);
+      });
+
+    // 3. Fetch Concept Map Nodes & Links (with localStorage fallback)
     const savedNodes = localStorage.getItem(`critic_nodes_canvas_${moduleId}`);
     const savedLinks = localStorage.getItem(`critic_links_canvas_${moduleId}`);
 
-    if (savedNodes && savedLinks) {
-      try {
-        setNodes(JSON.parse(savedNodes));
-        setLinks(JSON.parse(savedLinks));
-      } catch (e) {
-        console.error(e);
-      }
+    if (savedNodes) {
+      try { setNodes(JSON.parse(savedNodes)); } catch (e) { console.error(e); }
+    }
+    if (savedLinks) {
+      try { setLinks(JSON.parse(savedLinks)); } catch (e) { console.error(e); }
     }
 
-    // Fetch server data
     fetch(`/api/modules/${moduleId}/conceptualise`)
       .then((res) => res.json())
       .then((data) => {
-        if (data.nodes && data.links) {
+        if (data.nodes && data.links && (!savedNodes || JSON.parse(savedNodes).length === 0)) {
           setNodes(data.nodes);
           setLinks(data.links);
           localStorage.setItem(`critic_nodes_canvas_${moduleId}`, JSON.stringify(data.nodes));
@@ -68,17 +115,16 @@ export default function ConceptualiseStagePage() {
       });
   }, [moduleId]);
 
-  // Sync state helpers
-  const saveState = (updatedNodes: ConceptNode[], updatedLinks: ConceptLink[]) => {
+  const currentSource = sources.find((s) => s.id === selectedSourceId) || sources[0];
+  const sourceNotes = notes.filter((n) => n.sourceId === selectedSourceId);
+
+  const saveCanvasState = (updatedNodes: ConceptNode[], updatedLinks: ConceptLink[]) => {
     setNodes(updatedNodes);
     setLinks(updatedLinks);
     localStorage.setItem(`critic_nodes_canvas_${moduleId}`, JSON.stringify(updatedNodes));
     localStorage.setItem(`critic_links_canvas_${moduleId}`, JSON.stringify(updatedLinks));
   };
 
-  /**
-   * Synthesizes audio feedback using Web Audio API when a link is formed
-   */
   const playLinkAudioSound = () => {
     try {
       const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
@@ -88,8 +134,8 @@ export default function ConceptualiseStagePage() {
       const gain = ctx.createGain();
 
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5 tone
-      osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15); // A5 tone
+      osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15);
 
       gain.gain.setValueAtTime(0.15, ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
@@ -100,14 +146,14 @@ export default function ConceptualiseStagePage() {
       osc.start();
       osc.stop(ctx.currentTime + 0.3);
     } catch (e) {
-      // Audio context fallback
+      // Audio fallback
     }
   };
 
   const handleAddNode = async () => {
     if (!newNodeText.trim()) return;
-    const posX = 300 + Math.random() * 100;
-    const posY = 200 + Math.random() * 100;
+    const posX = 180 + Math.random() * 200;
+    const posY = 120 + Math.random() * 180;
 
     try {
       const res = await fetch(`/api/modules/${moduleId}/concepts`, {
@@ -119,10 +165,42 @@ export default function ConceptualiseStagePage() {
 
       if (data.success && data.node) {
         const updated = [...nodes, { ...data.node, linkCount: 0 }];
-        saveState(updated, links);
+        saveCanvasState(updated, links);
         setNewNodeText('');
         setShowAddNodeModal(false);
       }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleUpdateNodeText = async (nodeId: string) => {
+    if (!editNodeText.trim()) return;
+    try {
+      await fetch(`/api/concepts/${nodeId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: editNodeText }),
+      });
+
+      const updated = nodes.map((n) => (n.id === nodeId ? { ...n, text: editNodeText } : n));
+      saveCanvasState(updated, links);
+      setEditingNodeId(null);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeleteNode = async (nodeId: string) => {
+    try {
+      await fetch(`/api/concepts/${nodeId}`, {
+        method: 'DELETE',
+      });
+
+      const updatedNodes = nodes.filter((n) => n.id !== nodeId);
+      const updatedLinks = links.filter((l) => l.fromNodeId !== nodeId && l.toNodeId !== nodeId);
+      saveCanvasState(updatedNodes, updatedLinks);
+      if (selectedNodeId === nodeId) setSelectedNodeId(null);
     } catch (err) {
       console.error(err);
     }
@@ -133,7 +211,6 @@ export default function ConceptualiseStagePage() {
       if (!linkSourceNodeId) {
         setLinkSourceNodeId(nodeId);
       } else if (linkSourceNodeId !== nodeId) {
-        // Create link
         try {
           const res = await fetch(`/api/modules/${moduleId}/concepts/links`, {
             method: 'POST',
@@ -145,14 +222,13 @@ export default function ConceptualiseStagePage() {
           if (data.success && data.link) {
             playLinkAudioSound();
             const updatedLinks = [...links, data.link];
-            // Update node linkCounts
             const updatedNodes = nodes.map((n) => {
               if (n.id === linkSourceNodeId || n.id === nodeId) {
                 return { ...n, linkCount: (n.linkCount || 0) + 1 };
               }
               return n;
             });
-            saveState(updatedNodes, updatedLinks);
+            saveCanvasState(updatedNodes, updatedLinks);
           }
         } finally {
           setLinkSourceNodeId(null);
@@ -197,7 +273,7 @@ export default function ConceptualiseStagePage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ positionX: movedNode.positionX, positionY: movedNode.positionY }),
         });
-        saveState(nodes, links);
+        saveCanvasState(nodes, links);
       }
       setDraggingNodeId(null);
     }
@@ -219,6 +295,73 @@ export default function ConceptualiseStagePage() {
     }
   };
 
+  /**
+   * Helper to render source text with inline highlights & hover tooltips in left panel
+   */
+  const renderHighlightedText = (fullText: string) => {
+    if (!sourceNotes || sourceNotes.length === 0) return fullText;
+
+    let parts: Array<{ text: string; note?: Note }> = [{ text: fullText }];
+
+    sourceNotes.forEach((note) => {
+      const nextParts: Array<{ text: string; note?: Note }> = [];
+      parts.forEach((part) => {
+        if (part.note) {
+          nextParts.push(part);
+        } else {
+          const splitTexts = part.text.split(note.highlightedText);
+          splitTexts.forEach((st, idx) => {
+            if (st) nextParts.push({ text: st });
+            if (idx < splitTexts.length - 1) {
+              nextParts.push({ text: note.highlightedText, note });
+            }
+          });
+        }
+      });
+      parts = nextParts;
+    });
+
+    return parts.map((part, index) => {
+      if (!part.note) return <span key={index}>{part.text}</span>;
+
+      const n = part.note;
+      const isHovered = hoveredNoteId === n.id;
+      const isPinned = pinnedNoteId === n.id;
+      const isVisible = isHovered || isPinned;
+
+      return (
+        <span
+          key={index}
+          className={`${styles.highlightedSpan} ${isPinned ? styles.pinnedSpan : ''}`}
+          onMouseEnter={() => setHoveredNoteId(n.id)}
+          onMouseLeave={() => setHoveredNoteId(null)}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (isPinned) {
+              setPinnedNoteId(null);
+              setHoveredNoteId(null);
+            } else {
+              setPinnedNoteId(n.id);
+            }
+          }}
+        >
+          {part.text}
+
+          {isVisible && (
+            <span className={styles.hoverTooltip} onClick={(e) => e.stopPropagation()}>
+              <div className={styles.tooltipHeader}>
+                <span className={styles.tooltipLabel}>
+                  NOTE {isPinned ? '📌 (PINNED)' : ''}
+                </span>
+              </div>
+              <p className={styles.tooltipNoteText}>{n.noteText}</p>
+            </span>
+          )}
+        </span>
+      );
+    });
+  };
+
   return (
     <div className={styles.container}>
       {/* Header */}
@@ -230,22 +373,54 @@ export default function ConceptualiseStagePage() {
 
       {/* Main Workspace Split */}
       <div className={styles.workspace}>
-        {/* Left Source Reference Card Panel */}
+        {/* Left Source & Evidence Reference Panel */}
         <aside className={styles.leftSourcePanel}>
-          <div className="glass-card" style={{ padding: '24px', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <div className={styles.authorHeader}>
-              <div className={styles.authorAvatar} />
-              <span className={styles.authorName}>Donald Trump</span>
-            </div>
-            <p className={styles.sourceText}>
-              Be careful and try staying in your house. Large parts of the Country are suffering from tremendous amounts of snow and near record setting cold. Amazing how big this system is. Wouldn&apos;t be bad to have a little of that good old fashioned Global Warming right now!
-            </p>
+          <div className={styles.sourceSelectHeader}>
+            <span className={styles.sourceSelectLabel}>SOURCES & EVIDENCE</span>
+            <select
+              value={selectedSourceId}
+              onChange={(e) => setSelectedSourceId(e.target.value)}
+              className={styles.sourceDropdown}
+            >
+              {sources.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.title}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className={styles.sourceCardScrollable}>
+            {currentSource && (
+              <div className="glass-card" style={{ padding: '24px', width: '100%' }}>
+                {currentSource.content.authorName && (
+                  <div className={styles.authorHeader}>
+                    <div className={styles.authorAvatar} />
+                    <span className={styles.authorName}>{currentSource.content.authorName}</span>
+                  </div>
+                )}
+                <div className={styles.sourceText}>
+                  {renderHighlightedText(currentSource.content.text)}
+
+                  {currentSource.content.comments && (
+                    <div style={{ marginTop: '20px', borderTop: '1px solid var(--color-border-slate-50)', paddingTop: '12px' }}>
+                      <h5 style={{ fontFamily: 'var(--font-orbitron)', marginBottom: '8px' }}>Comments</h5>
+                      {currentSource.content.comments.map((c, i) => (
+                        <div key={i} style={{ fontSize: '0.85rem', marginBottom: '6px' }}>
+                          <strong className="cyan-neon-text">{c.author}:</strong>{' '}
+                          {renderHighlightedText(c.text)}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </aside>
 
         {/* Right Concept Map Canvas */}
         <main
-          ref={canvasRef}
           className={styles.canvasArea}
           onMouseMove={handleMouseMoveCanvas}
           onMouseUp={handleMouseUpCanvas}
@@ -283,10 +458,10 @@ export default function ConceptualiseStagePage() {
             {/* Interactive Concept Nodes */}
             {nodes.map((node) => {
               const count = node.linkCount || 0;
-              // Node growth radius calculation
               const size = 100 + count * 16;
               const isSelected = selectedNodeId === node.id;
               const isLinkSource = linkSourceNodeId === node.id;
+              const isEditing = editingNodeId === node.id;
 
               return (
                 <div
@@ -302,7 +477,58 @@ export default function ConceptualiseStagePage() {
                   onMouseDown={(e) => handleMouseDownNode(e, node.id)}
                   onClick={() => handleNodeClick(node.id)}
                 >
-                  <span className={styles.nodeLabel}>{node.text}</span>
+                  {isEditing ? (
+                    <div className={styles.inlineEditWrapper} onClick={(e) => e.stopPropagation()}>
+                      <input
+                        type="text"
+                        value={editNodeText}
+                        onChange={(e) => setEditNodeText(e.target.value)}
+                        className={styles.inlineEditInput}
+                        autoFocus
+                      />
+                      <div className={styles.inlineEditBtns}>
+                        <button
+                          onClick={() => handleUpdateNodeText(node.id)}
+                          className={styles.nodeSaveBtn}
+                        >
+                          ✓
+                        </button>
+                        <button
+                          onClick={() => setEditingNodeId(null)}
+                          className={styles.nodeCancelBtn}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <span className={styles.nodeLabel}>{node.text}</span>
+
+                      {/* Node Action Controls (Edit / Delete) */}
+                      {isSelected && (
+                        <div className={styles.nodeControls} onClick={(e) => e.stopPropagation()}>
+                          <button
+                            onClick={() => {
+                              setEditingNodeId(node.id);
+                              setEditNodeText(node.text);
+                            }}
+                            className={styles.nodeActionBtn}
+                            title="Edit label"
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            onClick={() => handleDeleteNode(node.id)}
+                            className={styles.nodeDeleteBtn}
+                            title="Delete node"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
               );
             })}

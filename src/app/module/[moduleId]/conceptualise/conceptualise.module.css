@@ -34,37 +34,119 @@
 }
 
 .leftSourcePanel {
-  width: 360px;
-  padding: 32px;
-  background: rgba(15, 23, 46, 0.4);
+  width: 380px;
+  padding: 24px;
+  background: rgba(15, 23, 46, 0.5);
   border-right: 1px solid rgba(55, 243, 255, 0.2);
+  display: flex;
+  flex-direction: column;
   z-index: 10;
+}
+
+.sourceSelectHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.sourceSelectLabel {
+  font-family: var(--font-orbitron);
+  font-size: 0.8rem;
+  color: var(--color-accent-cyan);
+  letter-spacing: 1px;
+}
+
+.sourceDropdown {
+  width: 100%;
+  background: rgba(7, 11, 26, 0.9);
+  border: 1px solid var(--color-border-slate);
+  color: var(--color-text-light);
+  font-family: var(--font-exo2);
+  padding: 8px 12px;
+  border-radius: 6px;
+  outline: none;
+}
+
+.sourceCardScrollable {
+  flex: 1;
+  overflow-y: auto;
 }
 
 .authorHeader {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 10px;
+  margin-bottom: 12px;
 }
 
 .authorAvatar {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: var(--color-border-slate);
 }
 
 .authorName {
   font-family: var(--font-orbitron);
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 700;
 }
 
 .sourceText {
   font-family: var(--font-exo2);
-  font-size: 1rem;
+  font-size: 0.95rem;
   line-height: 1.6;
+  color: var(--color-text-light);
+}
+
+/* Highlighted Text & Hover Tooltips in Left Panel */
+.highlightedSpan {
+  background: rgba(55, 243, 255, 0.25);
+  color: var(--color-accent-cyan);
+  border-bottom: 2px solid var(--color-accent-cyan);
+  padding: 2px 4px;
+  border-radius: 4px;
+  position: relative;
+  cursor: pointer;
+}
+
+.pinnedSpan {
+  background: rgba(255, 79, 216, 0.35);
+  color: var(--color-accent-pink);
+  border-bottom: 2px solid var(--color-accent-pink);
+}
+
+.hoverTooltip {
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 240px;
+  background: #070B1A;
+  border: 1px solid var(--color-accent-cyan);
+  box-shadow: 0 0 15px rgba(55, 243, 255, 0.4);
+  padding: 12px;
+  border-radius: 8px;
+  z-index: 100;
+  white-space: normal;
+  text-align: left;
+}
+
+.tooltipHeader {
+  margin-bottom: 6px;
+}
+
+.tooltipLabel {
+  font-family: var(--font-orbitron);
+  font-size: 0.7rem;
+  color: var(--color-accent-cyan);
+}
+
+.tooltipNoteText {
+  font-family: var(--font-exo2);
+  font-size: 0.85rem;
+  line-height: 1.3;
   color: var(--color-text-light);
 }
 
@@ -110,7 +192,7 @@
   filter: drop-shadow(0 0 8px #37F3FF);
 }
 
-/* Glowing Neon Pink Concept Nodes */
+/* Concept Node Circle & Action Controls */
 .conceptNodeCircle {
   position: absolute;
   border-radius: 50%;
@@ -151,6 +233,57 @@
   font-size: 0.95rem;
   color: #FFF;
   line-height: 1.2;
+}
+
+.nodeControls {
+  position: absolute;
+  top: -36px;
+  display: flex;
+  gap: 6px;
+  background: rgba(7, 11, 26, 0.9);
+  border: 1px solid var(--color-accent-pink);
+  padding: 4px 8px;
+  border-radius: 20px;
+}
+
+.nodeActionBtn, .nodeDeleteBtn {
+  background: transparent;
+  border: none;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.inlineEditWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.inlineEditInput {
+  width: 90px;
+  background: rgba(7, 11, 26, 0.9);
+  border: 1px solid #37F3FF;
+  color: #FFF;
+  font-family: var(--font-orbitron);
+  font-size: 0.8rem;
+  padding: 4px;
+  border-radius: 4px;
+  text-align: center;
+  outline: none;
+}
+
+.inlineEditBtns {
+  display: flex;
+  gap: 4px;
+}
+
+.nodeSaveBtn, .nodeCancelBtn {
+  background: transparent;
+  border: none;
+  color: #FFF;
+  cursor: pointer;
+  font-size: 0.8rem;
 }
 
 .canvasToolbar {

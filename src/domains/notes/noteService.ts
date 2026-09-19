@@ -1,7 +1,9 @@
 /**
  * Notes Domain Service
- * Manages evidence text highlights, inline note tooltips, editing, deletion, and conversion to concept nodes.
+ * Manages evidence text highlights, inline note tooltips on hover, editing, deletion, and conversion to concept nodes.
  */
+
+import { createConceptNode, ConceptNode } from '../concepts/conceptService';
 
 export interface Note {
   id: string;
@@ -70,15 +72,23 @@ export async function deleteNote(noteId: string): Promise<boolean> {
   return false;
 }
 
-export async function convertNoteToNode(noteId: string): Promise<{ success: boolean; conceptNodeId?: string }> {
+export async function convertNoteToNode(noteId: string): Promise<{ success: boolean; conceptNode?: ConceptNode }> {
   for (const [moduleId, notes] of memoryNotesStore.entries()) {
     const note = notes.find((n) => n.id === noteId);
     if (note) {
       note.convertedToNode = true;
       note.updatedAt = new Date().toISOString();
       
-      const conceptNodeId = `node_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
-      return { success: true, conceptNodeId };
+      // Automatically generate concept node in concept canvas store
+      const conceptNode = await createConceptNode({
+        moduleId,
+        text: note.noteText || note.highlightedText,
+        positionX: 200 + Math.random() * 250,
+        positionY: 150 + Math.random() * 200,
+        sourceNoteId: note.id,
+      });
+
+      return { success: true, conceptNode };
     }
   }
   return { success: false };

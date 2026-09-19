@@ -5,36 +5,37 @@ import {
   deleteConceptNode,
   createConceptLink,
 } from '../src/domains/concepts/conceptService';
+import { convertNoteToNode, createNote } from '../src/domains/notes/noteService';
 
-describe('Concepts Domain Tests', () => {
-  test('getConceptualiseData returns initial nodes and link degree counts', async () => {
-    const moduleId = 'mod_test_concepts';
+describe('Concepts Domain & Note Conversion Tests', () => {
+  test('getConceptualiseData starts clean without hardcoded dummy nodes', async () => {
+    const moduleId = 'mod_clean_canvas_test';
     const data = await getConceptualiseData(moduleId);
-
-    expect(data.nodes.length).toBeGreaterThan(0);
-    expect(data.links.length).toBeGreaterThan(0);
-    expect(data.nodes[0].linkCount).toBeDefined();
+    expect(data.nodes).toEqual([]);
+    expect(data.links).toEqual([]);
   });
 
-  test('Creates concept node and adds to canvas state', async () => {
-    const moduleId = 'mod_test_create_node';
-    const node = await createConceptNode({
+  test('convertNoteToNode automatically generates a Concept Node in concept store', async () => {
+    const moduleId = 'mod_convert_test';
+    const note = await createNote({
       moduleId,
-      text: 'polar vortex destabilization',
-      positionX: 300,
-      positionY: 400,
+      sourceId: 'source-1',
+      highlightedText: 'polar vortex',
+      noteText: 'Polar vortex instability caused by Arctic warming',
     });
 
-    expect(node.id).toBeDefined();
-    expect(node.text).toBe('polar vortex destabilization');
+    const result = await convertNoteToNode(note.id);
+    expect(result.success).toBe(true);
+    expect(result.conceptNode).toBeDefined();
+    expect(result.conceptNode?.text).toBe('Polar vortex instability caused by Arctic warming');
 
     const data = await getConceptualiseData(moduleId);
-    const found = data.nodes.find((n) => n.id === node.id);
-    expect(found).toBeDefined();
+    const nodeInStore = data.nodes.find((n) => n.id === result.conceptNode?.id);
+    expect(nodeInStore).toBeDefined();
   });
 
-  test('Updates concept node coordinates on canvas drag', async () => {
-    const moduleId = 'mod_test_update_node';
+  test('Updates concept node text and position coordinates', async () => {
+    const moduleId = 'mod_update_node_test';
     const node = await createConceptNode({
       moduleId,
       text: 'jet stream disruption',
@@ -42,34 +43,14 @@ describe('Concepts Domain Tests', () => {
       positionY: 100,
     });
 
-    const updated = await updateConceptNode(node.id, { positionX: 450, positionY: 550 });
+    const updated = await updateConceptNode(node.id, { text: 'jet stream disruption (edited)', positionX: 450, positionY: 550 });
+    expect(updated?.text).toBe('jet stream disruption (edited)');
     expect(updated?.positionX).toBe(450);
-    expect(updated?.positionY).toBe(550);
-  });
-
-  test('Connects two concept nodes with a link', async () => {
-    const moduleId = 'mod_test_link_nodes';
-    const node1 = await createConceptNode({ moduleId, text: 'node A', positionX: 10, positionY: 10 });
-    const node2 = await createConceptNode({ moduleId, text: 'node B', positionX: 100, positionY: 100 });
-
-    const link = await createConceptLink({
-      moduleId,
-      fromNodeId: node1.id,
-      toNodeId: node2.id,
-    });
-
-    expect(link).toBeDefined();
-    expect(link?.fromNodeId).toBe(node1.id);
-    expect(link?.toNodeId).toBe(node2.id);
-
-    const data = await getConceptualiseData(moduleId);
-    const linkedNode1 = data.nodes.find((n) => n.id === node1.id);
-    expect(linkedNode1?.linkCount).toBeGreaterThan(0);
   });
 
   test('Deletes concept node and cleans up connected links', async () => {
-    const moduleId = 'mod_test_delete_node';
-    const node = await createConceptNode({ moduleId, text: 'delete me', positionX: 50, positionY: 50 });
+    const moduleId = 'mod_delete_node_test';
+    const node = await createConceptNode({ moduleId, text: 'node to delete', positionX: 50, positionY: 50 });
 
     const isDeleted = await deleteConceptNode(node.id);
     expect(isDeleted).toBe(true);

@@ -10,7 +10,7 @@ export async function POST(
     if (!result.success) {
       return NextResponse.json({ error: 'Note not found or already converted' }, { status: 404 });
     }
-    return NextResponse.json({ success: true, conceptNodeId: result.conceptNodeId });
+    return NextResponse.json({ success: true, conceptNode: result.conceptNode });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to convert note to concept node' }, { status: 500 });
   }

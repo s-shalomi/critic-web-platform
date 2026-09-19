@@ -173,6 +173,14 @@ export default function FamiliariseStagePage() {
         updateNotesState((prev) =>
           prev.map((n) => (n.id === noteId ? { ...n, convertedToNode: true } : n))
         );
+
+        if (data.conceptNode) {
+          // Sync with canvas localStorage store so it appears on Conceptualise screen
+          const savedCanvasNodesStr = localStorage.getItem(`critic_nodes_canvas_${moduleId}`);
+          const canvasNodes = savedCanvasNodesStr ? JSON.parse(savedCanvasNodesStr) : [];
+          canvasNodes.push(data.conceptNode);
+          localStorage.setItem(`critic_nodes_canvas_${moduleId}`, JSON.stringify(canvasNodes));
+        }
       }
     } catch (err) {
       console.error(err);
