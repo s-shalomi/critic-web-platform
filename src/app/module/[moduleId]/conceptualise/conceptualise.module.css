@@ -1,0 +1,338 @@
+.container {
+  min-height: 100vh;
+  background: var(--color-bg-deep);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.header {
+  padding: 16px 32px;
+  border-bottom: 1px solid rgba(68, 81, 104, 0.3);
+}
+
+.backBtn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-light);
+  font-family: var(--font-space-grotesk);
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.backBtn:hover {
+  color: var(--color-accent-cyan);
+}
+
+.workspace {
+  flex: 1;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+}
+
+.leftSourcePanel {
+  width: 360px;
+  padding: 32px;
+  background: rgba(15, 23, 46, 0.4);
+  border-right: 1px solid rgba(55, 243, 255, 0.2);
+  z-index: 10;
+}
+
+.authorHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.authorAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-border-slate);
+}
+
+.authorName {
+  font-family: var(--font-orbitron);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.sourceText {
+  font-family: var(--font-exo2);
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--color-text-light);
+}
+
+.canvasArea {
+  flex: 1;
+  position: relative;
+  background: radial-gradient(circle at 50% 50%, #0F172E 0%, #070B1A 100%);
+  overflow: hidden;
+  user-select: none;
+}
+
+.canvasHeader {
+  position: absolute;
+  top: 24px;
+  right: 36px;
+  z-index: 20;
+}
+
+.stageTitle {
+  font-family: var(--font-orbitron);
+  font-size: 2rem;
+  letter-spacing: 2px;
+  color: var(--color-text-light);
+}
+
+.canvasStage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.1s ease-out;
+}
+
+.svgOverlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.svgLineGlow {
+  filter: drop-shadow(0 0 8px #37F3FF);
+}
+
+/* Glowing Neon Pink Concept Nodes */
+.conceptNodeCircle {
+  position: absolute;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FF4FD8 0%, #d42bb0 100%);
+  border: 2px solid #37F3FF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 12px;
+  cursor: grab;
+  transition: width 0.3s ease, height 0.3s ease, box-shadow 0.3s ease;
+  z-index: 15;
+}
+
+.conceptNodeCircle:active {
+  cursor: grabbing;
+}
+
+.selectedNode {
+  border-color: #FFF;
+  box-shadow: 0 0 35px #FF4FD8 !important;
+}
+
+.linkSourceNode {
+  border-color: #37F3FF;
+  animation: pulseCyan 1s infinite alternate;
+}
+
+@keyframes pulseCyan {
+  0% { box-shadow: 0 0 15px #37F3FF; }
+  100% { box-shadow: 0 0 35px #37F3FF; }
+}
+
+.nodeLabel {
+  font-family: var(--font-orbitron);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #FFF;
+  line-height: 1.2;
+}
+
+.canvasToolbar {
+  position: absolute;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: rgba(15, 23, 46, 0.85);
+  border: 1px solid var(--color-border-slate);
+  padding: 12px;
+  border-radius: 12px;
+  z-index: 30;
+}
+
+.toolbarBtn {
+  width: 44px;
+  height: 44px;
+  background: transparent;
+  border: 1px solid var(--color-border-slate-50);
+  color: var(--color-text-light);
+  font-size: 1.1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.toolbarBtn:hover {
+  border-color: var(--color-accent-pink);
+  color: var(--color-accent-pink);
+  background: rgba(255, 79, 216, 0.1);
+}
+
+.activeToolBtn {
+  background: rgba(55, 243, 255, 0.2);
+  border-color: var(--color-accent-cyan);
+  color: var(--color-accent-cyan);
+}
+
+.agentContainer {
+  position: fixed;
+  bottom: 80px;
+  left: 24px;
+  z-index: 60;
+}
+
+.agentAvatarBtn {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0F172E 0%, #37F3FF 100%);
+  border: 2px solid var(--color-accent-cyan);
+  box-shadow: 0 0 20px rgba(55, 243, 255, 0.5);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.agentAvatarBtn:hover {
+  transform: scale(1.08);
+}
+
+.robotHead {
+  width: 32px;
+  height: 24px;
+  background: #FFF;
+  border-radius: 6px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.robotEyes {
+  width: 20px;
+  height: 8px;
+  background: #37F3FF;
+  border-radius: 4px;
+}
+
+.speechBubble {
+  position: absolute;
+  bottom: 80px;
+  left: 0;
+  width: 280px;
+  background: #0F172E;
+  border: 1px solid var(--color-accent-cyan);
+  box-shadow: 0 0 20px rgba(55, 243, 255, 0.3);
+  padding: 16px;
+  border-radius: 12px;
+  font-family: var(--font-space-mono);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--color-text-light);
+}
+
+.speechHeader {
+  font-family: var(--font-orbitron);
+  color: var(--color-accent-cyan);
+  font-size: 0.8rem;
+  margin-bottom: 6px;
+}
+
+.closeSpeechBtn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: transparent;
+  border: none;
+  color: var(--color-text-soft);
+  cursor: pointer;
+}
+
+.stageNavBar {
+  height: 64px;
+  background: rgba(7, 11, 26, 0.95);
+  border-top: 1px solid rgba(68, 81, 104, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  z-index: 40;
+}
+
+.stageStep {
+  background: transparent;
+  border: none;
+  color: var(--color-text-soft);
+  font-family: var(--font-orbitron);
+  font-size: 0.9rem;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.stageStepActive {
+  background: rgba(55, 243, 255, 0.2);
+  border: 1px solid var(--color-accent-cyan);
+  color: var(--color-accent-cyan);
+}
+
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(7, 11, 26, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modalInput {
+  width: 100%;
+  background: rgba(7, 11, 26, 0.9);
+  border: 1px solid var(--color-border-slate);
+  padding: 10px 14px;
+  border-radius: 6px;
+  color: var(--color-text-light);
+  font-family: var(--font-exo2);
+  outline: none;
+}
+
+.cancelBtn {
+  background: transparent;
+  border: 1px solid var(--color-border-slate);
+  color: var(--color-text-soft);
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.introModalText {
+  font-family: var(--font-space-mono);
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--color-text-light);
+}
