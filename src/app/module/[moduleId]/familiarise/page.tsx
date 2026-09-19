@@ -35,15 +35,19 @@ export default function FamiliariseStagePage() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [showIntroModal, setShowIntroModal] = useState<boolean>(true);
   const [agentSpeech, setAgentSpeech] = useState<string | null>(null);
-  
-  // Highlighting state
+
+  // Highlighting creation state
   const [selectedText, setSelectedText] = useState<string>('');
   const [noteInput, setNoteInput] = useState<string>('');
   const [isHighlighting, setIsHighlighting] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
+  // Hovered and Editing Note state
+  const [hoveredNoteId, setHoveredNoteId] = useState<string | null>(null);
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+  const [editText, setEditText] = useState<string>('');
+
   useEffect(() => {
-    // Fetch sources for climate change topic
     fetch('/api/topics/climate-change/sources')
       .then((res) => res.json())
       .then((data) => {
@@ -53,7 +57,6 @@ export default function FamiliariseStagePage() {
         }
       });
 
-    // Fetch existing notes
     fetch(`/api/modules/${moduleId}/notes`)
       .then((res) => res.json())
       .then((data) => {
@@ -62,6 +65,7 @@ export default function FamiliariseStagePage() {
   }, [moduleId]);
 
   const currentSource = sources.find((s) => s.id === selectedSourceId) || sources[0];
+  const sourceNotes = notes.filter((n) => n.sourceId === selectedSourceId);
 
   const handleMouseUp = () => {
     const selection = window.getSelection()?.toString().trim();
@@ -98,6 +102,43 @@ export default function FamiliariseStagePage() {
     }
   };
 
+  const handleUpdateNote = async (noteId: string) => {
+    if (!editText.trim()) return;
+    try {
+      const res = await fetch(`/api/notes/${noteId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ noteText: editText }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        setNotes((prev) =>
+          prev.map((n) => (n.id === noteId ? { ...n, noteText: editText } : n))
+        );
+        setEditingNoteId(null);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeleteNote = async (noteId: string) => {
+    try {
+      const res = await fetch(`/api/notes/${noteId}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        setNotes((prev) => prev.filter((n) => n.id !== noteId));
+        if (hoveredNoteId === noteId) setHoveredNoteId(null);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const handleConvertToNode = async (noteId: string) => {
     try {
       const res = await fetch(`/api/notes/${noteId}/convert-to-node`, {
@@ -129,6 +170,126 @@ export default function FamiliariseStagePage() {
     } catch (err) {
       setAgentSpeech('What underlying assumptions might the author be making in this claim?');
     }
+  };
+
+  /**
+   * Helper to render source text with interactive inline highlights & hover tooltips
+   */
+  const renderHighlightedText = (fullText: string) => {
+    if (!sourceNotes || sourceNotes.length === 0) {
+      return fullText;
+    }
+
+    // Build regex pattern matching all highlighted snippets for current source
+    let parts: Array<{ text: string; note?: Note }> = [{ text: fullText }];
+
+    sourceNotes.forEach((note) => {
+      const nextParts: Array<{ text: string; note?: Note }> = [];
+      parts.forEach((part) => {
+        if (part.note) {
+          nextParts.push(part);
+        } else {
+          const splitTexts = part.text.split(note.highlightedText);
+          splitTexts.forEach((st, idx) => {
+            if (st) nextParts.push({ text: st });
+            if (idx < splitTexts.length - 1) {
+              nextParts.push({ text: note.highlightedText, note });
+            }
+          });
+        }
+      });
+      parts = nextParts;
+    });
+
+    return parts.map((part, index) => {
+      if (!part.note) return <span key={index}>{part.text}</span>;
+
+      const n = part.note;
+      const isHovered = hoveredNoteId === n.id;
+      const isEditing = editingNoteId === n.id;
+
+      return (
+        <span
+          key={index}
+          className={styles.highlightedSpan}
+          onMouseEnter={() => setHoveredNoteId(n.id)}
+          onMouseLeave={() => {
+            if (!isEditing) setHoveredNoteId(null);
+          }}
+        >
+          {part.text}
+
+          {/* Hover Tooltip Popup directly above highlighted text */}
+          {(isHovered || isEditing) && (
+            <span className={styles.hoverTooltip}>
+              {isEditing ? (
+                <div className={styles.editForm}>
+                  <textarea
+                    value={editText}
+                    onChange={(e) => setEditText(e.target.value)}
+                    className={styles.editTextArea}
+                  />
+                  <div className={styles.tooltipActions}>
+                    <button
+                      onClick={() => setEditingNoteId(null)}
+                      className={styles.cancelTooltipBtn}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => handleUpdateNote(n.id)}
+                      className={styles.saveTooltipBtn}
+                    >
+                      Save
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className={styles.tooltipContent}>
+                  <div className={styles.tooltipHeader}>
+                    <span className={styles.tooltipLabel}>NOTE</span>
+                    <div className={styles.tooltipHeaderBtns}>
+                      <button
+                        onClick={() => {
+                          setEditingNoteId(n.id);
+                          setEditText(n.noteText);
+                        }}
+                        className={styles.actionIconBtn}
+                        title="Edit note"
+                      >
+                        ✏️ Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteNote(n.id)}
+                        className={styles.deleteIconBtn}
+                        title="Delete note"
+                      >
+                        🗑️ Delete
+                      </button>
+                    </div>
+                  </div>
+
+                  <p className={styles.tooltipNoteText}>{n.noteText}</p>
+
+                  <div className={styles.tooltipFooter}>
+                    {n.convertedToNode ? (
+                      <span className={styles.convertedBadge}>✓ Converted to Concept Node</span>
+                    ) : (
+                      <button
+                        onClick={() => handleConvertToNode(n.id)}
+                        className={styles.convertTooltipBtn}
+                      >
+                        + Convert to node
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </span>
+          )}
+        </span>
+      );
+    });
   };
 
   return (
@@ -164,24 +325,24 @@ export default function FamiliariseStagePage() {
         <main className={styles.contentArea}>
           {currentSource && (
             <div className={styles.sourceCardContainer}>
-              <div className="glass-card" style={{ padding: '36px', width: '100%', maxWidth: '720px' }}>
+              <div className="glass-card" style={{ padding: '40px', width: '100%', maxWidth: '800px', position: 'relative' }}>
                 {currentSource.content.authorName && (
                   <div className={styles.authorHeader}>
                     <div className={styles.authorAvatar} />
                     <span className={styles.authorName}>{currentSource.content.authorName}</span>
                   </div>
                 )}
-                
-                <p
+
+                <div
                   className={styles.sourceBodyText}
                   onMouseUp={handleMouseUp}
                 >
-                  {currentSource.content.text}
-                </p>
+                  {renderHighlightedText(currentSource.content.text)}
+                </div>
 
                 {currentSource.content.comments && (
                   <div className={styles.commentsList}>
-                    <h4 style={{ fontFamily: 'var(--font-orbitron)', marginTop: '24px', marginBottom: '12px' }}>
+                    <h4 style={{ fontFamily: 'var(--font-orbitron)', marginTop: '28px', marginBottom: '16px' }}>
                       Comments
                     </h4>
                     {currentSource.content.comments.map((c, i) => (
@@ -195,7 +356,7 @@ export default function FamiliariseStagePage() {
             </div>
           )}
 
-          {/* Highlighting Drawer Popover */}
+          {/* Note Creation Modal / Popover */}
           {isHighlighting && (
             <div className={styles.highlightPopover}>
               <h4 className="cyan-neon-text" style={{ fontFamily: 'var(--font-orbitron)' }}>
@@ -228,37 +389,6 @@ export default function FamiliariseStagePage() {
             </div>
           )}
         </main>
-
-        {/* Right Notes Panel */}
-        <aside className={styles.notesPanel}>
-          <h3 className={styles.notesHeading}>YOUR EVIDENCE NOTES</h3>
-          <div className={styles.notesList}>
-            {notes.length === 0 ? (
-              <div className={styles.emptyNotes}>
-                Highlight text in any source to capture insights and note your assumptions.
-              </div>
-            ) : (
-              notes.map((n) => (
-                <div key={n.id} className={styles.noteCard}>
-                  <div className={styles.noteQuote}>&quot;{n.highlightedText}&quot;</div>
-                  <div className={styles.noteText}>{n.noteText}</div>
-                  <div className={styles.noteFooter}>
-                    {n.convertedToNode ? (
-                      <span className={styles.nodeBadge}>✓ Converted to Concept Node</span>
-                    ) : (
-                      <button
-                        onClick={() => handleConvertToNode(n.id)}
-                        className={styles.convertBtn}
-                      >
-                        + Convert to node
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </aside>
       </div>
 
       {/* Socratic Agent Avatar */}
@@ -301,7 +431,7 @@ export default function FamiliariseStagePage() {
         <div className={styles.modalBackdrop}>
           <div className="glass-card-glow" style={{ padding: '36px', maxWidth: '480px', width: '90%', textAlign: 'center' }}>
             <p className={styles.introModalText}>
-              read through the content. highlight the text and mark any thoughts, biases or assumptions. click on the AI agent if you need any hints
+              read through the content. highlight the text and mark any thoughts, biases or assumptions. hover over highlighted text to edit, delete, or convert your notes. click on the AI agent if you need any hints
             </p>
             <button
               onClick={() => setShowIntroModal(false)}

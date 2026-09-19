@@ -19,7 +19,7 @@
 - **Design & Architecture Notes**:
   - Modular monolithic Next.js App Router setup with domain-driven folders (`src/domains/...`).
   - Extensible topic architecture: zero core code changes to add topics; topics & sources driven entirely by database schemas.
-- **Immediate Next Step**: Await user review and approval of `implementation_plan.md`, then initiate Stage 1.
+- **Immediate Next Step**: Initiate Stage 1.
 
 ---
 
@@ -35,23 +35,25 @@
 - **Dependencies Introduced**:
   - `next`, `react`, `react-dom`, `@prisma/client`, `jose`, `bcryptjs`, `@google/generative-ai`, `groq-sdk`, `jest`, `ts-jest`, `typescript`.
 - **Tests Passing**:
-  - `tests/auth.test.ts` (4/4 tests passing: student access code login, invalid code rejection, teacher email/password verification, wrong password rejection).
+  - `tests/auth.test.ts` (4/4 tests passing).
 - **Immediate Next Step**: Initiate Stage 2.
 
 ---
 
-### [2026-09-20] - Stage 2: Topic Selection & Familiarise Stage
+### [2026-09-20] - Stage 2: Topic Selection & Familiarise Stage (Enhanced with Inline Hover Tooltips, Edit & Delete)
 - **Code Built**:
   - Built Topics domain [`src/domains/topics/topicService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/topics/topicService.ts) and documentation [`src/domains/topics/README.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/topics/README.md).
-  - Built Notes domain [`src/domains/notes/noteService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/notes/noteService.ts) and documentation [`src/domains/notes/README.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/notes/README.md).
-  - Built API routes: `/api/topics`, `/api/topics/:topicId/sources`, `/api/modules/:moduleId/notes`, `/api/notes/:noteId/convert-to-node`, `/api/modules/:moduleId/agent/hint`.
-  - Built Topic Selection Dashboard page [`src/app/dashboard/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/page.tsx) closely matching `screens/landing page.png`.
-  - Built Familiarise stage screen [`src/app/module/[moduleId]/familiarise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/familiarise/page.tsx) matching `screens/intro to familiarise.png` and `screens/familiarise.png`.
-  - Implemented interactive text selection & highlight notes creator, notes panel, "Convert to node" feature, and Socratic AI avatar hint trigger.
+  - Enhanced Notes domain [`src/domains/notes/noteService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/notes/noteService.ts) and documentation [`src/domains/notes/README.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/notes/README.md) with note editing (`updateNote`) and deletion (`deleteNote`).
+  - Built API routes: `/api/topics`, `/api/topics/:topicId/sources`, `/api/modules/:moduleId/notes`, `/api/notes/:noteId` (PUT, DELETE), `/api/notes/:noteId/convert-to-node`, `/api/modules/:moduleId/agent/hint`.
+  - Built Topic Selection Dashboard page [`src/app/dashboard/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/page.tsx) matching `screens/landing page.png`.
+  - Upgraded Familiarise stage screen [`src/app/module/[moduleId]/familiarise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/familiarise/page.tsx):
+    - Removed static right-hand sidebar.
+    - Added inline colored text highlighting (`<span className={styles.highlightedSpan}>`).
+    - Added interactive hover tooltips positioned directly above highlighted text displaying note content, inline **Edit** capability, **Delete** button, and **+ Convert to node** action.
 - **Dependencies Introduced**: None additional.
 - **Tests Passing**:
   - `tests/auth.test.ts` (4/4 tests passing).
   - `tests/topics.test.ts` (3/3 tests passing).
-  - `tests/notes.test.ts` (2/2 tests passing).
-  - Total: 9/9 unit tests passing.
-- **Immediate Next Step**: Report Stage 2 completion to user, request approval to proceed with Stage 3 (Conceptualise Stage interactive canvas).
+  - `tests/notes.test.ts` (4/4 tests passing: create, edit, delete, convert-to-node).
+  - Total: 11/11 unit tests passing.
+- **Immediate Next Step**: Commit enhancements, report completion to user, and request approval to proceed with Stage 3.

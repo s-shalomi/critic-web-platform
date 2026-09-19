@@ -1,4 +1,4 @@
-import { createNote, getNotesForModule, convertNoteToNode } from '../src/domains/notes/noteService';
+import { createNote, getNotesForModule, updateNote, deleteNote, convertNoteToNode } from '../src/domains/notes/noteService';
 
 describe('Notes Domain Tests', () => {
   test('Creates note and persists to module session', async () => {
@@ -18,6 +18,36 @@ describe('Notes Domain Tests', () => {
     expect(notes[0].highlightedText).toBe('Global Warming right now!');
   });
 
+  test('Edits existing note text successfully', async () => {
+    const moduleId = 'test_mod_edit';
+    const note = await createNote({
+      moduleId,
+      sourceId: 'source-1',
+      highlightedText: 'tremendous amounts of snow',
+      noteText: 'Initial note text',
+    });
+
+    const updated = await updateNote(note.id, 'Updated note explaining local vs regional weather');
+    expect(updated?.noteText).toBe('Updated note explaining local vs regional weather');
+  });
+
+  test('Deletes note successfully', async () => {
+    const moduleId = 'test_mod_del';
+    const note = await createNote({
+      moduleId,
+      sourceId: 'source-1',
+      highlightedText: 'staying in your house',
+      noteText: 'Temporary note',
+    });
+
+    const isDeleted = await deleteNote(note.id);
+    expect(isDeleted).toBe(true);
+
+    const notes = await getNotesForModule(moduleId);
+    const found = notes.find((n) => n.id === note.id);
+    expect(found).toBeUndefined();
+  });
+
   test('Converts note to concept node successfully', async () => {
     const moduleId = 'test_mod_456';
     const note = await createNote({
@@ -32,6 +62,7 @@ describe('Notes Domain Tests', () => {
     expect(conversionResult.conceptNodeId).toBeDefined();
 
     const notes = await getNotesForModule(moduleId);
-    expect(notes[0].convertedToNode).toBe(true);
+    const convertedNote = notes.find((n) => n.id === note.id);
+    expect(convertedNote?.convertedToNode).toBe(true);
   });
 });

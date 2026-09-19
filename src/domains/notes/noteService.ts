@@ -1,6 +1,6 @@
 /**
  * Notes Domain Service
- * Manages evidence text highlights, notes taken by students, and conversion to concept nodes.
+ * Manages evidence text highlights, inline note tooltips, editing, deletion, and conversion to concept nodes.
  */
 
 export interface Note {
@@ -43,6 +43,19 @@ export async function createNote(data: {
   memoryNotesStore.set(data.moduleId, existing);
 
   return note;
+}
+
+export async function updateNote(noteId: string, noteText: string): Promise<Note | null> {
+  for (const [moduleId, notes] of memoryNotesStore.entries()) {
+    const note = notes.find((n) => n.id === noteId);
+    if (note) {
+      note.noteText = noteText;
+      note.updatedAt = new Date().toISOString();
+      memoryNotesStore.set(moduleId, notes);
+      return note;
+    }
+  }
+  return null;
 }
 
 export async function deleteNote(noteId: string): Promise<boolean> {
