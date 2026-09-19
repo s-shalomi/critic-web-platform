@@ -58,12 +58,35 @@ export default function FamiliariseStagePage() {
         }
       });
 
+    // Check localStorage fallback first for instant offline reload persistence
+    const localSaved = localStorage.getItem(`critic_notes_${moduleId}`);
+    if (localSaved) {
+      try {
+        setNotes(JSON.parse(localSaved));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // Sync with server notes API
     fetch(`/api/modules/${moduleId}/notes`)
       .then((res) => res.json())
       .then((data) => {
-        if (data.notes) setNotes(data.notes);
+        if (data.notes && data.notes.length > 0) {
+          setNotes(data.notes);
+          localStorage.setItem(`critic_notes_${moduleId}`, JSON.stringify(data.notes));
+        }
       });
   }, [moduleId]);
+
+  // Sync notes state to localStorage whenever notes change
+  const updateNotesState = (newNotes: Note[] | ((prev: Note[]) => Note[])) => {
+    setNotes((prev) => {
+      const updated = typeof newNotes === 'function' ? newNotes(prev) : newNotes;
+      localStorage.setItem(`critic_notes_${moduleId}`, JSON.stringify(updated));
+      return updated;
+    });
+  };
 
   const currentSource = sources.find((s) => s.id === selectedSourceId) || sources[0];
   const sourceNotes = notes.filter((n) => n.sourceId === selectedSourceId);
@@ -93,7 +116,7 @@ export default function FamiliariseStagePage() {
 
       const data = await res.json();
       if (data.success) {
-        setNotes((prev) => [...prev, data.note]);
+        updateNotesState((prev) => [...prev, data.note]);
         setSelectedText('');
         setNoteInput('');
         setIsHighlighting(false);
@@ -114,7 +137,7 @@ export default function FamiliariseStagePage() {
       const data = await res.json();
 
       if (data.success) {
-        setNotes((prev) =>
+        updateNotesState((prev) =>
           prev.map((n) => (n.id === noteId ? { ...n, noteText: editText } : n))
         );
         setEditingNoteId(null);
@@ -125,8 +148,7 @@ export default function FamiliariseStagePage() {
   };
 
   const handleDeleteNote = async (noteId: string) => {
-    // Optimistically remove note from state immediately
-    setNotes((prev) => prev.filter((n) => n.id !== noteId));
+    updateNotesState((prev) => prev.filter((n) => n.id !== noteId));
     setHoveredNoteId(null);
     setPinnedNoteId(null);
     setEditingNoteId(null);
@@ -148,7 +170,7 @@ export default function FamiliariseStagePage() {
       const data = await res.json();
 
       if (data.success) {
-        setNotes((prev) =>
+        updateNotesState((prev) =>
           prev.map((n) => (n.id === noteId ? { ...n, convertedToNode: true } : n))
         );
       }
