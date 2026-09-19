@@ -355,20 +355,21 @@ export default function FamiliariseStagePage() {
                   onMouseUp={handleMouseUp}
                 >
                   {renderHighlightedText(currentSource.content.text)}
-                </div>
 
-                {currentSource.content.comments && (
-                  <div className={styles.commentsList}>
-                    <h4 style={{ fontFamily: 'var(--font-orbitron)', marginTop: '28px', marginBottom: '16px' }}>
-                      Comments
-                    </h4>
-                    {currentSource.content.comments.map((c, i) => (
-                      <div key={i} className={styles.commentItem}>
-                        <strong>{c.author}:</strong> {c.text}
-                      </div>
-                    ))}
-                  </div>
-                )}
+                  {currentSource.content.comments && (
+                    <div className={styles.commentsList}>
+                      <h4 style={{ fontFamily: 'var(--font-orbitron)', marginTop: '28px', marginBottom: '16px' }}>
+                        Comments
+                      </h4>
+                      {currentSource.content.comments.map((c, i) => (
+                        <div key={i} className={styles.commentItem}>
+                          <strong className="cyan-neon-text">{c.author}:</strong>{' '}
+                          {renderHighlightedText(c.text)}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           )}
