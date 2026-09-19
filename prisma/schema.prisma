@@ -1,0 +1,191 @@
+// Prisma schema for CRITIC Educational Web Platform
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Student {
+  id               String   @id @default(uuid())
+  accessCode       String   @unique @map("access_code")
+  agentPersonality String   @default("Socratic Peer") @map("agent_personality")
+  agentAppearance  String   @default("default_cyan") @map("agent_appearance")
+  avatarName       String   @default("Aria") @map("avatar_name")
+  createdAt        DateTime @default(now()) @map("created_at")
+  lastLoginAt      DateTime @default(now()) @map("last_login_at")
+
+  modules Modules[]
+
+  @@map("students")
+}
+
+model Teacher {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  accessCodes AccessCode[]
+  sourcesCreated Source[] @relation("SourceCreatedBy")
+  sourcesUpdated Source[] @relation("SourceUpdatedBy")
+
+  @@map("teachers")
+}
+
+model AccessCode {
+  id        String    @id @default(uuid())
+  code      String    @unique
+  teacherId String    @map("teacher_id")
+  createdAt DateTime  @default(now()) @map("created_at")
+  expiresAt DateTime? @map("expires_at")
+
+  teacher Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@map("access_codes")
+}
+
+model Topic {
+  id          String   @id @default(uuid())
+  status      String   // "Available", "Coming Soon"
+  title       String
+  description String
+
+  sources Source[]
+  modules Modules[]
+
+  @@map("topics")
+}
+
+model Source {
+  id         String   @id @default(uuid())
+  topicId    String   @map("topic_id")
+  createdBy  String?  @map("created_by")
+  updatedBy  String?  @map("updated_by")
+  orderIndex Int      @default(0) @map("order_index")
+  title      String
+  content    Json     // Formatted content sections
+  url        String?
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  topic     Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  creator   Teacher? @relation("SourceCreatedBy", fields: [createdBy], references: [id])
+  updater   Teacher? @relation("SourceUpdatedBy", fields: [updatedBy], references: [id])
+  notes     Note[]
+
+  @@map("sources")
+}
+
+model Modules {
+  id           String   @id @default(uuid())
+  studentId    String   @map("student_id")
+  topicId      String   @map("topic_id")
+  status       String   @default("in_progress") // "in_progress", "completed"
+  currentStage String   @default("familiarise") @map("current_stage") // "familiarise", "conceptualise", "inquire", "synthesise", "review"
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  student        Student        @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  topic          Topic          @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  notes          Note[]
+  conceptNodes   ConceptNode[]
+  conceptLinks   ConceptLink[]
+  chatMessages   ChatMessage[]
+  reviewSummaries ReviewSummary[]
+  reviewStats    ReviewStats[]
+
+  @@unique([studentId, topicId])
+  @@map("modules")
+}
+
+model Note {
+  id              String   @id @default(uuid())
+  moduleId        String   @map("module_id")
+  sourceId        String   @map("source_id")
+  highlightedText String   @map("highlighted_text")
+  noteText        String   @map("note_text")
+  convertedToNode Boolean  @default(false) @map("converted_to_node")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  module      Modules       @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  source      Source        @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  conceptNodes ConceptNode[]
+
+  @@map("notes")
+}
+
+model ConceptNode {
+  id           String   @id @default(uuid())
+  moduleId     String   @map("module_id")
+  text         String
+  positionX    Float    @map("position_x")
+  positionY    Float    @map("position_y")
+  sourceNoteId String?  @map("source_note_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  module     Modules       @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  sourceNote Note?         @relation(fields: [sourceNoteId], references: [id], onDelete: SetNull)
+  linksFrom  ConceptLink[] @relation("LinkFromNode")
+  linksTo    ConceptLink[] @relation("LinkToNode")
+
+  @@map("concept_nodes")
+}
+
+model ConceptLink {
+  id         String   @id @default(uuid())
+  moduleId   String   @map("module_id")
+  fromNodeId String   @map("from_node_id")
+  toNodeId   String   @map("to_node_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  module   Modules     @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  fromNode ConceptNode @relation("LinkFromNode", fields: [fromNodeId], references: [id], onDelete: Cascade)
+  toNode   ConceptNode @relation("LinkToNode", fields: [toNodeId], references: [id], onDelete: Cascade)
+
+  @@map("concept_links")
+}
+
+model ChatMessage {
+  id          String   @id @default(uuid())
+  moduleId    String   @map("module_id")
+  stage       String   // "familiarise", "conceptualise", "inquire", "synthesise"
+  sender      String   // "student", "agent"
+  text        String
+  messageType String   @default("chat") @map("message_type") // "chat", "devils_advocate", "hint", "nudge"
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  module Modules @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@map("chat_messages")
+}
+
+model ReviewSummary {
+  id           String   @id @default(uuid())
+  moduleId     String   @map("module_id")
+  summaryTitle String   @map("summary_title")
+  summaryText  String   @map("summary_text")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  module Modules @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@map("review_summaries")
+}
+
+model ReviewStats {
+  id        String   @id @default(uuid())
+  moduleId  String   @map("module_id")
+  stats     Json     // Badges and performance metrics JSON
+  createdAt DateTime @default(now()) @map("created_at")
+
+  module Modules @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@map("review_stats")
+}
