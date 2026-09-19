@@ -42,8 +42,9 @@ export default function FamiliariseStagePage() {
   const [isHighlighting, setIsHighlighting] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
-  // Hovered and Editing Note state
+  // Hovered, Pinned, and Editing Note state
   const [hoveredNoteId, setHoveredNoteId] = useState<string | null>(null);
+  const [pinnedNoteId, setPinnedNoteId] = useState<string | null>(null);
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
   const [editText, setEditText] = useState<string>('');
 
@@ -206,22 +207,36 @@ export default function FamiliariseStagePage() {
 
       const n = part.note;
       const isHovered = hoveredNoteId === n.id;
+      const isPinned = pinnedNoteId === n.id;
       const isEditing = editingNoteId === n.id;
+      const isVisible = isHovered || isPinned || isEditing;
 
       return (
         <span
           key={index}
-          className={styles.highlightedSpan}
+          className={`${styles.highlightedSpan} ${isPinned ? styles.pinnedSpan : ''}`}
           onMouseEnter={() => setHoveredNoteId(n.id)}
           onMouseLeave={() => {
             if (!isEditing) setHoveredNoteId(null);
           }}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (isPinned) {
+              setPinnedNoteId(null);
+              setHoveredNoteId(null);
+            } else {
+              setPinnedNoteId(n.id);
+            }
+          }}
         >
           {part.text}
 
-          {/* Hover Tooltip Popup directly above highlighted text */}
-          {(isHovered || isEditing) && (
-            <span className={styles.hoverTooltip}>
+          {/* Hover / Pinned Tooltip Popup */}
+          {isVisible && (
+            <span
+              className={styles.hoverTooltip}
+              onClick={(e) => e.stopPropagation()}
+            >
               {isEditing ? (
                 <div className={styles.editForm}>
                   <textarea
@@ -247,7 +262,9 @@ export default function FamiliariseStagePage() {
               ) : (
                 <div className={styles.tooltipContent}>
                   <div className={styles.tooltipHeader}>
-                    <span className={styles.tooltipLabel}>NOTE</span>
+                    <span className={styles.tooltipLabel}>
+                      NOTE {isPinned ? '📌 (PINNED)' : ''}
+                    </span>
                     <div className={styles.tooltipHeaderBtns}>
                       <button
                         onClick={() => {

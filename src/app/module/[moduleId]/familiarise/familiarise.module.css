@@ -137,6 +137,13 @@
   background: rgba(55, 243, 255, 0.45);
 }
 
+.pinnedSpan {
+  background: rgba(255, 79, 216, 0.35);
+  color: var(--color-accent-pink);
+  border-bottom: 2px solid var(--color-accent-pink);
+  box-shadow: 0 0 10px rgba(255, 79, 216, 0.4);
+}
+
 .hoverTooltip {
   position: absolute;
   bottom: 125%;
