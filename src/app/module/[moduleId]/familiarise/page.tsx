@@ -125,16 +125,16 @@ export default function FamiliariseStagePage() {
   };
 
   const handleDeleteNote = async (noteId: string) => {
+    // Optimistically remove note from state immediately
+    setNotes((prev) => prev.filter((n) => n.id !== noteId));
+    setHoveredNoteId(null);
+    setPinnedNoteId(null);
+    setEditingNoteId(null);
+
     try {
-      const res = await fetch(`/api/notes/${noteId}`, {
+      await fetch(`/api/notes/${noteId}`, {
         method: 'DELETE',
       });
-      const data = await res.json();
-
-      if (data.success) {
-        setNotes((prev) => prev.filter((n) => n.id !== noteId));
-        if (hoveredNoteId === noteId) setHoveredNoteId(null);
-      }
     } catch (err) {
       console.error(err);
     }
@@ -267,7 +267,8 @@ export default function FamiliariseStagePage() {
                     </span>
                     <div className={styles.tooltipHeaderBtns}>
                       <button
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation();
                           setEditingNoteId(n.id);
                           setEditText(n.noteText);
                         }}
@@ -277,7 +278,10 @@ export default function FamiliariseStagePage() {
                         ✏️ Edit
                       </button>
                       <button
-                        onClick={() => handleDeleteNote(n.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteNote(n.id);
+                        }}
                         className={styles.deleteIconBtn}
                         title="Delete note"
                       >
@@ -293,7 +297,10 @@ export default function FamiliariseStagePage() {
                       <span className={styles.convertedBadge}>✓ Converted to Concept Node</span>
                     ) : (
                       <button
-                        onClick={() => handleConvertToNode(n.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleConvertToNode(n.id);
+                        }}
                         className={styles.convertTooltipBtn}
                       >
                         + Convert to node
