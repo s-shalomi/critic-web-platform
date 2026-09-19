@@ -43,20 +43,30 @@
 ### [2026-09-20] - Stage 2 & Stage 3: Topic Selection, Evidence Highlighting, & Visual Concept Map Canvas
 - **Code Built**:
   - Built Topics domain [`src/domains/topics/topicService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/topics/topicService.ts) and documentation [`src/domains/topics/README.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/topics/README.md).
-  - Enhanced Notes domain [`src/domains/notes/noteService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/notes/noteService.ts) and documentation [`src/domains/notes/README.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/notes/README.md) with note editing, deletion, hover tooltips, and instant note-to-concept-node conversion.
-  - Built Concepts domain [`src/domains/concepts/conceptService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/concepts/conceptService.ts) and documentation [`src/domains/concepts/README.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/concepts/README.md) with clean canvas initial state and note-to-node auto generator.
+  - Enhanced Notes domain [`src/domains/notes/noteService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/notes/noteService.ts) and documentation [`src/domains/notes/README.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/notes/README.md).
+  - Built Concepts domain [`src/domains/concepts/conceptService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/concepts/conceptService.ts) and documentation [`src/domains/concepts/README.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/concepts/README.md).
   - Built API routes: `/api/topics`, `/api/topics/:topicId/sources`, `/api/modules/:moduleId/notes`, `/api/notes/:noteId` (PUT, DELETE), `/api/notes/:noteId/convert-to-node`, `/api/modules/:moduleId/agent/hint`, `/api/modules/:moduleId/conceptualise`, `/api/modules/:moduleId/concepts`, `/api/concepts/:nodeId` (PUT, DELETE), `/api/modules/:moduleId/concepts/links`, `/api/links/:linkId`.
-  - Built Conceptualise stage page [`src/app/module/[moduleId]/conceptualise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/conceptualise/page.tsx):
-    - Left side scrollable source dropdown selector with inline text highlights & hover tooltips.
-    - Right side interactive visual concept canvas with node edit (`✏️`) and delete (`🗑️`) controls.
-    - Dynamic node growth & glow intensity based on link connection degree.
-    - Drag physics positioning.
-    - Web Audio API synth chime sound on link creation.
 - **Dependencies Introduced**: None additional.
 - **Tests Passing**:
   - `tests/auth.test.ts` (4/4 tests passing).
   - `tests/topics.test.ts` (3/3 tests passing).
   - `tests/notes.test.ts` (4/4 tests passing).
   - `tests/concepts.test.ts` (4/4 tests passing).
-  - Total: 15/15 unit tests passing.
-- **Immediate Next Step**: Commit features, report completion to user, and request approval to proceed with Stage 4 (Socratic AI Engine with Gemini + Groq Fallback & Customization).
+
+---
+
+### [2026-09-20] - Stage 4: Socratic AI Agent Engine (Gemini + Groq Fallback & Customization)
+- **Code Built**:
+  - Built Socratic AI domain [`src/domains/ai/aiService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/ai/aiService.ts) and documentation [`src/domains/ai/README.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/ai/README.md).
+  - Built API routes: `/api/modules/:moduleId/inquire/messages`, `/api/students/:studentId/agent-preferences`.
+  - Implemented Gemini free tier client with automatic fallback to Groq (`llama-3.3-70b-versatile`) on rate-limit (429) or failure.
+  - Implemented Socratic guardrails: strictly non-definitive phrasing, ending turns with questions/counter-perspectives, and context compression (last 10 turns raw + summary).
+- **Dependencies Introduced**: `@google/generative-ai`, `groq-sdk`.
+- **Tests Passing**:
+  - `tests/auth.test.ts` (4/4 tests passing).
+  - `tests/topics.test.ts` (3/3 tests passing).
+  - `tests/notes.test.ts` (4/4 tests passing).
+  - `tests/concepts.test.ts` (4/4 tests passing).
+  - `tests/ai.test.ts` (3/3 tests passing: Socratic prompt building, context history compression, fallback execution).
+  - Total: 18/18 unit tests passing.
+- **Immediate Next Step**: Commit Stage 4 code, report completion to user, and request approval to proceed with Stage 5 (Inquire/Evaluate & Synthesise Stages).
