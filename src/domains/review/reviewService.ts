@@ -35,70 +35,69 @@ export async function generateModuleReview(
     synthesisLength?: number;
   }
 ): Promise<ReviewData> {
-  const conceptsCount = sessionStats?.conceptsCount ?? 4;
-  const notesCount = sessionStats?.notesCount ?? 3;
-  const chatTurns = sessionStats?.chatTurnsCount ?? 5;
-  const misinfoCount = sessionStats?.devilsAdvocateCount ?? 2;
-  const synthLen = sessionStats?.synthesisLength ?? 120;
+  const conceptsCount = sessionStats?.conceptsCount ?? 0;
+  const notesCount = sessionStats?.notesCount ?? 0;
+  const chatTurns = sessionStats?.chatTurnsCount ?? 0;
+  const misinfoCount = sessionStats?.devilsAdvocateCount ?? 0;
+  const synthLen = sessionStats?.synthesisLength ?? 0;
 
-  const criticalThinkingScore = Math.min(100, Math.max(50, 55 + notesCount * 6 + chatTurns * 3));
-  const synthesisScore = Math.min(100, Math.max(50, 60 + Math.floor(synthLen / 10) + conceptsCount * 4));
+  const criticalThinkingScore = Math.min(100, Math.max(50, 50 + notesCount * 8 + chatTurns * 4));
+  const synthesisScore = Math.min(100, Math.max(50, 55 + Math.floor(synthLen / 12) + conceptsCount * 5));
 
   const badges: Badge[] = [
     {
       id: 'badge-concepts',
       title: 'Master Conceptualizer',
-      description: `Identified ${conceptsCount} core concept nodes`,
+      description: `Identified ${conceptsCount} concept node${conceptsCount === 1 ? '' : 's'}`,
       icon: '🧠',
-      unlocked: true,
+      unlocked: conceptsCount > 0,
     },
     {
       id: 'badge-assumptions',
       title: 'Assumption Slayer',
-      description: `Challenged ${notesCount} implicit biases`,
+      description: `Challenged ${notesCount} implicit bias${notesCount === 1 ? '' : 'es'}`,
       icon: '🛡️',
-      unlocked: true,
+      unlocked: notesCount > 0,
     },
     {
       id: 'badge-questions',
       title: 'Socratic Inquirer',
-      description: `Asked ${chatTurns} probing questions`,
+      description: `Asked ${chatTurns} probing question${chatTurns === 1 ? '' : 's'}`,
       icon: '❓',
-      unlocked: true,
+      unlocked: chatTurns > 0,
     },
     {
       id: 'badge-misinfo',
       title: 'Truth Auditor',
-      description: `Evaluated ${misinfoCount} counter-claims`,
+      description: `Evaluated ${misinfoCount} counter-claim${misinfoCount === 1 ? '' : 's'}`,
       icon: '🔍',
-      unlocked: true,
+      unlocked: misinfoCount > 0 || notesCount > 0,
     },
     {
       id: 'badge-critical',
       title: 'High-Velocity Reasoner',
       description: `Critical Thinking Score: ${criticalThinkingScore}/100`,
       icon: '⚡',
-      unlocked: true,
+      unlocked: criticalThinkingScore >= 55,
     },
     {
       id: 'badge-synthesis',
       title: 'Synthesis Master',
       description: `Synthesis Quality Score: ${synthesisScore}/100`,
       icon: '🏆',
-      unlocked: true,
+      unlocked: synthesisScore >= 60,
     },
   ];
 
-  // MBTI-like reasoning summary generation
   let mbtiPersonalityTitle = 'The Empiricist Investigator (E-S-R-T)';
   let mbtiPersonalitySummary =
     'You approach complex claims with rigorous empirical scrutiny. Rather than accepting rhetoric at face value, you systematically map conceptual links, interrogate underlying assumptions, and demand verified evidence before forming conclusions.';
 
-  if (conceptsCount >= 5 && notesCount >= 4) {
+  if (conceptsCount >= 3 && notesCount >= 3) {
     mbtiPersonalityTitle = 'The Systemic Architect (S-A-C-M)';
     mbtiPersonalitySummary =
       'You view complex problems as interconnected webs of cause and effect. You excel at synthesizing evidence into clear visual concept structures, identifying structural vulnerabilities in bad arguments, and formulating holistically sound conclusions.';
-  } else if (chatTurns >= 6) {
+  } else if (chatTurns >= 3) {
     mbtiPersonalityTitle = 'The Socratic Questioner (S-Q-P-I)';
     mbtiPersonalitySummary =
       'You use targeted inquiry as your primary tool for discovery. Unafraid to challenge assumptions or probe counter-arguments, you uncover underlying truths by asking relentless, clarifying questions.';

@@ -228,7 +228,11 @@ export default function ConceptualiseStagePage() {
         }
       }
     } else {
-      setSelectedNodeId(nodeId);
+      if (selectedNodeId === nodeId) {
+        setSelectedNodeId(null);
+      } else {
+        setSelectedNodeId(nodeId);
+      }
     }
   };
 

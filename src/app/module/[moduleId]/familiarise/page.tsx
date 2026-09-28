@@ -164,40 +164,37 @@ export default function FamiliariseStagePage() {
   };
 
   const handleConvertToNode = async (noteId: string) => {
+    // 1. Instantly update local notes state to show '✓ Converted to Concept Node'
+    const targetNote = notes.find((n) => n.id === noteId);
+    updateNotesState((prev) =>
+      prev.map((n) => (n.id === noteId ? { ...n, convertedToNode: true } : n))
+    );
+
+    // 2. Generate concept node object
+    const conceptNodeToSave = {
+      id: `node_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      moduleId,
+      text: targetNote ? (targetNote.noteText || targetNote.highlightedText) : 'Key Concept',
+      positionX: 180 + Math.random() * 220,
+      positionY: 140 + Math.random() * 180,
+      linkCount: 0,
+    };
+
+    // 3. Save into canvas localStorage store immediately
+    const savedCanvasNodesStr = localStorage.getItem(`critic_nodes_canvas_${moduleId}`);
+    const canvasNodes = savedCanvasNodesStr ? JSON.parse(savedCanvasNodesStr) : [];
+    canvasNodes.push(conceptNodeToSave);
+    localStorage.setItem(`critic_nodes_canvas_${moduleId}`, JSON.stringify(canvasNodes));
+
+    // 4. Show visual feedback toast banner
+    setToastMsg('✨ Note converted to Concept Node! Added to Visual Map.');
+    setTimeout(() => setToastMsg(null), 3500);
+
+    // 5. Sync with server API
     try {
-      const res = await fetch(`/api/notes/${noteId}/convert-to-node`, {
+      await fetch(`/api/notes/${noteId}/convert-to-node`, {
         method: 'POST',
       });
-      const data = await res.json();
-
-      if (data.success) {
-        const targetNote = notes.find((n) => n.id === noteId);
-        updateNotesState((prev) =>
-          prev.map((n) => (n.id === noteId ? { ...n, convertedToNode: true } : n))
-        );
-
-        // Sync created concept node into canvas localStorage store
-        const conceptNodeToSave = data.conceptNode || {
-          id: `node_${Date.now()}`,
-          moduleId,
-          text: targetNote ? (targetNote.noteText || targetNote.highlightedText) : 'Key Concept',
-          positionX: 200 + Math.random() * 200,
-          positionY: 150 + Math.random() * 180,
-          linkCount: 0,
-        };
-
-        const savedCanvasNodesStr = localStorage.getItem(`critic_nodes_canvas_${moduleId}`);
-        const canvasNodes = savedCanvasNodesStr ? JSON.parse(savedCanvasNodesStr) : [];
-        const exists = canvasNodes.some((n: { id: string }) => n.id === conceptNodeToSave.id);
-        if (!exists) {
-          canvasNodes.push(conceptNodeToSave);
-          localStorage.setItem(`critic_nodes_canvas_${moduleId}`, JSON.stringify(canvasNodes));
-        }
-
-        // Show visual feedback toast
-        setToastMsg('✨ Note converted to Concept Node! Added to Visual Map.');
-        setTimeout(() => setToastMsg(null), 3500);
-      }
     } catch (err) {
       console.error(err);
     }
