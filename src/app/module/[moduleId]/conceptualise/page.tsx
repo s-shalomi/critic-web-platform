@@ -49,14 +49,13 @@ export default function ConceptualiseStagePage() {
   const [showIntroModal, setShowIntroModal] = useState<boolean>(true);
   const [agentSpeech, setAgentSpeech] = useState<string | null>(null);
 
-  // Left Source & Notes State
+  // Left Sources & Notes State
   const [sources, setSources] = useState<Source[]>([]);
-  const [selectedSourceId, setSelectedSourceId] = useState<string>('');
   const [notes, setNotes] = useState<Note[]>([]);
   const [hoveredNoteId, setHoveredNoteId] = useState<string | null>(null);
   const [pinnedNoteId, setPinnedNoteId] = useState<string | null>(null);
 
-  // Node Edit Modal / Tool state
+  // Node Controls & Tools State
   const [activeTool, setActiveTool] = useState<'pan' | 'add_node' | 'link'>('pan');
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
@@ -75,13 +74,10 @@ export default function ConceptualiseStagePage() {
     fetch('/api/topics/climate-change/sources')
       .then((res) => res.json())
       .then((data) => {
-        if (data.sources && data.sources.length > 0) {
-          setSources(data.sources);
-          setSelectedSourceId(data.sources[0].id);
-        }
+        if (data.sources) setSources(data.sources);
       });
 
-    // 2. Fetch Notes (with localStorage fallback)
+    // 2. Fetch Notes
     const localSavedNotes = localStorage.getItem(`critic_notes_${moduleId}`);
     if (localSavedNotes) {
       try { setNotes(JSON.parse(localSavedNotes)); } catch (e) { console.error(e); }
@@ -92,7 +88,7 @@ export default function ConceptualiseStagePage() {
         if (data.notes && data.notes.length > 0) setNotes(data.notes);
       });
 
-    // 3. Fetch Concept Map Nodes & Links (with localStorage fallback)
+    // 3. Fetch Canvas Nodes & Links
     const savedNodes = localStorage.getItem(`critic_nodes_canvas_${moduleId}`);
     const savedLinks = localStorage.getItem(`critic_links_canvas_${moduleId}`);
 
@@ -106,7 +102,7 @@ export default function ConceptualiseStagePage() {
     fetch(`/api/modules/${moduleId}/conceptualise`)
       .then((res) => res.json())
       .then((data) => {
-        if (data.nodes && data.links && (!savedNodes || JSON.parse(savedNodes).length === 0)) {
+        if (data.nodes && data.links && !savedNodes) {
           setNodes(data.nodes);
           setLinks(data.links);
           localStorage.setItem(`critic_nodes_canvas_${moduleId}`, JSON.stringify(data.nodes));
@@ -114,9 +110,6 @@ export default function ConceptualiseStagePage() {
         }
       });
   }, [moduleId]);
-
-  const currentSource = sources.find((s) => s.id === selectedSourceId) || sources[0];
-  const sourceNotes = notes.filter((n) => n.sourceId === selectedSourceId);
 
   const saveCanvasState = (updatedNodes: ConceptNode[], updatedLinks: ConceptLink[]) => {
     setNodes(updatedNodes);
@@ -287,9 +280,7 @@ export default function ConceptualiseStagePage() {
         body: JSON.stringify({ stage: 'conceptualise' }),
       });
       const data = await res.json();
-      if (data.hint) {
-        setAgentSpeech(data.hint);
-      }
+      if (data.hint) setAgentSpeech(data.hint);
     } catch (err) {
       setAgentSpeech('How does this concept connect to the evidence you highlighted earlier?');
     }
@@ -298,12 +289,13 @@ export default function ConceptualiseStagePage() {
   /**
    * Helper to render source text with inline highlights & hover tooltips in left panel
    */
-  const renderHighlightedText = (fullText: string) => {
-    if (!sourceNotes || sourceNotes.length === 0) return fullText;
+  const renderHighlightedText = (sourceId: string, fullText: string) => {
+    const sNotes = notes.filter((n) => n.sourceId === sourceId);
+    if (!sNotes || sNotes.length === 0) return fullText;
 
     let parts: Array<{ text: string; note?: Note }> = [{ text: fullText }];
 
-    sourceNotes.forEach((note) => {
+    sNotes.forEach((note) => {
       const nextParts: Array<{ text: string; note?: Note }> = [];
       parts.forEach((part) => {
         if (part.note) {
@@ -373,49 +365,39 @@ export default function ConceptualiseStagePage() {
 
       {/* Main Workspace Split */}
       <div className={styles.workspace}>
-        {/* Left Source & Evidence Reference Panel */}
+        {/* Left Horizontal Carousel Sources Reference Panel */}
         <aside className={styles.leftSourcePanel}>
-          <div className={styles.sourceSelectHeader}>
-            <span className={styles.sourceSelectLabel}>SOURCES & EVIDENCE</span>
-            <select
-              value={selectedSourceId}
-              onChange={(e) => setSelectedSourceId(e.target.value)}
-              className={styles.sourceDropdown}
-            >
-              {sources.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.title}
-                </option>
-              ))}
-            </select>
+          <div className={styles.sourcePanelHeader}>
+            <span className={styles.panelTitle}>EVIDENCE SOURCES (SCROLL HORIZONTALLY →)</span>
           </div>
 
-          <div className={styles.sourceCardScrollable}>
-            {currentSource && (
-              <div className="glass-card" style={{ padding: '24px', width: '100%' }}>
-                {currentSource.content.authorName && (
+          <div className={styles.horizontalSourcesCarousel}>
+            {sources.map((src) => (
+              <div key={src.id} className={styles.carouselSourceCard}>
+                <div className={styles.sourceCardBadge}>{src.title}</div>
+                {src.content.authorName && (
                   <div className={styles.authorHeader}>
                     <div className={styles.authorAvatar} />
-                    <span className={styles.authorName}>{currentSource.content.authorName}</span>
+                    <span className={styles.authorName}>{src.content.authorName}</span>
                   </div>
                 )}
                 <div className={styles.sourceText}>
-                  {renderHighlightedText(currentSource.content.text)}
+                  {renderHighlightedText(src.id, src.content.text)}
 
-                  {currentSource.content.comments && (
-                    <div style={{ marginTop: '20px', borderTop: '1px solid var(--color-border-slate-50)', paddingTop: '12px' }}>
-                      <h5 style={{ fontFamily: 'var(--font-orbitron)', marginBottom: '8px' }}>Comments</h5>
-                      {currentSource.content.comments.map((c, i) => (
+                  {src.content.comments && (
+                    <div style={{ marginTop: '16px', borderTop: '1px solid var(--color-border-slate-50)', paddingTop: '10px' }}>
+                      <h5 style={{ fontFamily: 'var(--font-orbitron)', fontSize: '0.8rem', marginBottom: '6px' }}>Comments</h5>
+                      {src.content.comments.map((c, i) => (
                         <div key={i} style={{ fontSize: '0.85rem', marginBottom: '6px' }}>
                           <strong className="cyan-neon-text">{c.author}:</strong>{' '}
-                          {renderHighlightedText(c.text)}
+                          {renderHighlightedText(src.id, c.text)}
                         </div>
                       ))}
                     </div>
                   )}
                 </div>
               </div>
-            )}
+            ))}
           </div>
         </aside>
 
@@ -475,6 +457,11 @@ export default function ConceptualiseStagePage() {
                     boxShadow: `0 0 ${20 + count * 10}px rgba(255, 79, 216, ${0.4 + count * 0.15})`,
                   }}
                   onMouseDown={(e) => handleMouseDownNode(e, node.id)}
+                  onDoubleClick={(e) => {
+                    e.stopPropagation();
+                    setEditingNodeId(node.id);
+                    setEditNodeText(node.text);
+                  }}
                   onClick={() => handleNodeClick(node.id)}
                 >
                   {isEditing ? (
@@ -605,7 +592,7 @@ export default function ConceptualiseStagePage() {
         <button onClick={() => router.push(`/module/${moduleId}/inquire`)} className={styles.stageStep}>
           03 inquire
         </button>
-        <button onClick={() => router.push(`/module/${moduleId}/evaluate`)} className={styles.stageStep}>
+        <button onClick={() => router.push(`/module/${moduleId}/inquire`)} className={styles.stageStep}>
           04 evaluate
         </button>
         <button onClick={() => router.push(`/module/${moduleId}/synthesise`)} className={styles.stageStep}>

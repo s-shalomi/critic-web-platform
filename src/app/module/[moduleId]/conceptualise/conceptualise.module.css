@@ -33,51 +33,70 @@
   overflow: hidden;
 }
 
+/* Left Horizontal Carousel Panel */
 .leftSourcePanel {
-  width: 380px;
-  padding: 24px;
-  background: rgba(15, 23, 46, 0.5);
+  width: 440px;
+  padding: 20px;
+  background: rgba(15, 23, 46, 0.65);
   border-right: 1px solid rgba(55, 243, 255, 0.2);
   display: flex;
   flex-direction: column;
   z-index: 10;
 }
 
-.sourceSelectHeader {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 16px;
+.sourcePanelHeader {
+  margin-bottom: 12px;
 }
 
-.sourceSelectLabel {
+.panelTitle {
   font-family: var(--font-orbitron);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--color-accent-cyan);
   letter-spacing: 1px;
 }
 
-.sourceDropdown {
-  width: 100%;
-  background: rgba(7, 11, 26, 0.9);
-  border: 1px solid var(--color-border-slate);
-  color: var(--color-text-light);
-  font-family: var(--font-exo2);
-  padding: 8px 12px;
-  border-radius: 6px;
-  outline: none;
+.horizontalSourcesCarousel {
+  flex: 1;
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 12px;
 }
 
-.sourceCardScrollable {
-  flex: 1;
+.horizontalSourcesCarousel::-webkit-scrollbar {
+  height: 8px;
+}
+.horizontalSourcesCarousel::-webkit-scrollbar-thumb {
+  background: var(--color-accent-cyan-50);
+  border-radius: 4px;
+}
+
+.carouselSourceCard {
+  flex: 0 0 340px;
+  scroll-snap-align: start;
+  background: rgba(7, 11, 26, 0.85);
+  border: 1px solid var(--color-border-slate);
+  border-radius: 12px;
+  padding: 20px;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.sourceCardBadge {
+  font-family: var(--font-orbitron);
+  font-size: 0.85rem;
+  color: var(--color-accent-cyan);
+  margin-bottom: 12px;
+  font-weight: 700;
 }
 
 .authorHeader {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .authorAvatar {
@@ -89,7 +108,7 @@
 
 .authorName {
   font-family: var(--font-orbitron);
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
 }
 

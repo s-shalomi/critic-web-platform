@@ -42,7 +42,7 @@
 ### [2026-09-20] - Stage 2 & Stage 3: Topic Selection, Evidence Highlighting, & Visual Concept Map Canvas
 - **Code Built**:
   - Built Topics domain [`src/domains/topics/topicService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/topics/topicService.ts) and documentation [`src/domains/topics/README.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/topics/README.md).
-  - Enhanced Notes domain [`src/domains/notes/noteService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/notes/noteService.ts) and documentation [`src/domains/notes/README.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/notes/README.md) with note editing, deletion, hover tooltips, and instant note-to-concept-node conversion.
+  - Enhanced Notes domain [`src/domains/notes/noteService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/notes/noteService.ts) and documentation [`src/domains/notes/README.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/notes/README.md).
   - Built Concepts domain [`src/domains/concepts/conceptService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/concepts/conceptService.ts) and documentation [`src/domains/concepts/README.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/concepts/README.md).
   - Built API routes: `/api/topics`, `/api/topics/:topicId/sources`, `/api/modules/:moduleId/notes`, `/api/notes/:noteId` (PUT, DELETE), `/api/notes/:noteId/convert-to-node`, `/api/modules/:moduleId/agent/hint`, `/api/modules/:moduleId/conceptualise`, `/api/modules/:moduleId/concepts`, `/api/concepts/:nodeId` (PUT, DELETE), `/api/modules/:moduleId/concepts/links`, `/api/links/:linkId`.
 - **Dependencies Introduced**: None additional.
@@ -59,23 +59,21 @@
   - Built Socratic AI domain [`src/domains/ai/aiService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/ai/aiService.ts) and documentation [`src/domains/ai/README.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/ai/README.md).
   - Built API routes: `/api/modules/:moduleId/inquire/messages`, `/api/students/:studentId/agent-preferences`.
   - Implemented Gemini free tier client with automatic fallback to Groq (`llama-3.3-70b-versatile`) on rate-limit (429) or failure.
-  - Implemented Socratic guardrails: strictly non-definitive phrasing, ending turns with questions/counter-perspectives, and context compression (last 10 turns raw + summary).
 - **Dependencies Introduced**: `@google/generative-ai`, `groq-sdk`.
 - **Tests Passing**:
-  - `tests/auth.test.ts` (4/4 tests passing).
-  - `tests/topics.test.ts` (3/3 tests passing).
-  - `tests/notes.test.ts` (4/4 tests passing).
-  - `tests/concepts.test.ts` (4/4 tests passing).
   - `tests/ai.test.ts` (3/3 tests passing).
 
 ---
 
-### [2026-09-28] - Stage 5 & Stage 6: Inquire/Evaluate, Synthesise, Gamified Review Badges, MBTI Profile & Teacher Portal
+### [2026-09-28] - Stage 5 & Stage 6: Horizontal Carousel, Visual Feedback Toast, Accurate Stats & Shareable Card Image Generation
 - **Code Built**:
-  - Built Inquire & Evaluate stage screen [`src/app/module/[moduleId]/inquire/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/inquire/page.tsx) matching `screens/inquire and evaluate.png` with interactive Socratic dialogue, Devil's Advocate mode toggle, perceived loading indicator, and concept map reference canvas.
-  - Built Synthesise stage screen [`src/app/module/[moduleId]/synthesise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/synthesise/page.tsx) matching `screens/synthesise.png` with case synthesis draft editor and AI cross-checking engine (`POST /api/modules/:moduleId/synthesis`).
-  - Built Review domain [`src/domains/review/reviewService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/review/reviewService.ts) and Module Review screen [`src/app/module/[moduleId]/review/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/review/page.tsx) displaying 6 core performance metrics, sequential badge unlock animations, and shareable MBTI-like reasoning summary card.
-  - Built Teacher domain [`src/domains/teacher/teacherService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/teacher/teacherService.ts) and Teacher Portal Dashboard [`src/app/teacher/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/teacher/page.tsx) with access code generator, student stage progress tracking, and topic source management.
+  - Added animated visual feedback toast banner (`✨ Note converted to Concept Node!`) in Familiarise stage.
+  - Enhanced note-to-node conversion sync: converted notes immediately land in `critic_nodes_canvas_${moduleId}` and appear on the visual map canvas.
+  - Started Conceptualise canvas baseline with a clean state (removed hardcoded dummy nodes).
+  - Built horizontal scrolling evidence sources carousel (`.horizontalSourcesCarousel`) in Conceptualise stage with inline note highlights & hover tooltips.
+  - Enabled concept node double-click & inline edit controls (`✏️`, `🗑️`).
+  - Implemented dynamic accurate statistics calculation on Case Debrief screen based on active module session store.
+  - Built HTML5 Canvas image generator on Case Debrief screen: clicking "SHARE REASONING CARD" exports and downloads a `.png` file (`reasoning_profile_card.png`).
 - **Dependencies Introduced**: None additional.
 - **Tests Passing**:
   - `tests/auth.test.ts` (4/4 tests passing).
@@ -87,4 +85,3 @@
   - `tests/review.test.ts` (2/2 tests passing).
   - `tests/teacher.test.ts` (2/2 tests passing).
   - Total: 23/23 unit tests passing.
-- **Immediate Next Step**: Commit final features and conclude task.

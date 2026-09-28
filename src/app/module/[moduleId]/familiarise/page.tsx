@@ -42,11 +42,12 @@ export default function FamiliariseStagePage() {
   const [isHighlighting, setIsHighlighting] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
 
-  // Hovered, Pinned, and Editing Note state
+  // Hovered, Pinned, Editing Note & Toast state
   const [hoveredNoteId, setHoveredNoteId] = useState<string | null>(null);
   const [pinnedNoteId, setPinnedNoteId] = useState<string | null>(null);
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
   const [editText, setEditText] = useState<string>('');
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/topics/climate-change/sources')
@@ -170,17 +171,32 @@ export default function FamiliariseStagePage() {
       const data = await res.json();
 
       if (data.success) {
+        const targetNote = notes.find((n) => n.id === noteId);
         updateNotesState((prev) =>
           prev.map((n) => (n.id === noteId ? { ...n, convertedToNode: true } : n))
         );
 
-        if (data.conceptNode) {
-          // Sync with canvas localStorage store so it appears on Conceptualise screen
-          const savedCanvasNodesStr = localStorage.getItem(`critic_nodes_canvas_${moduleId}`);
-          const canvasNodes = savedCanvasNodesStr ? JSON.parse(savedCanvasNodesStr) : [];
-          canvasNodes.push(data.conceptNode);
+        // Sync created concept node into canvas localStorage store
+        const conceptNodeToSave = data.conceptNode || {
+          id: `node_${Date.now()}`,
+          moduleId,
+          text: targetNote ? (targetNote.noteText || targetNote.highlightedText) : 'Key Concept',
+          positionX: 200 + Math.random() * 200,
+          positionY: 150 + Math.random() * 180,
+          linkCount: 0,
+        };
+
+        const savedCanvasNodesStr = localStorage.getItem(`critic_nodes_canvas_${moduleId}`);
+        const canvasNodes = savedCanvasNodesStr ? JSON.parse(savedCanvasNodesStr) : [];
+        const exists = canvasNodes.some((n: { id: string }) => n.id === conceptNodeToSave.id);
+        if (!exists) {
+          canvasNodes.push(conceptNodeToSave);
           localStorage.setItem(`critic_nodes_canvas_${moduleId}`, JSON.stringify(canvasNodes));
         }
+
+        // Show visual feedback toast
+        setToastMsg('✨ Note converted to Concept Node! Added to Visual Map.');
+        setTimeout(() => setToastMsg(null), 3500);
       }
     } catch (err) {
       console.error(err);
@@ -480,6 +496,13 @@ export default function FamiliariseStagePage() {
           05 synthesise
         </button>
       </footer>
+
+      {/* Toast Notification Banner */}
+      {toastMsg && (
+        <div className={styles.toastBanner}>
+          {toastMsg}
+        </div>
+      )}
 
       {/* Stage Intro Modal */}
       {showIntroModal && (

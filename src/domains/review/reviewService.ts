@@ -1,6 +1,7 @@
 /**
  * Review Domain Service
- * Calculates gamified student statistics, triggers sequential badge unlocks, and generates the MBTI-like reasoning summary card.
+ * Calculates gamified student statistics dynamically based on active session data,
+ * triggers sequential badge unlocks, and generates the MBTI-like reasoning summary card.
  */
 
 export interface Badge {
@@ -17,8 +18,8 @@ export interface ReviewData {
   assumptionsChallenged: number;
   questionsAsked: number;
   misinformationEvaluations: number;
-  criticalThinkingScore: number; // 0-100
-  synthesisScore: number; // 0-100
+  criticalThinkingScore: number;
+  synthesisScore: number;
   mbtiPersonalityTitle: string;
   mbtiPersonalitySummary: string;
   badges: Badge[];
@@ -26,24 +27,28 @@ export interface ReviewData {
 
 export async function generateModuleReview(
   moduleId: string,
-  statsInput?: {
+  sessionStats?: {
     conceptsCount?: number;
     notesCount?: number;
     chatTurnsCount?: number;
+    devilsAdvocateCount?: number;
+    synthesisLength?: number;
   }
 ): Promise<ReviewData> {
-  const conceptsCount = statsInput?.conceptsCount || 5;
-  const notesCount = statsInput?.notesCount || 4;
-  const chatTurns = statsInput?.chatTurnsCount || 8;
+  const conceptsCount = sessionStats?.conceptsCount ?? 4;
+  const notesCount = sessionStats?.notesCount ?? 3;
+  const chatTurns = sessionStats?.chatTurnsCount ?? 5;
+  const misinfoCount = sessionStats?.devilsAdvocateCount ?? 2;
+  const synthLen = sessionStats?.synthesisLength ?? 120;
 
-  const criticalThinkingScore = Math.min(100, 65 + notesCount * 5 + chatTurns * 3);
-  const synthesisScore = Math.min(100, 70 + conceptsCount * 4);
+  const criticalThinkingScore = Math.min(100, Math.max(50, 55 + notesCount * 6 + chatTurns * 3));
+  const synthesisScore = Math.min(100, Math.max(50, 60 + Math.floor(synthLen / 10) + conceptsCount * 4));
 
   const badges: Badge[] = [
     {
       id: 'badge-concepts',
       title: 'Master Conceptualizer',
-      description: `Identified ${conceptsCount} core concepts`,
+      description: `Identified ${conceptsCount} core concept nodes`,
       icon: '🧠',
       unlocked: true,
     },
@@ -64,7 +69,7 @@ export async function generateModuleReview(
     {
       id: 'badge-misinfo',
       title: 'Truth Auditor',
-      description: 'Critiqued misinformation claims',
+      description: `Evaluated ${misinfoCount} counter-claims`,
       icon: '🔍',
       unlocked: true,
     },
@@ -85,16 +90,26 @@ export async function generateModuleReview(
   ];
 
   // MBTI-like reasoning summary generation
-  const mbtiPersonalityTitle = 'The Empiricist Investigator (E-S-R-T)';
-  const mbtiPersonalitySummary =
+  let mbtiPersonalityTitle = 'The Empiricist Investigator (E-S-R-T)';
+  let mbtiPersonalitySummary =
     'You approach complex claims with rigorous empirical scrutiny. Rather than accepting rhetoric at face value, you systematically map conceptual links, interrogate underlying assumptions, and demand verified evidence before forming conclusions.';
+
+  if (conceptsCount >= 5 && notesCount >= 4) {
+    mbtiPersonalityTitle = 'The Systemic Architect (S-A-C-M)';
+    mbtiPersonalitySummary =
+      'You view complex problems as interconnected webs of cause and effect. You excel at synthesizing evidence into clear visual concept structures, identifying structural vulnerabilities in bad arguments, and formulating holistically sound conclusions.';
+  } else if (chatTurns >= 6) {
+    mbtiPersonalityTitle = 'The Socratic Questioner (S-Q-P-I)';
+    mbtiPersonalitySummary =
+      'You use targeted inquiry as your primary tool for discovery. Unafraid to challenge assumptions or probe counter-arguments, you uncover underlying truths by asking relentless, clarifying questions.';
+  }
 
   return {
     moduleId,
     conceptsIdentified: conceptsCount,
     assumptionsChallenged: notesCount,
     questionsAsked: chatTurns,
-    misinformationEvaluations: 3,
+    misinformationEvaluations: misinfoCount,
     criticalThinkingScore,
     synthesisScore,
     mbtiPersonalityTitle,
