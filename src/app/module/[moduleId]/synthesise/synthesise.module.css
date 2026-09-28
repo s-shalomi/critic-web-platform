@@ -1,0 +1,248 @@
+.container {
+  min-height: 100vh;
+  background: var(--color-bg-deep);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.header {
+  padding: 16px 32px;
+  border-bottom: 1px solid rgba(68, 81, 104, 0.3);
+}
+
+.backBtn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-light);
+  font-family: var(--font-space-grotesk);
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.backBtn:hover {
+  color: var(--color-accent-cyan);
+}
+
+.workspace {
+  flex: 1;
+  display: flex;
+  position: relative;
+  overflow: hidden;
+}
+
+.synthesisPanel {
+  width: 520px;
+  background: rgba(15, 23, 46, 0.6);
+  border-right: 1px solid rgba(55, 243, 255, 0.2);
+  display: flex;
+  flex-direction: column;
+  padding: 28px;
+  z-index: 10;
+}
+
+.promptHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.robotAvatarIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0F172E 0%, #37F3FF 100%);
+  border: 1px solid var(--color-accent-cyan);
+  flex-shrink: 0;
+}
+
+.promptText {
+  font-family: var(--font-space-grotesk);
+  font-size: 1.1rem;
+  line-height: 1.5;
+  color: var(--color-text-light);
+}
+
+.editorWrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.synthesisTextArea {
+  flex: 1;
+  width: 100%;
+  min-height: 240px;
+  background: rgba(7, 11, 26, 0.9);
+  border: 1px solid var(--color-accent-cyan-50);
+  border-radius: 12px;
+  color: var(--color-text-light);
+  font-family: var(--font-exo2);
+  font-size: 1.05rem;
+  line-height: 1.6;
+  padding: 20px;
+  outline: none;
+}
+
+.actionRow {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.feedbackCard {
+  background: rgba(15, 23, 46, 0.9);
+  border: 1px solid var(--color-accent-cyan);
+  box-shadow: 0 0 20px rgba(55, 243, 255, 0.2);
+  padding: 18px;
+  border-radius: 10px;
+  font-family: var(--font-space-mono);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--color-text-light);
+}
+
+.rightCanvasPanel {
+  flex: 1;
+  position: relative;
+  background: radial-gradient(circle at 50% 50%, #0F172E 0%, #070B1A 100%);
+  overflow: hidden;
+}
+
+.canvasHeader {
+  position: absolute;
+  top: 24px;
+  right: 36px;
+  z-index: 20;
+}
+
+.stageTitle {
+  font-family: var(--font-orbitron);
+  font-size: 2rem;
+  letter-spacing: 2px;
+  color: var(--color-text-light);
+}
+
+.canvasPreviewStage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.svgOverlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.svgLineGlow {
+  filter: drop-shadow(0 0 8px #37F3FF);
+}
+
+.conceptNodeCircle {
+  position: absolute;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FF4FD8 0%, #d42bb0 100%);
+  border: 2px solid #37F3FF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 12px;
+  box-shadow: 0 0 25px rgba(255, 79, 216, 0.5);
+}
+
+.nodeLabel {
+  font-family: var(--font-orbitron);
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #FFF;
+}
+
+.canvasToolbar {
+  position: absolute;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: rgba(15, 23, 46, 0.85);
+  border: 1px solid var(--color-border-slate);
+  padding: 12px;
+  border-radius: 12px;
+  z-index: 30;
+}
+
+.toolbarBtn {
+  width: 44px;
+  height: 44px;
+  background: transparent;
+  border: 1px solid var(--color-border-slate-50);
+  color: var(--color-text-light);
+  font-size: 1.1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.activeToolBtn {
+  background: rgba(55, 243, 255, 0.2);
+  border-color: var(--color-accent-cyan);
+  color: var(--color-accent-cyan);
+}
+
+.stageNavBar {
+  height: 64px;
+  background: rgba(7, 11, 26, 0.95);
+  border-top: 1px solid rgba(68, 81, 104, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  z-index: 40;
+}
+
+.stageStep {
+  background: transparent;
+  border: none;
+  color: var(--color-text-soft);
+  font-family: var(--font-orbitron);
+  font-size: 0.9rem;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.stageStepActive {
+  background: rgba(55, 243, 255, 0.2);
+  border: 1px solid var(--color-accent-cyan);
+  color: var(--color-accent-cyan);
+}
+
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(7, 11, 26, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.introModalText {
+  font-family: var(--font-space-mono);
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--color-text-light);
+}

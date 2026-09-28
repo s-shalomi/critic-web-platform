@@ -1,0 +1,92 @@
+# ==========================================
+# Dependencies & Package Managers
+# ==========================================
+node_modules/
+.pnpm-store/
+.yarn/
+vendor/
+
+# Lockfiles (Antigravity can infer dependencies from package.json)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+bun.lockb
+
+# ==========================================
+# Build Outputs & Compiled Assets
+# ==========================================
+dist/
+build/
+out/
+.next/
+.nuxt/
+.svelte-kit/
+.astro/
+.output/
+.turbo/
+.cache/
+*.tsbuildinfo
+
+# ==========================================
+# Heavy Media, Binary & Asset Files
+# ==========================================
+# Ignores large assets to save context tokens; 
+# keep key UI assets un-ignored if targeted explicitly.
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.avif
+*.ico
+*.svg
+*.mp4
+*.webm
+*.pdf
+*.zip
+*.tar.gz
+*.ttf
+*.woff
+*.woff2
+
+# ==========================================
+# Database & Heavy Local Storage
+# ==========================================
+*.sqlite
+*.sqlite-journal
+*.db
+*.dump
+prisma/dev.db
+.vector_cache/
+
+# ==========================================
+# Environment & Secrets
+# ==========================================
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# ==========================================
+# Logs, Temporary Files & Test Coverage
+# ==========================================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+coverage/
+.nyc_output/
+.tmp/
+tmp/
+
+# ==========================================
+# IDE, OS & Tooling Caches
+# ==========================================
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+.eslintcache
+.prettiercache

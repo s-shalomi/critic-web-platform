@@ -1,0 +1,330 @@
+'use client';
+
+import React, { useState, useEffect, useRef } from 'react';
+import { useRouter, useParams } from 'next/navigation';
+import styles from './inquire.module.css';
+
+interface ChatMessage {
+  id: string;
+  sender: 'student' | 'agent';
+  text: string;
+  messageType?: 'chat' | 'devils_advocate' | 'hint';
+}
+
+interface ConceptNode {
+  id: string;
+  text: string;
+  positionX: number;
+  positionY: number;
+  linkCount?: number;
+}
+
+interface ConceptLink {
+  id: string;
+  fromNodeId: string;
+  toNodeId: string;
+}
+
+export default function InquireEvaluateStagePage() {
+  const router = useRouter();
+  const params = useParams();
+  const moduleId = (params?.moduleId as string) || 'mod_climate_change_demo';
+
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [inputText, setInputText] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [isDevilsAdvocate, setIsDevilsAdvocate] = useState<boolean>(false);
+  const [showIntroModal, setShowIntroModal] = useState<boolean>(true);
+
+  // Concept Map Reference State
+  const [nodes, setNodes] = useState<ConceptNode[]>([]);
+  const [links, setLinks] = useState<ConceptLink[]>([]);
+  const chatBottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // 1. Fetch Chat History
+    fetch(`/api/modules/${moduleId}/inquire`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.messages) setMessages(data.messages);
+      });
+
+    // 2. Fetch Concept Map Nodes for right panel reference
+    const savedNodes = localStorage.getItem(`critic_nodes_canvas_${moduleId}`);
+    const savedLinks = localStorage.getItem(`critic_links_canvas_${moduleId}`);
+
+    if (savedNodes) {
+      try { setNodes(JSON.parse(savedNodes)); } catch (e) { console.error(e); }
+    }
+    if (savedLinks) {
+      try { setLinks(JSON.parse(savedLinks)); } catch (e) { console.error(e); }
+    }
+
+    fetch(`/api/modules/${moduleId}/conceptualise`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.nodes && data.links && (!savedNodes || JSON.parse(savedNodes).length === 0)) {
+          setNodes(data.nodes);
+          setLinks(data.links);
+        }
+      });
+  }, [moduleId]);
+
+  useEffect(() => {
+    chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, loading]);
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inputText.trim() || loading) return;
+
+    const userText = inputText;
+    const userMsg: ChatMessage = {
+      id: `msg_${Date.now()}`,
+      sender: 'student',
+      text: userText,
+    };
+
+    setMessages((prev) => [...prev, userMsg]);
+    setInputText('');
+    setLoading(true);
+
+    try {
+      const history = messages.map((m) => ({ sender: m.sender, text: m.text }));
+      const res = await fetch(`/api/modules/${moduleId}/inquire/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          history,
+          userMessage: userText,
+          mode: isDevilsAdvocate ? 'DevilsAdvocate' : 'Socratic',
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success && data.message) {
+        const agentMsg: ChatMessage = {
+          id: `msg_${Date.now()}_agent`,
+          sender: 'agent',
+          text: data.message.text,
+          messageType: data.message.messageType,
+        };
+        setMessages((prev) => [...prev, agentMsg]);
+      }
+    } catch (err) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `msg_err_${Date.now()}`,
+          sender: 'agent',
+          text: 'What underlying assumptions might we challenge in that claim? What evidence is needed to test it?',
+        },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className={styles.container}>
+      {/* Header */}
+      <header className={styles.header}>
+        <button onClick={() => router.push('/dashboard')} className={styles.backBtn}>
+          ← Climate Change
+        </button>
+      </header>
+
+      {/* Main Workspace Split */}
+      <div className={styles.workspace}>
+        {/* Left Interactive Chat Panel */}
+        <aside className={styles.chatPanel}>
+          <div className={styles.chatHeader}>
+            <div className={styles.chatTitleGroup}>
+              <h2 className="cyan-neon-text" style={{ fontFamily: 'var(--font-orbitron)', fontSize: '1.2rem' }}>
+                SOCRATIC INQUIRY
+              </h2>
+              <button
+                onClick={() => setIsDevilsAdvocate(!isDevilsAdvocate)}
+                className={`${styles.devilsBtn} ${isDevilsAdvocate ? styles.devilsBtnActive : ''}`}
+                title="Toggle Devil's Advocate Mode"
+              >
+                {isDevilsAdvocate ? "😈 Devil's Advocate Active" : "😈 Enable Devil's Advocate"}
+              </button>
+            </div>
+          </div>
+
+          <div className={styles.messagesList}>
+            {messages.map((m) => (
+              <div
+                key={m.id}
+                className={`${styles.messageRow} ${
+                  m.sender === 'student' ? styles.studentRow : styles.agentRow
+                }`}
+              >
+                {m.sender === 'agent' && (
+                  <div className={styles.agentAvatarIcon}>
+                    <div className={styles.robotHeadSmall} />
+                  </div>
+                )}
+
+                <div
+                  className={`${styles.messageBubble} ${
+                    m.sender === 'student'
+                      ? styles.studentBubble
+                      : m.messageType === 'devils_advocate'
+                      ? styles.devilsAdvocateBubble
+                      : styles.agentBubble
+                  }`}
+                >
+                  {m.messageType === 'devils_advocate' && (
+                    <div className={styles.devilsTag}>DEVIL&apos;S ADVOCATE COUNTER-CLAIM</div>
+                  )}
+                  <p>{m.text}</p>
+                </div>
+              </div>
+            ))}
+
+            {loading && (
+              <div className={`${styles.messageRow} ${styles.agentRow}`}>
+                <div className={styles.agentAvatarIcon}>
+                  <div className={styles.robotHeadSmall} />
+                </div>
+                <div className={styles.loadingBubble}>
+                  <span className={styles.dot} />
+                  <span className={styles.dot} />
+                  <span className={styles.dot} />
+                  <span className={styles.loadingText}>Aria is analyzing reasoning...</span>
+                </div>
+              </div>
+            )}
+            <div ref={chatBottomRef} />
+          </div>
+
+          {/* Input Box */}
+          <form onSubmit={handleSendMessage} className={styles.inputContainer}>
+            <div className={styles.inputBox}>
+              <input
+                type="text"
+                placeholder="What would you like to know? (Challenge claims or ask questions)"
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+                className={styles.chatInput}
+                disabled={loading}
+              />
+              <div className={styles.inputActions}>
+                <button type="button" className={styles.iconBtn} title="Upload Evidence Image">📷</button>
+                <button type="button" className={styles.iconBtn} title="Insert Code Snippet">&lt;&gt;</button>
+                <button type="button" className={styles.iconBtn} title="Voice Input">🎤</button>
+                <button
+                  type="submit"
+                  className={styles.sendBtn}
+                  disabled={loading || !inputText.trim()}
+                  title="Send Message"
+                >
+                  ↑
+                </button>
+              </div>
+            </div>
+          </form>
+        </aside>
+
+        {/* Right Concept Map Reference Canvas */}
+        <main className={styles.rightCanvasPanel}>
+          <div className={styles.canvasHeader}>
+            <h1 className={styles.stageTitle}>inquire + evaluate</h1>
+          </div>
+
+          <div className={styles.canvasPreviewStage}>
+            <svg className={styles.svgOverlay}>
+              {links.map((link) => {
+                const fromNode = nodes.find((n) => n.id === link.fromNodeId);
+                const toNode = nodes.find((n) => n.id === link.toNodeId);
+                if (!fromNode || !toNode) return null;
+
+                return (
+                  <line
+                    key={link.id}
+                    x1={fromNode.positionX + 50}
+                    y1={fromNode.positionY + 50}
+                    x2={toNode.positionX + 50}
+                    y2={toNode.positionY + 50}
+                    stroke="#37F3FF"
+                    strokeWidth="3"
+                    className={styles.svgLineGlow}
+                  />
+                );
+              })}
+            </svg>
+
+            {nodes.map((node) => {
+              const count = node.linkCount || 0;
+              const size = 100 + count * 16;
+
+              return (
+                <div
+                  key={node.id}
+                  className={styles.conceptNodeCircle}
+                  style={{
+                    left: `${node.positionX}px`,
+                    top: `${node.positionY}px`,
+                    width: `${size}px`,
+                    height: `${size}px`,
+                  }}
+                >
+                  <span className={styles.nodeLabel}>{node.text}</span>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Far Right Control Toolbar */}
+          <div className={styles.canvasToolbar}>
+            <button className={styles.toolbarBtn} title="Zoom In">🔍+</button>
+            <button className={styles.toolbarBtn} title="Zoom Out">🔍-</button>
+            <button className={`${styles.toolbarBtn} ${styles.activeToolBtn}`} title="Pan">✋</button>
+            <button className={styles.toolbarBtn} title="Concept Node">◯</button>
+            <button className={styles.toolbarBtn} title="Link Tool">🖋️</button>
+            <button className={styles.toolbarBtn} title="Text Tool">Tᴛ</button>
+          </div>
+        </main>
+      </div>
+
+      {/* Stage Navigation Bar */}
+      <footer className={styles.stageNavBar}>
+        <button onClick={() => router.push(`/module/${moduleId}/familiarise`)} className={styles.stageStep}>
+          01 familiarise
+        </button>
+        <button onClick={() => router.push(`/module/${moduleId}/conceptualise`)} className={styles.stageStep}>
+          02 conceptualise
+        </button>
+        <button onClick={() => router.push(`/module/${moduleId}/inquire`)} className={`${styles.stageStep} ${styles.stageStepActive}`}>
+          03 inquire
+        </button>
+        <button onClick={() => router.push(`/module/${moduleId}/inquire`)} className={`${styles.stageStep} ${styles.stageStepActive}`}>
+          04 evaluate
+        </button>
+        <button onClick={() => router.push(`/module/${moduleId}/synthesise`)} className={styles.stageStep}>
+          05 synthesise
+        </button>
+      </footer>
+
+      {/* Stage Intro Modal */}
+      {showIntroModal && (
+        <div className={styles.modalBackdrop}>
+          <div className="glass-card-glow" style={{ padding: '36px', maxWidth: '480px', width: '90%', textAlign: 'center' }}>
+            <p className={styles.introModalText}>
+              interrogate the material. question assumptions, seek alternative viewpoints, and assess the credibility of evidence.
+            </p>
+            <button
+              onClick={() => setShowIntroModal(false)}
+              className="btn-primary-cyan"
+              style={{ marginTop: '24px', padding: '10px 32px' }}
+            >
+              ok
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

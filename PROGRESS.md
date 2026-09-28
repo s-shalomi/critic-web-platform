@@ -36,14 +36,13 @@
   - `next`, `react`, `react-dom`, `@prisma/client`, `jose`, `bcryptjs`, `@google/generative-ai`, `groq-sdk`, `jest`, `ts-jest`, `typescript`.
 - **Tests Passing**:
   - `tests/auth.test.ts` (4/4 tests passing).
-- **Immediate Next Step**: Initiate Stage 2.
 
 ---
 
 ### [2026-09-20] - Stage 2 & Stage 3: Topic Selection, Evidence Highlighting, & Visual Concept Map Canvas
 - **Code Built**:
   - Built Topics domain [`src/domains/topics/topicService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/topics/topicService.ts) and documentation [`src/domains/topics/README.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/topics/README.md).
-  - Enhanced Notes domain [`src/domains/notes/noteService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/notes/noteService.ts) and documentation [`src/domains/notes/README.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/notes/README.md).
+  - Enhanced Notes domain [`src/domains/notes/noteService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/notes/noteService.ts) and documentation [`src/domains/notes/README.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/notes/README.md) with note editing, deletion, hover tooltips, and instant note-to-concept-node conversion.
   - Built Concepts domain [`src/domains/concepts/conceptService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/concepts/conceptService.ts) and documentation [`src/domains/concepts/README.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/concepts/README.md).
   - Built API routes: `/api/topics`, `/api/topics/:topicId/sources`, `/api/modules/:moduleId/notes`, `/api/notes/:noteId` (PUT, DELETE), `/api/notes/:noteId/convert-to-node`, `/api/modules/:moduleId/agent/hint`, `/api/modules/:moduleId/conceptualise`, `/api/modules/:moduleId/concepts`, `/api/concepts/:nodeId` (PUT, DELETE), `/api/modules/:moduleId/concepts/links`, `/api/links/:linkId`.
 - **Dependencies Introduced**: None additional.
@@ -67,6 +66,25 @@
   - `tests/topics.test.ts` (3/3 tests passing).
   - `tests/notes.test.ts` (4/4 tests passing).
   - `tests/concepts.test.ts` (4/4 tests passing).
-  - `tests/ai.test.ts` (3/3 tests passing: Socratic prompt building, context history compression, fallback execution).
-  - Total: 18/18 unit tests passing.
-- **Immediate Next Step**: Commit Stage 4 code, report completion to user, and request approval to proceed with Stage 5 (Inquire/Evaluate & Synthesise Stages).
+  - `tests/ai.test.ts` (3/3 tests passing).
+
+---
+
+### [2026-09-28] - Stage 5 & Stage 6: Inquire/Evaluate, Synthesise, Gamified Review Badges, MBTI Profile & Teacher Portal
+- **Code Built**:
+  - Built Inquire & Evaluate stage screen [`src/app/module/[moduleId]/inquire/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/inquire/page.tsx) matching `screens/inquire and evaluate.png` with interactive Socratic dialogue, Devil's Advocate mode toggle, perceived loading indicator, and concept map reference canvas.
+  - Built Synthesise stage screen [`src/app/module/[moduleId]/synthesise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/synthesise/page.tsx) matching `screens/synthesise.png` with case synthesis draft editor and AI cross-checking engine (`POST /api/modules/:moduleId/synthesis`).
+  - Built Review domain [`src/domains/review/reviewService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/review/reviewService.ts) and Module Review screen [`src/app/module/[moduleId]/review/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/review/page.tsx) displaying 6 core performance metrics, sequential badge unlock animations, and shareable MBTI-like reasoning summary card.
+  - Built Teacher domain [`src/domains/teacher/teacherService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/teacher/teacherService.ts) and Teacher Portal Dashboard [`src/app/teacher/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/teacher/page.tsx) with access code generator, student stage progress tracking, and topic source management.
+- **Dependencies Introduced**: None additional.
+- **Tests Passing**:
+  - `tests/auth.test.ts` (4/4 tests passing).
+  - `tests/topics.test.ts` (3/3 tests passing).
+  - `tests/notes.test.ts` (4/4 tests passing).
+  - `tests/concepts.test.ts` (4/4 tests passing).
+  - `tests/ai.test.ts` (3/3 tests passing).
+  - `tests/synthesis.test.ts` (1/1 test passing).
+  - `tests/review.test.ts` (2/2 tests passing).
+  - `tests/teacher.test.ts` (2/2 tests passing).
+  - Total: 23/23 unit tests passing.
+- **Immediate Next Step**: Commit final features and conclude task.
