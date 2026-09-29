@@ -509,19 +509,30 @@ export default function FamiliariseStagePage() {
         </div>
       )}
 
-      {/* Stage Intro Modal */}
+      {/* Stage Intro & AI Disclosure Modal */}
       {showIntroModal && (
         <div className={styles.modalBackdrop}>
-          <div className="glass-card-glow" style={{ padding: '36px', maxWidth: '480px', width: '90%', textAlign: 'center' }}>
-            <p className={styles.introModalText}>
-              read through the content. highlight the text and mark any thoughts, biases or assumptions. hover over highlighted text to edit, delete, or convert your notes. click on the AI agent if you need any hints
+          <div className="glass-card-glow" style={{ padding: '36px', maxWidth: '540px', width: '90%', textAlign: 'center' }}>
+            <h3 className="cyan-neon-text" style={{ fontFamily: 'var(--font-orbitron)', marginBottom: '16px', fontSize: '1.2rem' }}>
+              🔍 INVESTIGATION BRIEFING & AI DISCLOSURE
+            </h3>
+            <p className={styles.introModalText} style={{ marginBottom: '16px' }}>
+              Read through the climate sources. Highlight text and capture your thoughts, biases, or assumptions. Hover over highlighted snippets to edit, delete, or convert them into concept map nodes.
             </p>
+            <div style={{ background: 'rgba(7, 11, 26, 0.7)', border: '1px solid var(--accent-magenta)', borderRadius: '10px', padding: '16px', textAlign: 'left', fontSize: '0.88rem', color: '#D9DFF7', lineHeight: '1.5' }}>
+              <strong style={{ color: 'var(--accent-magenta)', display: 'block', marginBottom: '8px' }}>⚠️ Mandatory Socratic Peer Disclosure:</strong>
+              <ul style={{ paddingLeft: '18px', margin: 0 }}>
+                <li style={{ marginBottom: '6px' }}><strong>Socratic Questioning & Devil&apos;s Advocate:</strong> The AI agent (Aria) will guide you through questioning and may challenge your claims with counter-arguments.</li>
+                <li style={{ marginBottom: '6px' }}><strong>Reasoning Test:</strong> Aria may present arguments or claims it does not &quot;believe&quot; solely to test your analytical reasoning.</li>
+                <li><strong>No Verified Facts:</strong> Do not treat statements from the AI agent as absolute verified facts—evaluate all evidence critically yourself.</li>
+              </ul>
+            </div>
             <button
               onClick={() => setShowIntroModal(false)}
               className="btn-primary-cyan"
-              style={{ marginTop: '24px', padding: '10px 32px' }}
+              style={{ marginTop: '24px', padding: '12px 36px', fontWeight: 'bold' }}
             >
-              ok
+              UNDERSTOOD & START
             </button>
           </div>
         </div>

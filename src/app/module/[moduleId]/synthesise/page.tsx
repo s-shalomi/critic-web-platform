@@ -33,11 +33,26 @@ export default function SynthesiseStagePage() {
   // Concept Map Reference State
   const [nodes, setNodes] = useState<ConceptNode[]>([]);
   const [links, setLinks] = useState<ConceptLink[]>([]);
+  const [notesCount, setNotesCount] = useState<number>(0);
+  const [showNudge, setShowNudge] = useState<boolean>(true);
 
   useEffect(() => {
     const synthKey = getStudentStorageKey('critic_synthesis', moduleId);
     const nodesKey = getStudentStorageKey('critic_nodes_canvas', moduleId);
     const linksKey = getStudentStorageKey('critic_links_canvas', moduleId);
+    const notesKey = getStudentStorageKey('critic_notes', moduleId);
+
+    // 0. Check student evidence notes count for AI Nudge
+    const localNotesStr = localStorage.getItem(notesKey);
+    if (localNotesStr) {
+      try { setNotesCount(JSON.parse(localNotesStr).length); } catch (e) { console.error(e); }
+    } else {
+      fetch(`/api/modules/${moduleId}/notes`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.notes) setNotesCount(data.notes.length);
+        });
+    }
 
     // 1. Fetch Existing Draft Synthesis
     const localSynth = localStorage.getItem(synthKey);
@@ -115,6 +130,21 @@ export default function SynthesiseStagePage() {
         </button>
       </header>
 
+      {/* Non-blocking AI Contextual Nudge Banner */}
+      {notesCount === 0 && showNudge && (
+        <div style={{ background: 'rgba(55, 243, 255, 0.12)', borderBottom: '1px solid var(--primary-cyan)', padding: '10px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: 'var(--text-light)', fontSize: '0.9rem' }}>
+          <span>
+            💡 <strong>AI Learning Nudge:</strong> You are drafting a synthesis without having collected evidence notes in the <strong>Familiarise</strong> stage! Gathering evidence first leads to a stronger case synthesis. You can proceed or return to Familiarise.
+          </span>
+          <button
+            onClick={() => setShowNudge(false)}
+            style={{ background: 'transparent', border: 'none', color: 'var(--primary-cyan)', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem', marginLeft: '16px' }}
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* Main Workspace Split */}
       <div className={styles.workspace}>
         {/* Left Case Synthesis Editor Panel */}
@@ -131,7 +161,7 @@ export default function SynthesiseStagePage() {
               className={styles.synthesisTextArea}
               placeholder="Write your case synthesis here. Summarize your evidence, concept map connections, and answers to counter-arguments..."
               value={synthesisText}
-              onChange={(e) => setSynthesisText(e.target.value)}
+              onChange={(e) => handleSynthesisTextChange(e.target.value)}
             />
           </div>
 
@@ -245,16 +275,27 @@ export default function SynthesiseStagePage() {
       {/* Stage Intro Modal */}
       {showIntroModal && (
         <div className={styles.modalBackdrop}>
-          <div className="glass-card-glow" style={{ padding: '36px', maxWidth: '480px', width: '90%', textAlign: 'center' }}>
-            <p className={styles.introModalText}>
-              reflect on everything you learnt. what conclusions can you make?
+          <div className="glass-card-glow" style={{ padding: '36px', maxWidth: '540px', width: '90%', textAlign: 'center' }}>
+            <h3 className="cyan-neon-text" style={{ fontFamily: 'var(--font-orbitron)', marginBottom: '16px', fontSize: '1.2rem' }}>
+              📝 SYNTHESISE CASEFILE DISCLOSURE
+            </h3>
+            <p className={styles.introModalText} style={{ marginBottom: '16px' }}>
+              Reflect on everything you learnt. Write your synthesis, and trigger the AI cross-check to evaluate missing links or unaddressed arguments.
             </p>
+            <div style={{ background: 'rgba(7, 11, 26, 0.7)', border: '1px solid var(--accent-magenta)', borderRadius: '10px', padding: '16px', textAlign: 'left', fontSize: '0.88rem', color: '#D9DFF7', lineHeight: '1.5' }}>
+              <strong style={{ color: 'var(--accent-magenta)', display: 'block', marginBottom: '8px' }}>⚠️ Mandatory Socratic Peer Disclosure:</strong>
+              <ul style={{ paddingLeft: '18px', margin: 0 }}>
+                <li style={{ marginBottom: '6px' }}><strong>Socratic Cross-Checking:</strong> The AI agent (Aria) checks your synthesis against earlier evidence and concept nodes to question unaddressed arguments.</li>
+                <li style={{ marginBottom: '6px' }}><strong>Reasoning Test:</strong> Aria presents questions rather than factual corrections.</li>
+                <li><strong>No Verified Facts:</strong> Do not treat agent questions or statements as verified facts.</li>
+              </ul>
+            </div>
             <button
               onClick={() => setShowIntroModal(false)}
               className="btn-primary-cyan"
-              style={{ marginTop: '24px', padding: '10px 32px' }}
+              style={{ marginTop: '24px', padding: '12px 36px', fontWeight: 'bold' }}
             >
-              ok
+              UNDERSTOOD & START
             </button>
           </div>
         </div>

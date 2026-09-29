@@ -38,15 +38,30 @@ export default function InquireEvaluateStagePage() {
   const [isDevilsAdvocate, setIsDevilsAdvocate] = useState<boolean>(false);
   const [showIntroModal, setShowIntroModal] = useState<boolean>(true);
 
-  // Concept Map Reference State
+  // Concept Map & Nudge Reference State
   const [nodes, setNodes] = useState<ConceptNode[]>([]);
   const [links, setLinks] = useState<ConceptLink[]>([]);
+  const [notesCount, setNotesCount] = useState<number>(0);
+  const [showNudge, setShowNudge] = useState<boolean>(true);
   const chatBottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const chatKey = getStudentStorageKey('critic_chat', moduleId);
     const nodesKey = getStudentStorageKey('critic_nodes_canvas', moduleId);
     const linksKey = getStudentStorageKey('critic_links_canvas', moduleId);
+    const notesKey = getStudentStorageKey('critic_notes', moduleId);
+
+    // 0. Check student evidence notes count for AI Nudge
+    const localNotesStr = localStorage.getItem(notesKey);
+    if (localNotesStr) {
+      try { setNotesCount(JSON.parse(localNotesStr).length); } catch (e) { console.error(e); }
+    } else {
+      fetch(`/api/modules/${moduleId}/notes`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.notes) setNotesCount(data.notes.length);
+        });
+    }
 
     // 1. Fetch Chat History from local storage or server
     const localChat = localStorage.getItem(chatKey);
@@ -152,6 +167,21 @@ export default function InquireEvaluateStagePage() {
           ← Climate Change
         </button>
       </header>
+
+      {/* Non-blocking AI Contextual Nudge Banner */}
+      {notesCount === 0 && showNudge && (
+        <div style={{ background: 'rgba(55, 243, 255, 0.12)', borderBottom: '1px solid var(--primary-cyan)', padding: '10px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: 'var(--text-light)', fontSize: '0.9rem' }}>
+          <span>
+            💡 <strong>AI Learning Nudge:</strong> You haven&apos;t gathered evidence notes in the <strong>Familiarise</strong> stage yet! Gathering notes helps Aria cross-reference your reasoning. You can continue exploring here or return to Familiarise anytime.
+          </span>
+          <button
+            onClick={() => setShowNudge(false)}
+            style={{ background: 'transparent', border: 'none', color: 'var(--primary-cyan)', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem', marginLeft: '16px' }}
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* Main Workspace Split */}
       <div className={styles.workspace}>
@@ -330,16 +360,27 @@ export default function InquireEvaluateStagePage() {
       {/* Stage Intro Modal */}
       {showIntroModal && (
         <div className={styles.modalBackdrop}>
-          <div className="glass-card-glow" style={{ padding: '36px', maxWidth: '480px', width: '90%', textAlign: 'center' }}>
-            <p className={styles.introModalText}>
-              interrogate the material. question assumptions, seek alternative viewpoints, and assess the credibility of evidence.
+          <div className="glass-card-glow" style={{ padding: '36px', maxWidth: '540px', width: '90%', textAlign: 'center' }}>
+            <h3 className="cyan-neon-text" style={{ fontFamily: 'var(--font-orbitron)', marginBottom: '16px', fontSize: '1.2rem' }}>
+              ❓ INQUIRE & EVALUATE DISCLOSURE
+            </h3>
+            <p className={styles.introModalText} style={{ marginBottom: '16px' }}>
+              Interrogate topic material, question assumptions, seek alternative viewpoints, and assess the credibility of evidence.
             </p>
+            <div style={{ background: 'rgba(7, 11, 26, 0.7)', border: '1px solid var(--accent-magenta)', borderRadius: '10px', padding: '16px', textAlign: 'left', fontSize: '0.88rem', color: '#D9DFF7', lineHeight: '1.5' }}>
+              <strong style={{ color: 'var(--accent-magenta)', display: 'block', marginBottom: '8px' }}>⚠️ Mandatory Socratic Peer Disclosure:</strong>
+              <ul style={{ paddingLeft: '18px', margin: 0 }}>
+                <li style={{ marginBottom: '6px' }}><strong>Socratic Questioning & Devil&apos;s Advocate:</strong> Aria acts as a Socratic peer and will challenge your assumptions with counter-perspectives.</li>
+                <li style={{ marginBottom: '6px' }}><strong>Reasoning Test:</strong> Aria may take positions it does not &quot;believe&quot; to test your evidence evaluation.</li>
+                <li><strong>No Verified Facts:</strong> Do not treat agent statements as verified facts.</li>
+              </ul>
+            </div>
             <button
               onClick={() => setShowIntroModal(false)}
               className="btn-primary-cyan"
-              style={{ marginTop: '24px', padding: '10px 32px' }}
+              style={{ marginTop: '24px', padding: '12px 36px', fontWeight: 'bold' }}
             >
-              ok
+              UNDERSTOOD & START
             </button>
           </div>
         </div>
