@@ -85,3 +85,34 @@
   - `tests/review.test.ts` (2/2 tests passing).
   - `tests/teacher.test.ts` (2/2 tests passing).
   - Total: 23/23 unit tests passing.
+
+---
+
+### [2026-09-29] - QA Phase: Full System Assessment, Socratic AI Disclosures, Contextual Nudges, Codebase Navigation & Comprehensive Documentation
+
+- **Role**: Quality Assurance Engineer
+- **Code Built & Updated**:
+  - **Root Developer Documentation**: Created [`README.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/README.md) containing comprehensive system architecture overview, directory navigation map, domain model descriptions, environment setup, and API contract references.
+  - **Directory-Level READMEs**: Created [`src/shared/README.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/README.md), [`src/app/README.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/README.md), and [`tests/README.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/tests/README.md) to ensure seamless codebase navigation for developers.
+  - **Socratic Peer Disclosures**: Enhanced Stage Intro Modals across all 5 module stages (`familiarise`, `conceptualise`, `inquire`, `synthesise`) to explicitly state the 3 mandatory requirements from `requirements.md` (Socratic questioning & Devil's Advocate position, testing reasoning with non-believed claims, and non-authoritative fact status).
+  - **Non-blocking Contextual AI Nudges**: Added dismissible AI Learning Nudge banners on `inquire` and `synthesise` stage pages triggering when students attempt stage progression without having collected evidence notes in `familiarise`.
+  - **Teacher Dynamic Source Publishing**: Implemented `addSourceToTopic` service and `POST /api/topics/:topicId/sources` API handler enabling real-time source publishing to student modules.
+  - **Student Storage Scoping**: Built `getStudentStorageKey` in [`src/shared/utils/storage.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/utils/storage.ts) guaranteeing complete data isolation per student login session.
+  - **Test Suite Expansion**: Added unit tests in `tests/topics.test.ts` for dynamic teacher source publishing (`addSourceToTopic`).
+- **Dependencies Introduced**: None additional.
+- **Tests Passing**:
+  - `tests/auth.test.ts` (4/4 tests passing).
+  - `tests/topics.test.ts` (4/4 tests passing).
+  - `tests/notes.test.ts` (4/4 tests passing).
+  - `tests/concepts.test.ts` (4/4 tests passing).
+  - `tests/ai.test.ts` (3/3 tests passing).
+  - `tests/synthesis.test.ts` (1/1 test passing).
+  - `tests/review.test.ts` (2/2 tests passing).
+  - `tests/teacher.test.ts` (2/2 tests passing).
+  - **Total**: 24/24 unit & integration tests passing cleanly across 8 test suites.
+- **Requirements Coverage Verification**:
+  - All 24 requirement table items in `requirements.md` verified and satisfied.
+  - Socratic AI guardrails (no factual verdicts, ends in questions, fallback to Groq, Socratic disclosure modal) verified.
+  - Responsive layout tokens (`src/shared/config/theme.ts`) and database models (`prisma/schema.prisma`) verified.
+- **Immediate Next Step**: Platform is fully tested, documented, and ready for production deployment / user testing.
+
