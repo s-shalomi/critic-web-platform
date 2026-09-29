@@ -91,6 +91,10 @@ export default function TeacherDashboardPage() {
     }
   };
 
+  const handleAddSource = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newSourceTitle || !newSourceText) return;
+
     setSubmittingSource(true);
     try {
       const res = await fetch('/api/topics/climate-change/sources', {
