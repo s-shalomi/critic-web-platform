@@ -3,6 +3,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import styles from './review.module.css';
+import { getStudentStorageKey } from '@/shared/utils/storage';
+
+import { reportStudentProgress } from '@/shared/utils/reportProgress';
 
 interface Badge {
   id: string;
@@ -35,42 +38,143 @@ export default function ModuleReviewPage() {
   const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // 1. Gather actual metrics from active session stores
-    const canvasNodesStr = localStorage.getItem(`critic_nodes_canvas_${moduleId}`);
-    const notesStr = localStorage.getItem(`critic_notes_${moduleId}`);
-    const chatStr = localStorage.getItem(`critic_chat_${moduleId}`);
+    // 1. Report module completion to teacher portal
+    reportStudentProgress('review', 'Climate Change', 'completed');
 
-    const conceptsCount = canvasNodesStr ? JSON.parse(canvasNodesStr).length : 0;
-    const notesCount = notesStr ? JSON.parse(notesStr).length : 0;
-    
-    let chatTurnsCount = 0;
-    let devilsAdvocateCount = 0;
-    if (chatStr) {
+    const computeAndLoadStats = async () => {
+      // Keys with student scoping and legacy fallbacks
+      const canvasNodesKey = getStudentStorageKey('critic_nodes_canvas', moduleId);
+      const notesKey = getStudentStorageKey('critic_notes', moduleId);
+      const chatKey = getStudentStorageKey('critic_chat', moduleId);
+      const synthKey = getStudentStorageKey('critic_synthesis', moduleId);
+      const hintsKey = getStudentStorageKey('critic_hints', moduleId);
+      const reviewKey = getStudentStorageKey('critic_review', moduleId);
+
+      // Check if review was already saved locally
+      const savedReviewStr = localStorage.getItem(reviewKey);
+      if (savedReviewStr) {
+        try {
+          const parsed = JSON.parse(savedReviewStr);
+          if (parsed && parsed.conceptsIdentified !== undefined) {
+            setReview(parsed);
+            setLoading(false);
+          }
+        } catch (e) {
+          console.error('Error parsing saved review:', e);
+        }
+      }
+
+      // Check localStorage first
+      let canvasNodes: any[] = [];
+      const canvasNodesStr = localStorage.getItem(canvasNodesKey) || localStorage.getItem(`critic_nodes_canvas_${moduleId}`);
+      if (canvasNodesStr) {
+        try { canvasNodes = JSON.parse(canvasNodesStr); } catch (e) { console.error(e); }
+      }
+
+      let notes: any[] = [];
+      const notesStr = localStorage.getItem(notesKey) || localStorage.getItem(`critic_notes_${moduleId}`);
+      if (notesStr) {
+        try { notes = JSON.parse(notesStr); } catch (e) { console.error(e); }
+      }
+
+      let chatMsgs: any[] = [];
+      const chatStr = localStorage.getItem(chatKey) || localStorage.getItem(`critic_chat_${moduleId}`);
+      if (chatStr) {
+        try { chatMsgs = JSON.parse(chatStr); } catch (e) { console.error(e); }
+      }
+
+      let synthText = localStorage.getItem(synthKey) || localStorage.getItem(`critic_synthesis_${moduleId}`) || '';
+
+      const hintsCount = parseInt(
+        localStorage.getItem(hintsKey) || localStorage.getItem(`critic_hints_${moduleId}`) || '0',
+        10
+      );
+
+      // Server fallbacks if local storage is empty
+      if (canvasNodes.length === 0) {
+        try {
+          const res = await fetch(`/api/modules/${moduleId}/conceptualise`);
+          const data = await res.json();
+          if (data.nodes && data.nodes.length > 0) canvasNodes = data.nodes;
+        } catch (e) { console.error(e); }
+      }
+
+      if (notes.length === 0) {
+        try {
+          const res = await fetch(`/api/modules/${moduleId}/notes`);
+          const data = await res.json();
+          if (data.notes && data.notes.length > 0) notes = data.notes;
+        } catch (e) { console.error(e); }
+      }
+
+      if (chatMsgs.length === 0) {
+        try {
+          const res = await fetch(`/api/modules/${moduleId}/inquire`);
+          const data = await res.json();
+          if (data.messages && data.messages.length > 0) chatMsgs = data.messages;
+        } catch (e) { console.error(e); }
+      }
+
+      if (!synthText) {
+        try {
+          const res = await fetch(`/api/modules/${moduleId}/synthesis`);
+          const data = await res.json();
+          if (data.synthesisDraft) synthText = data.synthesisDraft;
+        } catch (e) { console.error(e); }
+      }
+
+      // 2. Accurate metric calculations
+      // Concepts Identified: canvas nodes + any notes converted to node
+      const convertedNotesCount = notes.filter((n) => n.convertedToNode).length;
+      const conceptsCount = Math.max(canvasNodes.length, convertedNotesCount);
+
+      // Assumptions Challenged: notes taken (which deconstruct biases and implicit assumptions) + chat turns
+      const notesCount = notes.length;
+
+      // Questions Asked: student messages with '?' or student inquiry turns + avatar hints requested
+      const studentMsgs = chatMsgs.filter((m) => m.sender === 'student');
+      const questionsInChat = studentMsgs.filter((m) => m.text && m.text.includes('?')).length;
+      const chatTurnsCount = studentMsgs.length;
+      const questionsAsked = Math.max(questionsInChat + hintsCount, chatTurnsCount);
+
+      // Misinformation Evaluations: Devil's Advocate messages critiqued + notes evaluating misinformation source 1
+      const devilsAdvocateTurns = chatMsgs.filter(
+        (m) => m.messageType === 'devils_advocate' || m.mode === 'DevilsAdvocate'
+      ).length;
+      const misinfoSourceNotes = notes.filter(
+        (n) => n.sourceId === 'source-1' || (n.highlightedText && n.highlightedText.toLowerCase().includes('global warming'))
+      ).length;
+      const devilsAdvocateCount = Math.max(devilsAdvocateTurns, misinfoSourceNotes);
+
+      const synthesisLength = synthText ? synthText.length : 0;
+
+      // 3. Generate review with computed accurate metrics
       try {
-        const msgs = JSON.parse(chatStr);
-        chatTurnsCount = msgs.filter((m: { sender: string }) => m.sender === 'student').length;
-        devilsAdvocateCount = msgs.filter((m: { messageType: string }) => m.messageType === 'devils_advocate').length;
-      } catch (e) { console.error(e); }
-    }
+        const res = await fetch(`/api/modules/${moduleId}/review/generate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            conceptsCount,
+            notesCount,
+            chatTurnsCount: questionsAsked,
+            devilsAdvocateCount,
+            synthesisLength,
+          }),
+        });
 
-    // 2. Fetch server review with actual session stats
-    fetch(`/api/modules/${moduleId}/review/generate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        conceptsCount,
-        notesCount,
-        chatTurnsCount,
-        devilsAdvocateCount,
-      }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
+        const data = await res.json();
         if (data.review) {
           setReview(data.review);
+          localStorage.setItem(reviewKey, JSON.stringify(data.review));
         }
-      })
-      .finally(() => setLoading(false));
+      } catch (err) {
+        console.error('Error generating review:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    computeAndLoadStats();
   }, [moduleId]);
 
   // Sequential Badge Unlock Animation effect

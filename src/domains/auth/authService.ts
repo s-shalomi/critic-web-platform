@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import { signToken } from './jwt';
+import { accessCodeStore } from '@/shared/db/sessionStore';
 
 // Mock/Default fallback seed data for access codes and teachers
 // Used when real DB connection is unpopulated or in test mode
@@ -30,8 +31,12 @@ export async function authenticateStudent(accessCode: string): Promise<AuthResul
     return { success: false, error: 'Access code is required' };
   }
 
-  // Check valid code format or presence
-  const isValidCode = DEMO_ACCESS_CODES.has(cleanCode) || cleanCode.startsWith('STUDENT_') || cleanCode.startsWith('VALID_');
+  // Check valid code: from teacher-generated accessCodeStore, demo list, or valid prefix
+  const isValidCode =
+    accessCodeStore.has(cleanCode) ||
+    DEMO_ACCESS_CODES.has(cleanCode) ||
+    cleanCode.startsWith('STUDENT_') ||
+    cleanCode.startsWith('VALID_');
   
   if (!isValidCode) {
     return { success: false, error: 'Invalid access code. Please check with your teacher.' };

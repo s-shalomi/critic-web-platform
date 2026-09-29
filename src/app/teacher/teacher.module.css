@@ -171,3 +171,95 @@
   font-family: var(--font-space-mono);
   font-size: 0.85rem;
 }
+
+.statusCompleted {
+  color: #39FF14;
+  font-family: var(--font-space-mono);
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
+.sourceList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+  max-height: 480px;
+  overflow-y: auto;
+}
+
+.sourceCard {
+  background: rgba(7, 11, 26, 0.85);
+  border: 1px solid var(--color-border-slate);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sourceCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.sourceCardTitle {
+  font-family: var(--font-orbitron);
+  font-size: 1rem;
+  color: var(--color-text-light);
+  margin: 0;
+}
+
+.sourceMeta {
+  font-family: var(--font-space-mono);
+  font-size: 0.78rem;
+  color: var(--color-text-soft);
+}
+
+.sourceExcerpt {
+  font-family: var(--font-exo2);
+  font-size: 0.88rem;
+  color: var(--color-text-light-60);
+  line-height: 1.4;
+  white-space: pre-wrap;
+  max-height: 60px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sourceActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.actionBtnSmall {
+  background: rgba(15, 23, 46, 0.8);
+  border: 1px solid var(--color-border-slate);
+  color: var(--color-text-light);
+  font-family: var(--font-space-mono);
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.actionBtnSmall:hover {
+  border-color: var(--color-accent-cyan);
+  color: var(--color-accent-cyan);
+}
+
+.actionBtnDelete {
+  border-color: rgba(255, 79, 216, 0.4);
+  color: #ff75c3;
+}
+
+.actionBtnDelete:hover {
+  border-color: #ff4fd8;
+  background: rgba(255, 79, 216, 0.15);
+  color: #fff;
+}
+

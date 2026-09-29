@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import styles from './inquire.module.css';
 
 import { getStudentStorageKey } from '@/shared/utils/storage';
+import { reportStudentProgress } from '@/shared/utils/reportProgress';
 
 interface ChatMessage {
   id: string;
@@ -50,6 +51,9 @@ export default function InquireEvaluateStagePage() {
     const nodesKey = getStudentStorageKey('critic_nodes_canvas', moduleId);
     const linksKey = getStudentStorageKey('critic_links_canvas', moduleId);
     const notesKey = getStudentStorageKey('critic_notes', moduleId);
+
+    // Inform teacher portal this student is on the Inquire stage
+    reportStudentProgress('inquire');
 
     // 0. Check student evidence notes count for AI Nudge
     const localNotesStr = localStorage.getItem(notesKey);
@@ -124,14 +128,19 @@ export default function InquireEvaluateStagePage() {
     setLoading(true);
 
     try {
-      const history = messages.map((m) => ({ sender: m.sender, text: m.text }));
+      // Devil's Advocate mode: manual toggle OR random (~30% chance) OR high-confidence assertion (per requirements.md)
+      const highConfidenceRegex = /\b(definitely|obviously|clearly|always|never|proves|fake|hoax|certainly|guaranteed|undeniable|true|false)\b/i;
+      const isHighConfidence = highConfidenceRegex.test(userText);
+      const shouldTriggerRandomly = Math.random() < 0.3;
+      const effectiveMode = isDevilsAdvocate || isHighConfidence || shouldTriggerRandomly ? 'DevilsAdvocate' : 'Socratic';
+
       const res = await fetch(`/api/modules/${moduleId}/inquire/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           history,
           userMessage: userText,
-          mode: isDevilsAdvocate ? 'DevilsAdvocate' : 'Socratic',
+          mode: effectiveMode,
         }),
       });
 

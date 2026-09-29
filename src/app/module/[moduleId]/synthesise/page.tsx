@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import styles from './synthesise.module.css';
 
 import { getStudentStorageKey } from '@/shared/utils/storage';
+import { reportStudentProgress } from '@/shared/utils/reportProgress';
 
 interface ConceptNode {
   id: string;
@@ -41,6 +42,9 @@ export default function SynthesiseStagePage() {
     const nodesKey = getStudentStorageKey('critic_nodes_canvas', moduleId);
     const linksKey = getStudentStorageKey('critic_links_canvas', moduleId);
     const notesKey = getStudentStorageKey('critic_notes', moduleId);
+
+    // Inform teacher portal this student is on the Synthesise stage
+    reportStudentProgress('synthesise');
 
     // 0. Check student evidence notes count for AI Nudge
     const localNotesStr = localStorage.getItem(notesKey);

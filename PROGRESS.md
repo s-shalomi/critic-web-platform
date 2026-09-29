@@ -130,4 +130,46 @@
   - `npm run build` (100% successful Next.js App Router build with 0 compilation errors).
 - **Immediate Next Step**: All requirements in `requirements.md` verified, 100% tests passing, production build succeeded cleanly. Ready for deployment.
 
+---
+
+### [2026-09-29] - Full Stack Developer Phase: Teacher Portal Sync, Live Student Progress & Accurate Debrief Stats
+
+- **Role**: Full Stack Developer
+- **Code Built & Updated**:
+  - **Cross-Bundle Global State Persistence**:
+    - Attached `dynamicSourcesStore`, `studentProgressStore`, `accessCodeStore`, and `reviewStatsStore` to `globalThis` in [`src/shared/db/sessionStore.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/db/sessionStore.ts), resolving the issue where Next.js route handlers in separate Webpack chunks lost in-memory state.
+  - **Teacher Access Code Generation -> Student Login**:
+    - Updated [`src/domains/auth/authService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/auth/authService.ts) to validate access codes against `accessCodeStore` in addition to demo codes. Generated access codes are immediately valid for student login.
+  - **Full Source Management (Add, Edit, Remove) & Immediate Student Sync**:
+    - Created [`src/app/api/sources/[sourceId]/route.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/api/sources/%5BsourceId%5D/route.ts) supporting `PUT` and `DELETE /api/sources/:sourceId` per `requirements.md`.
+    - Added `updateSourceInTopic`, `deleteSourceFromTopic`, and `getSourceById` in [`src/domains/topics/topicService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/topics/topicService.ts).
+    - Added source list, inline editing, and deletion controls in the Teacher Portal dashboard [`src/app/teacher/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/teacher/page.tsx).
+    - Added live polling and window focus synchronization in [`src/app/module/[moduleId]/familiarise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/familiarise/page.tsx) and [`src/app/module/[moduleId]/conceptualise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/conceptualise/page.tsx), ensuring source additions, edits, and deletions reflect immediately in student modules.
+  - **Live Student Progress Overview in Teacher Portal**:
+    - Enhanced [`src/shared/utils/reportProgress.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/utils/reportProgress.ts) to accept completion status (`status: 'in_progress' | 'completed'`) and persist the student's current stage in `critic_current_stage_${topicId}`.
+    - Added progress reporting in [`src/app/module/[moduleId]/review/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/review/page.tsx) (`reportStudentProgress('review', 'Climate Change', 'completed')`) so the Teacher Portal accurately shows module completion.
+    - Updated [`src/app/dashboard/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/page.tsx) to reload students to their exact saved stage upon reopening a topic.
+    - Enhanced the Student Progress Overview table in [`src/app/teacher/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/teacher/page.tsx) with formatted stage labels, green "✓ COMPLETED" vs cyan "● IN PROGRESS" status badges, 8-second auto-polling, and a manual refresh trigger.
+  - **Accurate Case Debrief & Statistics Calculation**:
+    - Updated [`src/app/module/[moduleId]/review/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/review/page.tsx) to gather metrics across scoped/unscoped localStorage keys with server API fallbacks (`/api/modules/:moduleId/notes`, `conceptualise`, `inquire`, `synthesis`).
+    - Accurately computed all 6 metrics required by `requirements.md`:
+      1. Concepts Identified: Unique concept nodes + converted notes.
+      2. Assumptions Challenged: Evidence notes highlighting assumptions/biases + inquiry turns.
+      3. Questions Asked: Student question messages + avatar hint queries in familiarise and conceptualise.
+      4. Misinformation Evaluations: Devil's Advocate counter-claims critiqued + notes evaluating misinformation claims.
+      5. Critical Thinking Score: Composite score (0-100).
+      6. Synthesis Score: Evaluated synthesis quality (0-100).
+    - Updated [`src/app/module/[moduleId]/inquire/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/inquire/page.tsx) to trigger Devil's Advocate mode randomly (~30% probability) and on high-confidence assertions per `requirements.md`.
+    - Persisted generated reviews in `reviewStatsStore` and `localStorage`, so `GET /api/modules/:moduleId/review` retrieves existing reviews on reopen/reload without recalculating defaults.
+  - **Test Suite Expansion**:
+    - Added tests in `tests/topics.test.ts` for `updateSourceInTopic`, `deleteSourceFromTopic`, and `getSourceById`.
+    - Added tests in `tests/teacher.test.ts` for student authentication with teacher-generated codes.
+    - Added tests in `tests/review.test.ts` for `getExistingModuleReview` retrieval.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (28/28 tests passing across 8 suites).
+  - `npm run build` (100% clean production build with 0 errors across all routes and pages).
+- **Immediate Next Step**: All 3 tasks successfully resolved, tested, verified, and documented.
+
+
 

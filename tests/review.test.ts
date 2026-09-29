@@ -24,4 +24,23 @@ describe('Review Domain Tests', () => {
     expect(review.mbtiPersonalityTitle).toContain('Investigator');
     expect(review.mbtiPersonalitySummary.length).toBeGreaterThan(20);
   });
+
+  test('getExistingModuleReview retrieves saved review data without recalculating defaults', async () => {
+    const { getExistingModuleReview } = await import('../src/domains/review/reviewService');
+    const moduleId = 'saved_module_eval';
+    await generateModuleReview(moduleId, {
+      conceptsCount: 8,
+      notesCount: 4,
+      chatTurnsCount: 7,
+      devilsAdvocateCount: 3,
+      synthesisLength: 250,
+    });
+
+    const retrieved = await getExistingModuleReview(moduleId);
+    expect(retrieved).toBeDefined();
+    expect(retrieved?.conceptsIdentified).toBe(8);
+    expect(retrieved?.assumptionsChallenged).toBe(4);
+    expect(retrieved?.questionsAsked).toBe(7);
+    expect(retrieved?.misinformationEvaluations).toBe(3);
+  });
 });

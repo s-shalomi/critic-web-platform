@@ -25,6 +25,12 @@ export interface ReviewData {
   badges: Badge[];
 }
 
+import { reviewStatsStore } from '@/shared/db/sessionStore';
+
+export async function getExistingModuleReview(moduleId: string): Promise<ReviewData | null> {
+  return reviewStatsStore.get(moduleId) || null;
+}
+
 export async function generateModuleReview(
   moduleId: string,
   sessionStats?: {
@@ -103,7 +109,7 @@ export async function generateModuleReview(
       'You use targeted inquiry as your primary tool for discovery. Unafraid to challenge assumptions or probe counter-arguments, you uncover underlying truths by asking relentless, clarifying questions.';
   }
 
-  return {
+  const reviewResult: ReviewData = {
     moduleId,
     conceptsIdentified: conceptsCount,
     assumptionsChallenged: notesCount,
@@ -115,4 +121,7 @@ export async function generateModuleReview(
     mbtiPersonalitySummary,
     badges,
   };
+
+  reviewStatsStore.set(moduleId, reviewResult);
+  return reviewResult;
 }

@@ -27,7 +27,8 @@ export default function DashboardPage() {
 
   const handleEnterModule = (topicId: string) => {
     const moduleId = `mod_${topicId}_student_demo`;
-    router.push(`/module/${moduleId}/familiarise`);
+    const savedStage = localStorage.getItem(`critic_current_stage_${topicId}`) || 'familiarise';
+    router.push(`/module/${moduleId}/${savedStage}`);
   };
 
   return (

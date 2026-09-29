@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import styles from './familiarise.module.css';
 
 import { getStudentStorageKey } from '@/shared/utils/storage';
+import { reportStudentProgress } from '@/shared/utils/reportProgress';
 
 interface Source {
   id: string;
@@ -55,15 +56,28 @@ export default function FamiliariseStagePage() {
     setLoading(true);
     const notesKey = getStudentStorageKey('critic_notes', moduleId);
 
-    fetch('/api/topics/climate-change/sources')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.sources && data.sources.length > 0) {
-          setSources(data.sources);
-          setSelectedSourceId(data.sources[0].id);
-        }
-      })
-      .finally(() => setLoading(false));
+    // Inform teacher portal this student is on the Familiarise stage
+    reportStudentProgress('familiarise');
+
+    const fetchSources = () => {
+      fetch('/api/topics/climate-change/sources')
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.sources) {
+            setSources(data.sources);
+            setSelectedSourceId((prev) => {
+              if (data.sources.some((s: Source) => s.id === prev)) return prev;
+              return data.sources.length > 0 ? data.sources[0].id : '';
+            });
+          }
+        })
+        .catch((err) => console.error('Error fetching sources:', err))
+        .finally(() => setLoading(false));
+    };
+
+    fetchSources();
+    const sourcesInterval = setInterval(fetchSources, 4000);
+    window.addEventListener('focus', fetchSources);
 
     // Check localStorage fallback first for instant offline reload persistence
     const localSaved = localStorage.getItem(notesKey);
@@ -84,6 +98,11 @@ export default function FamiliariseStagePage() {
           localStorage.setItem(notesKey, JSON.stringify(data.notes));
         }
       });
+
+    return () => {
+      clearInterval(sourcesInterval);
+      window.removeEventListener('focus', fetchSources);
+    };
   }, [moduleId]);
 
   // Sync notes state to localStorage whenever notes change
@@ -210,6 +229,10 @@ export default function FamiliariseStagePage() {
 
   const handleAgentClick = async () => {
     try {
+      const hintKey = getStudentStorageKey('critic_hints', moduleId);
+      const current = parseInt(localStorage.getItem(hintKey) || '0', 10);
+      localStorage.setItem(hintKey, String(current + 1));
+
       const res = await fetch(`/api/modules/${moduleId}/agent/hint`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

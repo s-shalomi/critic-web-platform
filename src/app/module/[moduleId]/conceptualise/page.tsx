@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import styles from './conceptualise.module.css';
 
 import { getStudentStorageKey } from '@/shared/utils/storage';
+import { reportStudentProgress } from '@/shared/utils/reportProgress';
 
 interface ConceptNode {
   id: string;
@@ -76,12 +77,22 @@ export default function ConceptualiseStagePage() {
     const nodesKey = getStudentStorageKey('critic_nodes_canvas', moduleId);
     const linksKey = getStudentStorageKey('critic_links_canvas', moduleId);
 
-    // 1. Fetch Sources
-    fetch('/api/topics/climate-change/sources')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.sources) setSources(data.sources);
-      });
+    // Inform teacher portal this student is on the Conceptualise stage
+    reportStudentProgress('conceptualise');
+
+    // 1. Fetch Sources with live syncing
+    const fetchSources = () => {
+      fetch('/api/topics/climate-change/sources')
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.sources) setSources(data.sources);
+        })
+        .catch((err) => console.error('Error fetching sources:', err));
+    };
+
+    fetchSources();
+    const sourcesInterval = setInterval(fetchSources, 4000);
+    window.addEventListener('focus', fetchSources);
 
     // 2. Fetch Notes
     const localSavedNotes = localStorage.getItem(notesKey);
@@ -115,6 +126,11 @@ export default function ConceptualiseStagePage() {
           localStorage.setItem(linksKey, JSON.stringify(data.links));
         }
       });
+
+    return () => {
+      clearInterval(sourcesInterval);
+      window.removeEventListener('focus', fetchSources);
+    };
   }, [moduleId]);
 
   const saveCanvasState = (updatedNodes: ConceptNode[], updatedLinks: ConceptLink[]) => {
@@ -287,6 +303,10 @@ export default function ConceptualiseStagePage() {
 
   const handleAgentClick = async () => {
     try {
+      const hintKey = getStudentStorageKey('critic_hints', moduleId);
+      const current = parseInt(localStorage.getItem(hintKey) || '0', 10);
+      localStorage.setItem(hintKey, String(current + 1));
+
       const res = await fetch(`/api/modules/${moduleId}/agent/hint`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

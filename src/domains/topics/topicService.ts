@@ -109,14 +109,37 @@ export async function getTopicById(topicId: string): Promise<Topic | null> {
 }
 
 export async function getSourcesForTopic(topicId: string): Promise<Source[]> {
-  const initial = INITIAL_SOURCES.filter((s) => s.topicId === topicId);
-  const dynamic = dynamicSourcesStore.get(topicId) || [];
-  return [...initial, ...dynamic].sort((a, b) => a.orderIndex - b.orderIndex);
+  if (!dynamicSourcesStore.has(topicId)) {
+    const initial = INITIAL_SOURCES.filter((s) => s.topicId === topicId).map((s) => ({
+      ...s,
+      content: { ...s.content },
+    }));
+    dynamicSourcesStore.set(topicId, initial);
+  }
+  const sources = dynamicSourcesStore.get(topicId) || [];
+  return [...sources].sort((a, b) => a.orderIndex - b.orderIndex);
+}
+
+export async function getSourceById(sourceId: string): Promise<Source | null> {
+  // Ensure default topics are loaded
+  for (const topic of INITIAL_TOPICS) {
+    await getSourcesForTopic(topic.id);
+  }
+  for (const sources of dynamicSourcesStore.values()) {
+    const found = sources.find((s) => s.id === sourceId);
+    if (found) return found;
+  }
+  return null;
 }
 
 export async function addSourceToTopic(
   topicId: string,
-  sourceData: { title: string; authorName?: string; text: string; type?: 'social_post' | 'article' | 'comments' | 'video' }
+  sourceData: {
+    title: string;
+    authorName?: string;
+    text: string;
+    type?: 'social_post' | 'article' | 'comments' | 'video';
+  }
 ): Promise<Source> {
   const currentSources = await getSourcesForTopic(topicId);
   const newSource: Source = {
@@ -131,22 +154,66 @@ export async function addSourceToTopic(
     },
   };
 
-  const dynamic = dynamicSourcesStore.get(topicId) || [];
-  dynamic.push(newSource);
-  dynamicSourcesStore.set(topicId, dynamic);
+  currentSources.push(newSource);
+  dynamicSourcesStore.set(topicId, currentSources);
 
   return newSource;
 }
 
+export async function updateSourceInTopic(
+  sourceId: string,
+  updates: {
+    title?: string;
+    authorName?: string;
+    text?: string;
+    type?: 'social_post' | 'article' | 'comments' | 'video';
+  }
+): Promise<Source | null> {
+  // Ensure sources are loaded into store
+  for (const topic of INITIAL_TOPICS) {
+    await getSourcesForTopic(topic.id);
+  }
+
+  for (const [topicId, sources] of dynamicSourcesStore.entries()) {
+    const idx = sources.findIndex((s) => s.id === sourceId);
+    if (idx !== -1) {
+      const existing = sources[idx];
+      const updated: Source = {
+        ...existing,
+        title: updates.title !== undefined ? updates.title : existing.title,
+        content: {
+          ...existing.content,
+          type: updates.type || existing.content.type,
+          authorName: updates.authorName !== undefined ? updates.authorName : existing.content.authorName,
+          text: updates.text !== undefined ? updates.text : existing.content.text,
+        },
+      };
+      sources[idx] = updated;
+      dynamicSourcesStore.set(topicId, sources);
+      return updated;
+    }
+  }
+  return null;
+}
+
 export async function deleteSourceFromTopic(sourceId: string): Promise<boolean> {
+  // Ensure sources are loaded into store
+  for (const topic of INITIAL_TOPICS) {
+    await getSourcesForTopic(topic.id);
+  }
+
   for (const [topicId, sources] of dynamicSourcesStore.entries()) {
     const idx = sources.findIndex((s) => s.id === sourceId);
     if (idx !== -1) {
       sources.splice(idx, 1);
+      // Re-index order
+      sources.forEach((s, i) => {
+        s.orderIndex = i;
+      });
       dynamicSourcesStore.set(topicId, sources);
       return true;
     }
   }
-  // Cannot delete initial sources
   return false;
 }
+
