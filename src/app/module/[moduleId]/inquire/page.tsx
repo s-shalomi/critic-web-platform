@@ -4,6 +4,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import styles from './inquire.module.css';
 
+import { getStudentStorageKey } from '@/shared/utils/storage';
+
 interface ChatMessage {
   id: string;
   sender: 'student' | 'agent';
@@ -42,16 +44,25 @@ export default function InquireEvaluateStagePage() {
   const chatBottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // 1. Fetch Chat History
-    fetch(`/api/modules/${moduleId}/inquire`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.messages) setMessages(data.messages);
-      });
+    const chatKey = getStudentStorageKey('critic_chat', moduleId);
+    const nodesKey = getStudentStorageKey('critic_nodes_canvas', moduleId);
+    const linksKey = getStudentStorageKey('critic_links_canvas', moduleId);
+
+    // 1. Fetch Chat History from local storage or server
+    const localChat = localStorage.getItem(chatKey);
+    if (localChat) {
+      try { setMessages(JSON.parse(localChat)); } catch (e) { console.error(e); }
+    } else {
+      fetch(`/api/modules/${moduleId}/inquire`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.messages) setMessages(data.messages);
+        });
+    }
 
     // 2. Fetch Concept Map Nodes for right panel reference
-    const savedNodes = localStorage.getItem(`critic_nodes_canvas_${moduleId}`);
-    const savedLinks = localStorage.getItem(`critic_links_canvas_${moduleId}`);
+    const savedNodes = localStorage.getItem(nodesKey);
+    const savedLinks = localStorage.getItem(linksKey);
 
     if (savedNodes) {
       try { setNodes(JSON.parse(savedNodes)); } catch (e) { console.error(e); }
@@ -69,6 +80,14 @@ export default function InquireEvaluateStagePage() {
         }
       });
   }, [moduleId]);
+
+  // Persist student-scoped chat history whenever messages change
+  useEffect(() => {
+    if (messages.length > 0) {
+      const chatKey = getStudentStorageKey('critic_chat', moduleId);
+      localStorage.setItem(chatKey, JSON.stringify(messages));
+    }
+  }, [messages, moduleId]);
 
   useEffect(() => {
     chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });

@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import styles from './familiarise.module.css';
 
+import { getStudentStorageKey } from '@/shared/utils/storage';
+
 interface Source {
   id: string;
   topicId: string;
@@ -40,7 +42,7 @@ export default function FamiliariseStagePage() {
   const [selectedText, setSelectedText] = useState<string>('');
   const [noteInput, setNoteInput] = useState<string>('');
   const [isHighlighting, setIsHighlighting] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
 
   // Hovered, Pinned, Editing Note & Toast state
   const [hoveredNoteId, setHoveredNoteId] = useState<string | null>(null);
@@ -50,6 +52,9 @@ export default function FamiliariseStagePage() {
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
   useEffect(() => {
+    setLoading(true);
+    const notesKey = getStudentStorageKey('critic_notes', moduleId);
+
     fetch('/api/topics/climate-change/sources')
       .then((res) => res.json())
       .then((data) => {
@@ -57,10 +62,11 @@ export default function FamiliariseStagePage() {
           setSources(data.sources);
           setSelectedSourceId(data.sources[0].id);
         }
-      });
+      })
+      .finally(() => setLoading(false));
 
     // Check localStorage fallback first for instant offline reload persistence
-    const localSaved = localStorage.getItem(`critic_notes_${moduleId}`);
+    const localSaved = localStorage.getItem(notesKey);
     if (localSaved) {
       try {
         setNotes(JSON.parse(localSaved));
@@ -75,16 +81,17 @@ export default function FamiliariseStagePage() {
       .then((data) => {
         if (data.notes && data.notes.length > 0) {
           setNotes(data.notes);
-          localStorage.setItem(`critic_notes_${moduleId}`, JSON.stringify(data.notes));
+          localStorage.setItem(notesKey, JSON.stringify(data.notes));
         }
       });
   }, [moduleId]);
 
   // Sync notes state to localStorage whenever notes change
   const updateNotesState = (newNotes: Note[] | ((prev: Note[]) => Note[])) => {
+    const notesKey = getStudentStorageKey('critic_notes', moduleId);
     setNotes((prev) => {
       const updated = typeof newNotes === 'function' ? newNotes(prev) : newNotes;
-      localStorage.setItem(`critic_notes_${moduleId}`, JSON.stringify(updated));
+      localStorage.setItem(notesKey, JSON.stringify(updated));
       return updated;
     });
   };
@@ -181,10 +188,11 @@ export default function FamiliariseStagePage() {
     };
 
     // 3. Save into canvas localStorage store immediately
-    const savedCanvasNodesStr = localStorage.getItem(`critic_nodes_canvas_${moduleId}`);
+    const canvasNodesKey = getStudentStorageKey('critic_nodes_canvas', moduleId);
+    const savedCanvasNodesStr = localStorage.getItem(canvasNodesKey);
     const canvasNodes = savedCanvasNodesStr ? JSON.parse(savedCanvasNodesStr) : [];
     canvasNodes.push(conceptNodeToSave);
-    localStorage.setItem(`critic_nodes_canvas_${moduleId}`, JSON.stringify(canvasNodes));
+    localStorage.setItem(canvasNodesKey, JSON.stringify(canvasNodes));
 
     // 4. Show visual feedback toast banner
     setToastMsg('✨ Note converted to Concept Node! Added to Visual Map.');

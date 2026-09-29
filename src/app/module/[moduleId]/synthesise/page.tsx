@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import styles from './synthesise.module.css';
 
+import { getStudentStorageKey } from '@/shared/utils/storage';
+
 interface ConceptNode {
   id: string;
   text: string;
@@ -33,16 +35,25 @@ export default function SynthesiseStagePage() {
   const [links, setLinks] = useState<ConceptLink[]>([]);
 
   useEffect(() => {
+    const synthKey = getStudentStorageKey('critic_synthesis', moduleId);
+    const nodesKey = getStudentStorageKey('critic_nodes_canvas', moduleId);
+    const linksKey = getStudentStorageKey('critic_links_canvas', moduleId);
+
     // 1. Fetch Existing Draft Synthesis
-    fetch(`/api/modules/${moduleId}/synthesis`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.synthesisDraft) setSynthesisText(data.synthesisDraft);
-      });
+    const localSynth = localStorage.getItem(synthKey);
+    if (localSynth) {
+      setSynthesisText(localSynth);
+    } else {
+      fetch(`/api/modules/${moduleId}/synthesis`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.synthesisDraft) setSynthesisText(data.synthesisDraft);
+        });
+    }
 
     // 2. Fetch Concept Map Nodes for right panel reference
-    const savedNodes = localStorage.getItem(`critic_nodes_canvas_${moduleId}`);
-    const savedLinks = localStorage.getItem(`critic_links_canvas_${moduleId}`);
+    const savedNodes = localStorage.getItem(nodesKey);
+    const savedLinks = localStorage.getItem(linksKey);
 
     if (savedNodes) {
       try { setNodes(JSON.parse(savedNodes)); } catch (e) { console.error(e); }
@@ -60,6 +71,13 @@ export default function SynthesiseStagePage() {
         }
       });
   }, [moduleId]);
+
+  // Save student synthesis draft to student-scoped localStorage
+  const handleSynthesisTextChange = (text: string) => {
+    setSynthesisText(text);
+    const synthKey = getStudentStorageKey('critic_synthesis', moduleId);
+    localStorage.setItem(synthKey, text);
+  };
 
   const handleCrossCheckSynthesis = async () => {
     if (!synthesisText.trim()) return;

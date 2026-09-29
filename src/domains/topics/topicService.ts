@@ -98,6 +98,9 @@ const INITIAL_SOURCES: Source[] = [
   },
 ];
 
+// Extended in-memory sources store for dynamic teacher additions
+const dynamicSourcesStore = new Map<string, Source[]>();
+
 export async function getAllTopics(): Promise<Topic[]> {
   return INITIAL_TOPICS;
 }
@@ -107,5 +110,32 @@ export async function getTopicById(topicId: string): Promise<Topic | null> {
 }
 
 export async function getSourcesForTopic(topicId: string): Promise<Source[]> {
-  return INITIAL_SOURCES.filter((s) => s.topicId === topicId).sort((a, b) => a.orderIndex - b.orderIndex);
+  const initial = INITIAL_SOURCES.filter((s) => s.topicId === topicId);
+  const dynamic = dynamicSourcesStore.get(topicId) || [];
+  return [...initial, ...dynamic].sort((a, b) => a.orderIndex - b.orderIndex);
 }
+
+export async function addSourceToTopic(
+  topicId: string,
+  sourceData: { title: string; authorName?: string; text: string; type?: 'social_post' | 'article' | 'comments' | 'video' }
+): Promise<Source> {
+  const currentSources = await getSourcesForTopic(topicId);
+  const newSource: Source = {
+    id: `source_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+    topicId,
+    orderIndex: currentSources.length,
+    title: sourceData.title,
+    content: {
+      type: sourceData.type || 'article',
+      authorName: sourceData.authorName || 'Teacher Added',
+      text: sourceData.text,
+    },
+  };
+
+  const dynamic = dynamicSourcesStore.get(topicId) || [];
+  dynamic.push(newSource);
+  dynamicSourcesStore.set(topicId, dynamic);
+
+  return newSource;
+}
+

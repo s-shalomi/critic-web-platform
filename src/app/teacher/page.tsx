@@ -45,6 +45,7 @@ export default function TeacherDashboardPage() {
   const [newSourceText, setNewSourceText] = useState<string>('');
 
   const [loading, setLoading] = useState<boolean>(true);
+  const [submittingSource, setSubmittingSource] = useState<boolean>(false);
   const [msg, setMsg] = useState<string | null>(null);
 
   useEffect(() => {
@@ -90,27 +91,34 @@ export default function TeacherDashboardPage() {
     }
   };
 
-  const handleAddSource = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newSourceTitle || !newSourceText) return;
+    setSubmittingSource(true);
+    try {
+      const res = await fetch('/api/topics/climate-change/sources', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: newSourceTitle,
+          authorName: newSourceAuthor || 'Teacher Added',
+          text: newSourceText,
+          type: 'article',
+        }),
+      });
 
-    const newSource: Source = {
-      id: `source_${Date.now()}`,
-      topicId: 'climate-change',
-      orderIndex: sources.length,
-      title: newSourceTitle,
-      content: {
-        type: 'article',
-        authorName: newSourceAuthor || 'Teacher Added',
-        text: newSourceText,
-      },
-    };
-
-    setSources((prev) => [...prev, newSource]);
-    setNewSourceTitle('');
-    setNewSourceAuthor('');
-    setNewSourceText('');
-    setMsg('Source added successfully! Reflected in student modules.');
+      const data = await res.json();
+      if (data.success && data.source) {
+        setSources((prev) => [...prev, data.source]);
+        setNewSourceTitle('');
+        setNewSourceAuthor('');
+        setNewSourceText('');
+        setMsg('✨ New source published! It is now instantly live across all student modules.');
+      } else {
+        setMsg('Failed to publish source.');
+      }
+    } catch (err) {
+      setMsg('Error adding source.');
+    } finally {
+      setSubmittingSource(false);
+    }
   };
 
   return (

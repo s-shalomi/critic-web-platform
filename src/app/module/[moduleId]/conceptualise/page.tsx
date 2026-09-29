@@ -4,6 +4,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import styles from './conceptualise.module.css';
 
+import { getStudentStorageKey } from '@/shared/utils/storage';
+
 interface ConceptNode {
   id: string;
   text: string;
@@ -70,6 +72,10 @@ export default function ConceptualiseStagePage() {
   const dragOffsetRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
   useEffect(() => {
+    const notesKey = getStudentStorageKey('critic_notes', moduleId);
+    const nodesKey = getStudentStorageKey('critic_nodes_canvas', moduleId);
+    const linksKey = getStudentStorageKey('critic_links_canvas', moduleId);
+
     // 1. Fetch Sources
     fetch('/api/topics/climate-change/sources')
       .then((res) => res.json())
@@ -78,7 +84,7 @@ export default function ConceptualiseStagePage() {
       });
 
     // 2. Fetch Notes
-    const localSavedNotes = localStorage.getItem(`critic_notes_${moduleId}`);
+    const localSavedNotes = localStorage.getItem(notesKey);
     if (localSavedNotes) {
       try { setNotes(JSON.parse(localSavedNotes)); } catch (e) { console.error(e); }
     }
@@ -89,8 +95,8 @@ export default function ConceptualiseStagePage() {
       });
 
     // 3. Fetch Canvas Nodes & Links
-    const savedNodes = localStorage.getItem(`critic_nodes_canvas_${moduleId}`);
-    const savedLinks = localStorage.getItem(`critic_links_canvas_${moduleId}`);
+    const savedNodes = localStorage.getItem(nodesKey);
+    const savedLinks = localStorage.getItem(linksKey);
 
     if (savedNodes) {
       try { setNodes(JSON.parse(savedNodes)); } catch (e) { console.error(e); }
@@ -105,17 +111,20 @@ export default function ConceptualiseStagePage() {
         if (data.nodes && data.links && !savedNodes) {
           setNodes(data.nodes);
           setLinks(data.links);
-          localStorage.setItem(`critic_nodes_canvas_${moduleId}`, JSON.stringify(data.nodes));
-          localStorage.setItem(`critic_links_canvas_${moduleId}`, JSON.stringify(data.links));
+          localStorage.setItem(nodesKey, JSON.stringify(data.nodes));
+          localStorage.setItem(linksKey, JSON.stringify(data.links));
         }
       });
   }, [moduleId]);
 
   const saveCanvasState = (updatedNodes: ConceptNode[], updatedLinks: ConceptLink[]) => {
+    const nodesKey = getStudentStorageKey('critic_nodes_canvas', moduleId);
+    const linksKey = getStudentStorageKey('critic_links_canvas', moduleId);
+
     setNodes(updatedNodes);
     setLinks(updatedLinks);
-    localStorage.setItem(`critic_nodes_canvas_${moduleId}`, JSON.stringify(updatedNodes));
-    localStorage.setItem(`critic_links_canvas_${moduleId}`, JSON.stringify(updatedLinks));
+    localStorage.setItem(nodesKey, JSON.stringify(updatedNodes));
+    localStorage.setItem(linksKey, JSON.stringify(updatedLinks));
   };
 
   const playLinkAudioSound = () => {
