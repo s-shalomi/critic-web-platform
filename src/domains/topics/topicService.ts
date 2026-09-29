@@ -4,6 +4,8 @@
  * Adding a new topic requires only new rows in Topics and Sources without modifying core application code.
  */
 
+import { dynamicSourcesStore } from '@/shared/db/sessionStore';
+
 export interface Topic {
   id: string;
   title: string;
@@ -98,9 +100,6 @@ const INITIAL_SOURCES: Source[] = [
   },
 ];
 
-// Extended in-memory sources store for dynamic teacher additions
-const dynamicSourcesStore = new Map<string, Source[]>();
-
 export async function getAllTopics(): Promise<Topic[]> {
   return INITIAL_TOPICS;
 }
@@ -139,3 +138,15 @@ export async function addSourceToTopic(
   return newSource;
 }
 
+export async function deleteSourceFromTopic(sourceId: string): Promise<boolean> {
+  for (const [topicId, sources] of dynamicSourcesStore.entries()) {
+    const idx = sources.findIndex((s) => s.id === sourceId);
+    if (idx !== -1) {
+      sources.splice(idx, 1);
+      dynamicSourcesStore.set(topicId, sources);
+      return true;
+    }
+  }
+  // Cannot delete initial sources
+  return false;
+}
