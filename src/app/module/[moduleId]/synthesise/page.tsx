@@ -12,6 +12,7 @@ interface ConceptNode {
   text: string;
   positionX: number;
   positionY: number;
+  sourceNoteId?: string;
   linkCount?: number;
 }
 
@@ -74,19 +75,34 @@ export default function SynthesiseStagePage() {
     const savedNodes = localStorage.getItem(nodesKey);
     const savedLinks = localStorage.getItem(linksKey);
 
+    let initialNodes: ConceptNode[] = [];
     if (savedNodes) {
-      try { setNodes(JSON.parse(savedNodes)); } catch (e) { console.error(e); }
+      try {
+        initialNodes = JSON.parse(savedNodes);
+        setNodes(initialNodes);
+      } catch (e) { console.error(e); }
     }
     if (savedLinks) {
-      try { setLinks(JSON.parse(savedLinks)); } catch (e) { console.error(e); }
+      try {
+        const parsedLinks: ConceptLink[] = JSON.parse(savedLinks);
+        const validIds = new Set(initialNodes.map((n) => n.id));
+        const filteredLinks = initialNodes.length > 0
+          ? parsedLinks.filter((l) => validIds.has(l.fromNodeId) && validIds.has(l.toNodeId))
+          : parsedLinks;
+        setLinks(filteredLinks);
+      } catch (e) { console.error(e); }
     }
 
     fetch(`/api/modules/${moduleId}/conceptualise`)
       .then((res) => res.json())
       .then((data) => {
-        if (data.nodes && data.links && (!savedNodes || JSON.parse(savedNodes).length === 0)) {
+        if (data.nodes && data.links && (!savedNodes || initialNodes.length === 0)) {
+          const validIds = new Set(data.nodes.map((n: ConceptNode) => n.id));
+          const cleanLinks = data.links.filter(
+            (l: ConceptLink) => validIds.has(l.fromNodeId) && validIds.has(l.toNodeId)
+          );
           setNodes(data.nodes);
-          setLinks(data.links);
+          setLinks(cleanLinks);
         }
       });
   }, [moduleId]);

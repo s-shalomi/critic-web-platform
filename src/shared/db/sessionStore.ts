@@ -36,6 +36,9 @@ interface CriticGlobalStore {
   studentProgressStore?: Map<string, StudentProgressEntry>;
   accessCodeStore?: Map<string, AccessCodeEntry>;
   reviewStatsStore?: Map<string, any>;
+  conceptNodesStore?: Map<string, any[]>;
+  conceptLinksStore?: Map<string, any[]>;
+  notesStore?: Map<string, any[]>;
 }
 
 const criticGlobal = globalThis as unknown as CriticGlobalStore;
@@ -45,6 +48,15 @@ if (!criticGlobal.dynamicSourcesStore) {
 }
 if (!criticGlobal.studentProgressStore) {
   criticGlobal.studentProgressStore = new Map<string, StudentProgressEntry>();
+}
+if (!criticGlobal.conceptNodesStore) {
+  criticGlobal.conceptNodesStore = new Map<string, any[]>();
+}
+if (!criticGlobal.conceptLinksStore) {
+  criticGlobal.conceptLinksStore = new Map<string, any[]>();
+}
+if (!criticGlobal.notesStore) {
+  criticGlobal.notesStore = new Map<string, any[]>();
 }
 if (!criticGlobal.accessCodeStore) {
   criticGlobal.accessCodeStore = new Map<string, AccessCodeEntry>();
@@ -74,6 +86,9 @@ export const dynamicSourcesStore = criticGlobal.dynamicSourcesStore!;
 export const studentProgressStore = criticGlobal.studentProgressStore!;
 export const accessCodeStore = criticGlobal.accessCodeStore!;
 export const reviewStatsStore = criticGlobal.reviewStatsStore!;
+export const conceptNodesStore = criticGlobal.conceptNodesStore!;
+export const conceptLinksStore = criticGlobal.conceptLinksStore!;
+export const notesStore = criticGlobal.notesStore!;
 
 /**
  * Records or updates a student's current stage progress.

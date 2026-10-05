@@ -203,6 +203,7 @@ export default function FamiliariseStagePage() {
       text: targetNote ? (targetNote.noteText || targetNote.highlightedText) : 'Key Concept',
       positionX: 180 + Math.random() * 220,
       positionY: 140 + Math.random() * 180,
+      sourceNoteId: noteId,
       linkCount: 0,
     };
 

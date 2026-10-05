@@ -48,15 +48,53 @@ describe('Concepts Domain & Note Conversion Tests', () => {
     expect(updated?.positionX).toBe(450);
   });
 
-  test('Deletes concept node and cleans up connected links', async () => {
-    const moduleId = 'mod_delete_node_test';
-    const node = await createConceptNode({ moduleId, text: 'node to delete', positionX: 50, positionY: 50 });
+  test('Deletes concept node, cleans up connected links, and reverts note convertedToNode', async () => {
+    const moduleId = 'mod_delete_node_links_test';
+    const note = await createNote({
+      moduleId,
+      sourceId: 'source-test',
+      highlightedText: 'arctic amplification',
+      noteText: 'Arctic warming faster than rest of globe',
+    });
 
-    const isDeleted = await deleteConceptNode(node.id);
+    const convResult = await convertNoteToNode(note.id);
+    expect(convResult.success).toBe(true);
+    const nodeA = convResult.conceptNode!;
+
+    const nodeB = await createConceptNode({
+      moduleId,
+      text: 'extreme winter weather',
+      positionX: 300,
+      positionY: 300,
+    });
+
+    const link = await createConceptLink({
+      moduleId,
+      fromNodeId: nodeA.id,
+      toNodeId: nodeB.id,
+    });
+    expect(link).toBeDefined();
+
+    // Verify initial state: 2 nodes, 1 link
+    const beforeData = await getConceptualiseData(moduleId);
+    expect(beforeData.nodes.length).toBe(2);
+    expect(beforeData.links.length).toBe(1);
+
+    // Delete nodeA
+    const isDeleted = await deleteConceptNode(nodeA.id);
     expect(isDeleted).toBe(true);
 
-    const data = await getConceptualiseData(moduleId);
-    const found = data.nodes.find((n) => n.id === node.id);
-    expect(found).toBeUndefined();
+    // Verify nodeA and its connecting link are both completely gone
+    const afterData = await getConceptualiseData(moduleId);
+    expect(afterData.nodes.find((n) => n.id === nodeA.id)).toBeUndefined();
+    expect(afterData.links.find((l) => l.fromNodeId === nodeA.id || l.toNodeId === nodeA.id)).toBeUndefined();
+    expect(afterData.links.length).toBe(0);
+
+    // Verify the original note has reverted convertedToNode back to false
+    const notesInModule = (await import('../src/domains/notes/noteService')).getNotesForModule;
+    const notes = await notesInModule(moduleId);
+    const foundNote = notes.find((n) => n.id === note.id);
+    expect(foundNote?.convertedToNode).toBe(false);
   });
 });
+

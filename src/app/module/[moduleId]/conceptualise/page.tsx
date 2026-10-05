@@ -12,6 +12,7 @@ interface ConceptNode {
   text: string;
   positionX: number;
   positionY: number;
+  sourceNoteId?: string;
   linkCount?: number;
 }
 
@@ -109,21 +110,36 @@ export default function ConceptualiseStagePage() {
     const savedNodes = localStorage.getItem(nodesKey);
     const savedLinks = localStorage.getItem(linksKey);
 
+    let initialNodes: ConceptNode[] = [];
     if (savedNodes) {
-      try { setNodes(JSON.parse(savedNodes)); } catch (e) { console.error(e); }
+      try {
+        initialNodes = JSON.parse(savedNodes);
+        setNodes(initialNodes);
+      } catch (e) { console.error(e); }
     }
     if (savedLinks) {
-      try { setLinks(JSON.parse(savedLinks)); } catch (e) { console.error(e); }
+      try {
+        const parsedLinks: ConceptLink[] = JSON.parse(savedLinks);
+        const validIds = new Set(initialNodes.map((n) => n.id));
+        const filteredLinks = initialNodes.length > 0
+          ? parsedLinks.filter((l) => validIds.has(l.fromNodeId) && validIds.has(l.toNodeId))
+          : parsedLinks;
+        setLinks(filteredLinks);
+      } catch (e) { console.error(e); }
     }
 
     fetch(`/api/modules/${moduleId}/conceptualise`)
       .then((res) => res.json())
       .then((data) => {
-        if (data.nodes && data.links && !savedNodes) {
+        if (data.nodes && data.links && (!savedNodes || initialNodes.length === 0)) {
+          const validIds = new Set(data.nodes.map((n: ConceptNode) => n.id));
+          const cleanLinks = data.links.filter(
+            (l: ConceptLink) => validIds.has(l.fromNodeId) && validIds.has(l.toNodeId)
+          );
           setNodes(data.nodes);
-          setLinks(data.links);
+          setLinks(cleanLinks);
           localStorage.setItem(nodesKey, JSON.stringify(data.nodes));
-          localStorage.setItem(linksKey, JSON.stringify(data.links));
+          localStorage.setItem(linksKey, JSON.stringify(cleanLinks));
         }
       });
 
@@ -137,10 +153,24 @@ export default function ConceptualiseStagePage() {
     const nodesKey = getStudentStorageKey('critic_nodes_canvas', moduleId);
     const linksKey = getStudentStorageKey('critic_links_canvas', moduleId);
 
-    setNodes(updatedNodes);
-    setLinks(updatedLinks);
-    localStorage.setItem(nodesKey, JSON.stringify(updatedNodes));
-    localStorage.setItem(linksKey, JSON.stringify(updatedLinks));
+    // CRITICAL: Filter out any links whose fromNode or toNode does not exist in updatedNodes
+    const validNodeIds = new Set(updatedNodes.map((n) => n.id));
+    const cleanedLinks = updatedLinks.filter(
+      (l) => validNodeIds.has(l.fromNodeId) && validNodeIds.has(l.toNodeId)
+    );
+
+    // Recompute linkCount dynamically for each node based on surviving links
+    const nodesWithAccurateCount = updatedNodes.map((n) => ({
+      ...n,
+      linkCount: cleanedLinks.filter(
+        (l) => l.fromNodeId === n.id || l.toNodeId === n.id
+      ).length,
+    }));
+
+    setNodes(nodesWithAccurateCount);
+    setLinks(cleanedLinks);
+    localStorage.setItem(nodesKey, JSON.stringify(nodesWithAccurateCount));
+    localStorage.setItem(linksKey, JSON.stringify(cleanedLinks));
   };
 
   const playLinkAudioSound = () => {
@@ -210,17 +240,35 @@ export default function ConceptualiseStagePage() {
   };
 
   const handleDeleteNode = async (nodeId: string) => {
+    // 1. Immediately remove node and clean attached links optimistically
+    const targetNode = nodes.find((n) => n.id === nodeId);
+    const updatedNodes = nodes.filter((n) => n.id !== nodeId);
+    const updatedLinks = links.filter((l) => l.fromNodeId !== nodeId && l.toNodeId !== nodeId);
+    saveCanvasState(updatedNodes, updatedLinks);
+    if (selectedNodeId === nodeId) setSelectedNodeId(null);
+
+    // 2. Revert note convertedToNode on note in state and localStorage
+    const sourceNoteId = targetNode?.sourceNoteId;
+    const notesKey = getStudentStorageKey('critic_notes', moduleId);
+    const updatedNotes = notes.map((note) => {
+      if (
+        (sourceNoteId && note.id === sourceNoteId) ||
+        (!sourceNoteId && targetNode && (note.noteText === targetNode.text || note.highlightedText === targetNode.text))
+      ) {
+        return { ...note, convertedToNode: false };
+      }
+      return note;
+    });
+    setNotes(updatedNotes);
+    localStorage.setItem(notesKey, JSON.stringify(updatedNotes));
+
+    // 3. Fire-and-forget sync to server
     try {
       await fetch(`/api/concepts/${nodeId}`, {
         method: 'DELETE',
       });
-
-      const updatedNodes = nodes.filter((n) => n.id !== nodeId);
-      const updatedLinks = links.filter((l) => l.fromNodeId !== nodeId && l.toNodeId !== nodeId);
-      saveCanvasState(updatedNodes, updatedLinks);
-      if (selectedNodeId === nodeId) setSelectedNodeId(null);
     } catch (err) {
-      console.error(err);
+      console.error('Error syncing node deletion with server:', err);
     }
   };
 
@@ -536,7 +584,10 @@ export default function ConceptualiseStagePage() {
                             ✏️
                           </button>
                           <button
-                            onClick={() => handleDeleteNode(node.id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteNode(node.id);
+                            }}
                             className={styles.nodeDeleteBtn}
                             title="Delete node"
                           >

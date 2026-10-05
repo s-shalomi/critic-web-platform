@@ -4,6 +4,7 @@
  */
 
 import { createConceptNode, ConceptNode } from '../concepts/conceptService';
+import { notesStore } from '@/shared/db/sessionStore';
 
 export interface Note {
   id: string;
@@ -16,11 +17,8 @@ export interface Note {
   updatedAt: string;
 }
 
-// In-memory store fallback for active module sessions
-const memoryNotesStore = new Map<string, Note[]>();
-
 export async function getNotesForModule(moduleId: string): Promise<Note[]> {
-  return memoryNotesStore.get(moduleId) || [];
+  return (notesStore.get(moduleId) as Note[]) || [];
 }
 
 export async function createNote(data: {
@@ -40,20 +38,20 @@ export async function createNote(data: {
     updatedAt: new Date().toISOString(),
   };
 
-  const existing = memoryNotesStore.get(data.moduleId) || [];
+  const existing = (notesStore.get(data.moduleId) as Note[]) || [];
   existing.push(note);
-  memoryNotesStore.set(data.moduleId, existing);
+  notesStore.set(data.moduleId, existing);
 
   return note;
 }
 
 export async function updateNote(noteId: string, noteText: string): Promise<Note | null> {
-  for (const [moduleId, notes] of memoryNotesStore.entries()) {
-    const note = notes.find((n) => n.id === noteId);
+  for (const [moduleId, notes] of notesStore.entries()) {
+    const note = (notes as Note[]).find((n) => n.id === noteId);
     if (note) {
       note.noteText = noteText;
       note.updatedAt = new Date().toISOString();
-      memoryNotesStore.set(moduleId, notes);
+      notesStore.set(moduleId, notes);
       return note;
     }
   }
@@ -61,11 +59,11 @@ export async function updateNote(noteId: string, noteText: string): Promise<Note
 }
 
 export async function deleteNote(noteId: string): Promise<boolean> {
-  for (const [moduleId, notes] of memoryNotesStore.entries()) {
-    const index = notes.findIndex((n) => n.id === noteId);
+  for (const [moduleId, notes] of notesStore.entries()) {
+    const index = (notes as Note[]).findIndex((n) => n.id === noteId);
     if (index !== -1) {
-      notes.splice(index, 1);
-      memoryNotesStore.set(moduleId, notes);
+      (notes as Note[]).splice(index, 1);
+      notesStore.set(moduleId, notes);
       return true;
     }
   }
@@ -73,8 +71,8 @@ export async function deleteNote(noteId: string): Promise<boolean> {
 }
 
 export async function convertNoteToNode(noteId: string): Promise<{ success: boolean; conceptNode?: ConceptNode }> {
-  for (const [moduleId, notes] of memoryNotesStore.entries()) {
-    const note = notes.find((n) => n.id === noteId);
+  for (const [moduleId, notes] of notesStore.entries()) {
+    const note = (notes as Note[]).find((n) => n.id === noteId);
     if (note) {
       note.convertedToNode = true;
       note.updatedAt = new Date().toISOString();
@@ -92,4 +90,17 @@ export async function convertNoteToNode(noteId: string): Promise<{ success: bool
     }
   }
   return { success: false };
+}
+
+export async function revertNoteConvertedToNode(noteId: string): Promise<boolean> {
+  for (const [moduleId, notes] of notesStore.entries()) {
+    const note = (notes as Note[]).find((n) => n.id === noteId);
+    if (note) {
+      note.convertedToNode = false;
+      note.updatedAt = new Date().toISOString();
+      notesStore.set(moduleId, notes);
+      return true;
+    }
+  }
+  return false;
 }

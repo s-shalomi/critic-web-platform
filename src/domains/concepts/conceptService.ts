@@ -24,20 +24,20 @@ export interface ConceptLink {
   updatedAt: string;
 }
 
-const memoryNodesStore = new Map<string, ConceptNode[]>();
-const memoryLinksStore = new Map<string, ConceptLink[]>();
+import { conceptNodesStore, conceptLinksStore } from '@/shared/db/sessionStore';
+import { revertNoteConvertedToNode } from '../notes/noteService';
 
 export async function getConceptualiseData(moduleId: string): Promise<{
   nodes: ConceptNode[];
   links: ConceptLink[];
 }> {
   // Start with empty nodes/links if not present (no hardcoded mockup example nodes)
-  const nodes = memoryNodesStore.get(moduleId) || [];
-  const links = memoryLinksStore.get(moduleId) || [];
+  const nodes = (conceptNodesStore.get(moduleId) as ConceptNode[]) || [];
+  const links = (conceptLinksStore.get(moduleId) as ConceptLink[]) || [];
 
-  if (!memoryNodesStore.has(moduleId)) {
-    memoryNodesStore.set(moduleId, nodes);
-    memoryLinksStore.set(moduleId, links);
+  if (!conceptNodesStore.has(moduleId)) {
+    conceptNodesStore.set(moduleId, nodes);
+    conceptLinksStore.set(moduleId, links);
   }
 
   // Calculate degree connection linkCount for each node
@@ -70,9 +70,9 @@ export async function createConceptNode(data: {
     updatedAt: new Date().toISOString(),
   };
 
-  const existing = memoryNodesStore.get(data.moduleId) || [];
+  const existing = (conceptNodesStore.get(data.moduleId) as ConceptNode[]) || [];
   existing.push(node);
-  memoryNodesStore.set(data.moduleId, existing);
+  conceptNodesStore.set(data.moduleId, existing);
 
   return node;
 }
@@ -81,14 +81,14 @@ export async function updateConceptNode(
   nodeId: string,
   data: { text?: string; positionX?: number; positionY?: number }
 ): Promise<ConceptNode | null> {
-  for (const [moduleId, nodes] of memoryNodesStore.entries()) {
-    const node = nodes.find((n) => n.id === nodeId);
+  for (const [moduleId, nodes] of conceptNodesStore.entries()) {
+    const node = (nodes as ConceptNode[]).find((n) => n.id === nodeId);
     if (node) {
       if (data.text !== undefined) node.text = data.text;
       if (data.positionX !== undefined) node.positionX = data.positionX;
       if (data.positionY !== undefined) node.positionY = data.positionY;
       node.updatedAt = new Date().toISOString();
-      memoryNodesStore.set(moduleId, nodes);
+      conceptNodesStore.set(moduleId, nodes);
       return node;
     }
   }
@@ -96,23 +96,37 @@ export async function updateConceptNode(
 }
 
 export async function deleteConceptNode(nodeId: string): Promise<boolean> {
-  for (const [moduleId, nodes] of memoryNodesStore.entries()) {
-    const index = nodes.findIndex((n) => n.id === nodeId);
+  let found = false;
+
+  // 1. Remove the node from any module's node list
+  for (const [moduleId, nodes] of conceptNodesStore.entries()) {
+    const typedNodes = nodes as ConceptNode[];
+    const index = typedNodes.findIndex((n) => n.id === nodeId);
     if (index !== -1) {
-      nodes.splice(index, 1);
-      memoryNodesStore.set(moduleId, nodes);
+      const [deletedNode] = typedNodes.splice(index, 1);
+      conceptNodesStore.set(moduleId, typedNodes);
+      found = true;
 
-      // Remove attached links
-      const links = memoryLinksStore.get(moduleId) || [];
-      const updatedLinks = links.filter(
-        (l) => l.fromNodeId !== nodeId && l.toNodeId !== nodeId
-      );
-      memoryLinksStore.set(moduleId, updatedLinks);
-
-      return true;
+      // Revert convertedToNode on associated note in familiarise stage
+      if (deletedNode.sourceNoteId) {
+        await revertNoteConvertedToNode(deletedNode.sourceNoteId);
+      }
     }
   }
-  return false;
+
+  // 2. ALWAYS purge all connected links across all modules
+  for (const [moduleId, links] of conceptLinksStore.entries()) {
+    const typedLinks = links as ConceptLink[];
+    const remainingLinks = typedLinks.filter(
+      (l) => l.fromNodeId !== nodeId && l.toNodeId !== nodeId
+    );
+    if (remainingLinks.length !== typedLinks.length) {
+      conceptLinksStore.set(moduleId, remainingLinks);
+      found = true;
+    }
+  }
+
+  return found;
 }
 
 export async function createConceptLink(data: {
@@ -122,7 +136,7 @@ export async function createConceptLink(data: {
 }): Promise<ConceptLink | null> {
   if (data.fromNodeId === data.toNodeId) return null;
 
-  const existingLinks = memoryLinksStore.get(data.moduleId) || [];
+  const existingLinks = (conceptLinksStore.get(data.moduleId) as ConceptLink[]) || [];
   const duplicate = existingLinks.find(
     (l) =>
       (l.fromNodeId === data.fromNodeId && l.toNodeId === data.toNodeId) ||
@@ -141,17 +155,18 @@ export async function createConceptLink(data: {
   };
 
   existingLinks.push(link);
-  memoryLinksStore.set(data.moduleId, existingLinks);
+  conceptLinksStore.set(data.moduleId, existingLinks);
 
   return link;
 }
 
 export async function deleteConceptLink(linkId: string): Promise<boolean> {
-  for (const [moduleId, links] of memoryLinksStore.entries()) {
-    const index = links.findIndex((l) => l.id === linkId);
+  for (const [moduleId, links] of conceptLinksStore.entries()) {
+    const typedLinks = links as ConceptLink[];
+    const index = typedLinks.findIndex((l) => l.id === linkId);
     if (index !== -1) {
-      links.splice(index, 1);
-      memoryLinksStore.set(moduleId, links);
+      typedLinks.splice(index, 1);
+      conceptLinksStore.set(moduleId, typedLinks);
       return true;
     }
   }

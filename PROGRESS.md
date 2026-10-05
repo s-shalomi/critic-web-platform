@@ -201,4 +201,26 @@
 - **Tests Passing**:
   - `npm test` (28/28 tests passing across 8 suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
-- **Immediate Next Step**: Seek approval for Fix 2, then proceed to Fix 3: "if a node is deleted in conceptualise, revert converted to node on note in familiarise stage".
+- **Immediate Next Step**: Completed and approved. Proceed to Fix 3.
+
+---
+
+### [2026-10-05] - Fix 3: Revert Note Converted Status and Clean Links on Node Deletion
+
+- **Role**: Full Stack Developer
+- **Code Built & Updated**:
+  - **Attached Concept & Note Stores to Global Singleton**: Added `conceptNodesStore`, `conceptLinksStore`, and `notesStore` to `CriticGlobalStore` in [`src/shared/db/sessionStore.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/db/sessionStore.ts) so state is never fragmented across isolated Next.js API route bundles.
+  - **Complete Link Cleanup on Node Deletion**:
+    - In [`src/app/module/[moduleId]/conceptualise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/conceptualise/page.tsx): Updated `handleDeleteNode` to immediately and optimistically remove the deleted node and all links attached to it (`l.fromNodeId !== nodeId && l.toNodeId !== nodeId`).
+    - In `saveCanvasState`: Added validation to automatically purge any orphaned links whose endpoints do not exist in `updatedNodes`, and recomputed `linkCount` dynamically.
+    - In mount `useEffect` across [`conceptualise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/conceptualise/page.tsx), [`inquire/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/inquire/page.tsx), and [`synthesise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/synthesise/page.tsx): Purged any leftover orphaned links on load.
+    - In [`src/domains/concepts/conceptService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/concepts/conceptService.ts): `deleteConceptNode` now sweeps all modules in `conceptLinksStore` to remove any links involving the deleted node ID.
+  - **Revert Note `convertedToNode` Status**:
+    - In [`src/app/module/[moduleId]/familiarise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/familiarise/page.tsx): Stored `sourceNoteId: noteId` when converting a note to a concept node.
+    - In [`src/domains/notes/noteService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/notes/noteService.ts): Added `revertNoteConvertedToNode(noteId)` to flip `note.convertedToNode = false`.
+    - In [`conceptualise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/conceptualise/page.tsx): `handleDeleteNode` matches the node by `sourceNoteId` or text and resets `convertedToNode: false` in `localStorage` and component state immediately.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (28/28 tests passing across 8 suites, including newly added test in `tests/concepts.test.ts`).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+- **Immediate Next Step**: Seek approval for Fix 3, then proceed to the next item: "links should be able to be deleted".
