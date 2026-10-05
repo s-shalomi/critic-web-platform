@@ -521,44 +521,6 @@ export default function ConceptualiseStagePage() {
             className={styles.canvasStage}
             style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'top left' }}
           >
-            {/* SVG Connecting Links Layer */}
-            <svg className={styles.svgOverlay}>
-              {links.map((link) => {
-                const fromNode = nodes.find((n) => n.id === link.fromNodeId);
-                const toNode = nodes.find((n) => n.id === link.toNodeId);
-                if (!fromNode || !toNode) return null;
-
-                const isHovered = hoveredLinkId === link.id;
-                const x1 = fromNode.positionX + 50;
-                const y1 = fromNode.positionY + 50;
-                const x2 = toNode.positionX + 50;
-                const y2 = toNode.positionY + 50;
-
-                return (
-                  <g
-                    key={link.id}
-                    onMouseEnter={() => setHoveredLinkId(link.id)}
-                    onMouseLeave={() => setHoveredLinkId(null)}
-                    onClick={() => handleDeleteLink(link.id)}
-                    style={{ cursor: 'pointer', pointerEvents: 'all' }}
-                  >
-                    {/* Invisible wide hit area for easy clicking */}
-                    <line
-                      x1={x1} y1={y1} x2={x2} y2={y2}
-                      stroke="transparent"
-                      strokeWidth="16"
-                    />
-                    {/* Visible styled line */}
-                    <line
-                      x1={x1} y1={y1} x2={x2} y2={y2}
-                      stroke={isHovered ? '#FF4FD8' : '#37F3FF'}
-                      strokeWidth={isHovered ? 4 : 3}
-                      className={styles.svgLineGlow}
-                    />
-                  </g>
-                );
-              })}
-            </svg>
 
             {/* Interactive Concept Nodes */}
             {nodes.map((node) => {
@@ -642,6 +604,49 @@ export default function ConceptualiseStagePage() {
                 </div>
               );
             })}
+
+            {/* SVG Connecting Links Layer — after nodes so links render on top and receive pointer events */}
+            <svg className={styles.svgOverlay}>
+              {/* Background rect passes through mouse events so canvas drag still works */}
+              <rect width="100%" height="100%" fill="none" pointerEvents="none" />
+              {links.map((link) => {
+                const fromNode = nodes.find((n) => n.id === link.fromNodeId);
+                const toNode = nodes.find((n) => n.id === link.toNodeId);
+                if (!fromNode || !toNode) return null;
+
+                const isHovered = hoveredLinkId === link.id;
+                const x1 = fromNode.positionX + 50;
+                const y1 = fromNode.positionY + 50;
+                const x2 = toNode.positionX + 50;
+                const y2 = toNode.positionY + 50;
+
+                return (
+                  <g
+                    key={link.id}
+                    onMouseEnter={() => setHoveredLinkId(link.id)}
+                    onMouseLeave={() => setHoveredLinkId(null)}
+                    onClick={(e) => { e.stopPropagation(); handleDeleteLink(link.id); }}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    {/* Invisible wide hit area — rgba(0,0,0,0) needed for SVG hit testing */}
+                    <line
+                      x1={x1} y1={y1} x2={x2} y2={y2}
+                      stroke="rgba(0,0,0,0)"
+                      strokeWidth="16"
+                      pointerEvents="stroke"
+                    />
+                    {/* Visible styled line */}
+                    <line
+                      x1={x1} y1={y1} x2={x2} y2={y2}
+                      stroke={isHovered ? '#FF4FD8' : '#37F3FF'}
+                      strokeWidth={isHovered ? 4 : 3}
+                      className={styles.svgLineGlow}
+                      pointerEvents="stroke"
+                    />
+                  </g>
+                );
+              })}
+            </svg>
           </div>
 
           {/* Far Right Control Toolbar */}
