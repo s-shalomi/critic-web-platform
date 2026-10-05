@@ -472,8 +472,6 @@ export default function ConceptualiseStagePage() {
 
             {/* Interactive Concept Nodes */}
             {nodes.map((node) => {
-              const count = node.linkCount || 0;
-              const size = 100 + count * 16;
               const isSelected = selectedNodeId === node.id;
               const isLinkSource = linkSourceNodeId === node.id;
               const isEditing = editingNodeId === node.id;
@@ -485,9 +483,8 @@ export default function ConceptualiseStagePage() {
                   style={{
                     left: `${node.positionX}px`,
                     top: `${node.positionY}px`,
-                    width: `${size}px`,
-                    height: `${size}px`,
-                    boxShadow: `0 0 ${20 + count * 10}px rgba(255, 79, 216, ${0.4 + count * 0.15})`,
+                    width: '100px',
+                    height: '100px',
                   }}
                   onMouseDown={(e) => handleMouseDownNode(e, node.id)}
                   onDoubleClick={(e) => {

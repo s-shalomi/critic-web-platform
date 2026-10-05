@@ -315,9 +315,6 @@ export default function InquireEvaluateStagePage() {
             </svg>
 
             {nodes.map((node) => {
-              const count = node.linkCount || 0;
-              const size = 100 + count * 16;
-
               return (
                 <div
                   key={node.id}
@@ -325,8 +322,8 @@ export default function InquireEvaluateStagePage() {
                   style={{
                     left: `${node.positionX}px`,
                     top: `${node.positionY}px`,
-                    width: `${size}px`,
-                    height: `${size}px`,
+                    width: '100px',
+                    height: '100px',
                   }}
                 >
                   <span className={styles.nodeLabel}>{node.text}</span>

@@ -214,6 +214,8 @@
 /* Concept Node Circle & Action Controls */
 .conceptNodeCircle {
   position: absolute;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
   background: linear-gradient(135deg, #FF4FD8 0%, #d42bb0 100%);
   border: 2px solid #37F3FF;
@@ -223,7 +225,8 @@
   text-align: center;
   padding: 12px;
   cursor: grab;
-  transition: width 0.3s ease, height 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 0 25px rgba(255, 79, 216, 0.45);
+  transition: box-shadow 0.3s ease;
   z-index: 15;
 }
 

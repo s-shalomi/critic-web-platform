@@ -184,8 +184,21 @@
 - **Tests Passing**:
   - `npm test` (28/28 tests passing across 8 suites).
   - `npm run build` (100% successful Next.js App Router build with 0 errors).
-- **Immediate Next Step**: Seek user approval for Fix 1 before proceeding to Fix 2 ("stop nodes getting bigger on linking").
+- **Immediate Next Step**: Completed and approved. Proceed to Fix 2.
 
+---
 
+### [2026-10-05] - Fix 2: Stop Nodes Getting Bigger on Linking
 
-
+- **Role**: Full Stack Developer
+- **Code Built & Updated**:
+  - **Standardized Concept Node Dimensions**: Removed the dynamic sizing formula `100 + count * 16` that was previously applied to nodes upon linking.
+  - **Consistent Sizing Across Stages**:
+    - In [`src/app/module/[moduleId]/conceptualise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/conceptualise/page.tsx) and [`conceptualise.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/conceptualise/conceptualise.module.css): Fixed node diameter to a standard 100px circle with uniform cyan/pink styling and glowing borders.
+    - In [`src/app/module/[moduleId]/inquire/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/inquire/page.tsx) and [`src/app/module/[moduleId]/synthesise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/synthesise/page.tsx): Updated concept reference map nodes to fixed 100px diameter.
+  - **SVG Line Alignment**: Verified that SVG connection lines (`fromNode.positionX + 50`, `fromNode.positionY + 50`) remain perfectly centered at all times regardless of how many links are connected to each node.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (28/28 tests passing across 8 suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+- **Immediate Next Step**: Seek approval for Fix 2, then proceed to Fix 3: "if a node is deleted in conceptualise, revert converted to node on note in familiarise stage".
