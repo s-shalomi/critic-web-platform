@@ -236,3 +236,22 @@
 - **Tests Passing**:
   - `npm test` (28/28 tests passing across 8 suites).
 - **Immediate Next Step**: Seek approval, then proceed to "links should be able to be deleted".
+
+---
+
+### [2026-10-05] - Fix 5: Links Can Be Deleted
+
+- **Role**: Full Stack Developer
+- **Code Built & Updated**:
+  - **`hoveredLinkId` State**: Added `const [hoveredLinkId, setHoveredLinkId] = useState<string | null>(null)` to [`conceptualise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/conceptualise/page.tsx) to track which link the mouse is over.
+  - **`handleDeleteLink` Function**: Added handler that optimistically removes the link from state and localStorage via `saveCanvasState`, then fire-and-forget calls `DELETE /api/links/[linkId]` (the route already existed in [`src/app/api/links/[linkId]/route.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/api/links/%5BlinkId%5D/route.ts)).
+  - **Interactive SVG Links**: Replaced bare `<line>` elements in the SVG overlay with `<g>` wrappers that include:
+    - A **transparent 16px-wide hit area** `<line>` for easy mouse targeting.
+    - A **visible styled `<line>`** that turns pink (`#FF4FD8`) and thickens to 4px on hover (vs. default cyan `#37F3FF` at 3px).
+    - `onMouseEnter`/`onMouseLeave` to update `hoveredLinkId`.
+    - `onClick` → `handleDeleteLink(link.id)`.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (28/28 tests passing across 8 suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+- **Immediate Next Step**: Seek approval, then proceed to "loading indicators on all pages".

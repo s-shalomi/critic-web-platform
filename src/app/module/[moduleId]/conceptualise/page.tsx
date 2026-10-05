@@ -65,6 +65,7 @@ export default function ConceptualiseStagePage() {
   const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
   const [editNodeText, setEditNodeText] = useState<string>('');
   const [linkSourceNodeId, setLinkSourceNodeId] = useState<string | null>(null);
+  const [hoveredLinkId, setHoveredLinkId] = useState<string | null>(null);
   const [zoomLevel, setZoomLevel] = useState<number>(1);
   const [showAddNodeModal, setShowAddNodeModal] = useState<boolean>(false);
   const [newNodeText, setNewNodeText] = useState<string>('');
@@ -269,6 +270,18 @@ export default function ConceptualiseStagePage() {
       });
     } catch (err) {
       console.error('Error syncing node deletion with server:', err);
+    }
+  };
+
+  const handleDeleteLink = async (linkId: string) => {
+    // Optimistically remove from state & localStorage
+    const updatedLinks = links.filter((l) => l.id !== linkId);
+    saveCanvasState(nodes, updatedLinks);
+    // Sync to server
+    try {
+      await fetch(`/api/links/${linkId}`, { method: 'DELETE' });
+    } catch (err) {
+      console.error('Error deleting link:', err);
     }
   };
 
@@ -503,17 +516,34 @@ export default function ConceptualiseStagePage() {
                 const toNode = nodes.find((n) => n.id === link.toNodeId);
                 if (!fromNode || !toNode) return null;
 
+                const isHovered = hoveredLinkId === link.id;
+                const x1 = fromNode.positionX + 50;
+                const y1 = fromNode.positionY + 50;
+                const x2 = toNode.positionX + 50;
+                const y2 = toNode.positionY + 50;
+
                 return (
-                  <line
+                  <g
                     key={link.id}
-                    x1={fromNode.positionX + 50}
-                    y1={fromNode.positionY + 50}
-                    x2={toNode.positionX + 50}
-                    y2={toNode.positionY + 50}
-                    stroke="#37F3FF"
-                    strokeWidth="3"
-                    className={styles.svgLineGlow}
-                  />
+                    onMouseEnter={() => setHoveredLinkId(link.id)}
+                    onMouseLeave={() => setHoveredLinkId(null)}
+                    onClick={() => handleDeleteLink(link.id)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    {/* Invisible wide hit area for easy clicking */}
+                    <line
+                      x1={x1} y1={y1} x2={x2} y2={y2}
+                      stroke="transparent"
+                      strokeWidth="16"
+                    />
+                    {/* Visible styled line */}
+                    <line
+                      x1={x1} y1={y1} x2={x2} y2={y2}
+                      stroke={isHovered ? '#FF4FD8' : '#37F3FF'}
+                      strokeWidth={isHovered ? 4 : 3}
+                      className={styles.svgLineGlow}
+                    />
+                  </g>
                 );
               })}
             </svg>
