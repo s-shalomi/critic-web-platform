@@ -224,3 +224,15 @@
   - `npm test` (28/28 tests passing across 8 suites, including newly added test in `tests/concepts.test.ts`).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
 - **Immediate Next Step**: Seek approval for Fix 3, then proceed to the next item: "links should be able to be deleted".
+
+---
+
+### [2026-10-05] - Fix 4: Stop Nodes Glowing When Link Tool Is Not Active
+
+- **Role**: Full Stack Developer
+- **Code Built & Updated**:
+  - **Conditional Glow Class**: In [`src/app/module/[moduleId]/conceptualise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/conceptualise/page.tsx), updated the node class binding so that `.linkSourceNode` (which applies `pulseCyan` animation) is only applied when **both** `activeTool === 'link'` AND `isLinkSource` are true. Previously, clicking a node while in link mode then switching to pan mode would leave the node glowing indefinitely.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (28/28 tests passing across 8 suites).
+- **Immediate Next Step**: Seek approval, then proceed to "links should be able to be deleted".

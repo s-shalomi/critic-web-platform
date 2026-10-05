@@ -527,7 +527,7 @@ export default function ConceptualiseStagePage() {
               return (
                 <div
                   key={node.id}
-                  className={`${styles.conceptNodeCircle} ${isSelected ? styles.selectedNode : ''} ${isLinkSource ? styles.linkSourceNode : ''}`}
+                  className={`${styles.conceptNodeCircle} ${isSelected ? styles.selectedNode : ''} ${activeTool === 'link' && isLinkSource ? styles.linkSourceNode : ''}`}
                   style={{
                     left: `${node.positionX}px`,
                     top: `${node.positionY}px`,
