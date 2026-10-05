@@ -255,3 +255,21 @@
   - `npm test` (28/28 tests passing across 8 suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
 - **Immediate Next Step**: Seek approval, then proceed to "loading indicators on all pages".
+
+---
+
+### [2026-10-05] - Fix 5 (Revision): Link Deletion Pointer Events & Orphaned Link Cleanup
+
+- **Role**: Full Stack Developer
+- **Issues Reported**:
+  1. Links could not be deleted — clicks were not registering.
+  2. When a node was deleted, some links were still orphaned (if one of the two connected nodes still existed).
+- **Root Causes & Fixes**:
+  - **Pointer Events**: `svgOverlay` CSS had `pointer-events: none` which blocked all mouse events on child SVG elements. Fixed by adding `pointerEvents: 'all'` directly on the `<g>` wrapper in [`conceptualise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/conceptualise/page.tsx) so link groups re-enable pointer events despite the overlay being transparent to clicks.
+  - **Orphaned Links — Client Side**: Updated the mount `useEffect` in `conceptualise/page.tsx` so that even when localStorage data exists, the server fetch result always triggers a second pass of orphan-link cleanup using `setLinks((currentLinks) => ...)`.
+  - **Orphaned Links — Server Side**: Updated `getConceptualiseData` in [`conceptService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/concepts/conceptService.ts) to always filter links against the current node list before returning and re-persisting to the store — so the server never serves stale orphaned links.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (28/28 tests passing across 8 suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+- **Immediate Next Step**: Seek approval, then proceed to "loading indicators on all pages".

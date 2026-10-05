@@ -33,12 +33,17 @@ export async function getConceptualiseData(moduleId: string): Promise<{
 }> {
   // Start with empty nodes/links if not present (no hardcoded mockup example nodes)
   const nodes = (conceptNodesStore.get(moduleId) as ConceptNode[]) || [];
-  const links = (conceptLinksStore.get(moduleId) as ConceptLink[]) || [];
+  let links = (conceptLinksStore.get(moduleId) as ConceptLink[]) || [];
 
   if (!conceptNodesStore.has(moduleId)) {
     conceptNodesStore.set(moduleId, nodes);
     conceptLinksStore.set(moduleId, links);
   }
+
+  // Always filter out any orphaned links whose endpoints no longer exist
+  const validNodeIds = new Set(nodes.map((n) => n.id));
+  links = links.filter((l) => validNodeIds.has(l.fromNodeId) && validNodeIds.has(l.toNodeId));
+  conceptLinksStore.set(moduleId, links);
 
   // Calculate degree connection linkCount for each node
   const nodesWithDegree = nodes.map((node) => {

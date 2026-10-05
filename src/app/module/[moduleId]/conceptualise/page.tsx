@@ -121,26 +121,38 @@ export default function ConceptualiseStagePage() {
     if (savedLinks) {
       try {
         const parsedLinks: ConceptLink[] = JSON.parse(savedLinks);
-        const validIds = new Set(initialNodes.map((n) => n.id));
-        const filteredLinks = initialNodes.length > 0
-          ? parsedLinks.filter((l) => validIds.has(l.fromNodeId) && validIds.has(l.toNodeId))
-          : parsedLinks;
-        setLinks(filteredLinks);
+        if (initialNodes.length > 0) {
+          const validIds = new Set(initialNodes.map((n) => n.id));
+          setLinks(parsedLinks.filter((l) => validIds.has(l.fromNodeId) && validIds.has(l.toNodeId)));
+        } else {
+          setLinks(parsedLinks);
+        }
       } catch (e) { console.error(e); }
     }
 
     fetch(`/api/modules/${moduleId}/conceptualise`)
       .then((res) => res.json())
       .then((data) => {
-        if (data.nodes && data.links && (!savedNodes || initialNodes.length === 0)) {
+        if (data.nodes && data.links) {
           const validIds = new Set(data.nodes.map((n: ConceptNode) => n.id));
           const cleanLinks = data.links.filter(
             (l: ConceptLink) => validIds.has(l.fromNodeId) && validIds.has(l.toNodeId)
           );
-          setNodes(data.nodes);
-          setLinks(cleanLinks);
-          localStorage.setItem(nodesKey, JSON.stringify(data.nodes));
-          localStorage.setItem(linksKey, JSON.stringify(cleanLinks));
+          if (!savedNodes || initialNodes.length === 0) {
+            // No local data — use server data as source of truth
+            setNodes(data.nodes);
+            setLinks(cleanLinks);
+            localStorage.setItem(nodesKey, JSON.stringify(data.nodes));
+            localStorage.setItem(linksKey, JSON.stringify(cleanLinks));
+          } else {
+            // Local data exists — still clean up any orphaned links in current state
+            setLinks((currentLinks) => {
+              const localValidIds = new Set(initialNodes.map((n) => n.id));
+              return currentLinks.filter(
+                (l) => localValidIds.has(l.fromNodeId) && localValidIds.has(l.toNodeId)
+              );
+            });
+          }
         }
       });
 
@@ -528,7 +540,7 @@ export default function ConceptualiseStagePage() {
                     onMouseEnter={() => setHoveredLinkId(link.id)}
                     onMouseLeave={() => setHoveredLinkId(null)}
                     onClick={() => handleDeleteLink(link.id)}
-                    style={{ cursor: 'pointer' }}
+                    style={{ cursor: 'pointer', pointerEvents: 'all' }}
                   >
                     {/* Invisible wide hit area for easy clicking */}
                     <line
