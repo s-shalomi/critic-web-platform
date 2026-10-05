@@ -171,5 +171,21 @@
   - `npm run build` (100% clean production build with 0 errors across all routes and pages).
 - **Immediate Next Step**: All 3 tasks successfully resolved, tested, verified, and documented.
 
+---
+
+### [2026-09-29] - Fix 1: Loading Indicator on Entering Module & Reopen Reset
+
+- **Role**: Full Stack Developer
+- **Code Built & Updated**:
+  - **Module Entry Feedback**: Added `enteringTopicId` state, animated spinning loader on the "enter module" button (`.enterModuleBtnLoading`, `.spinnerSmall`), and an animated backdrop blur loading overlay (`.loadingOverlay`, `.loadingGlowBox`, `.spinnerLarge`) in [`src/app/dashboard/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/page.tsx) and [`src/app/dashboard/dashboard.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/dashboard.module.css).
+  - **Familiarise Loading Screen**: Added cyberpunk loading spinner and status banner in [`src/app/module/[moduleId]/familiarise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/familiarise/page.tsx) while sources are being retrieved from the server.
+  - **Completed Module Re-Entry**: Ensured that reopening a completed module routes back to the `familiarise` stage instead of staying stuck on the case debrief screen.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (28/28 tests passing across 8 suites).
+  - `npm run build` (100% successful Next.js App Router build with 0 errors).
+- **Immediate Next Step**: Seek user approval for Fix 1 before proceeding to Fix 2 ("stop nodes getting bigger on linking").
+
+
 
 

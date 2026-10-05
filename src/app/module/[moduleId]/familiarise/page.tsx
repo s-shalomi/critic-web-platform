@@ -421,7 +421,14 @@ export default function FamiliariseStagePage() {
 
         {/* Center Content Area */}
         <main className={styles.contentArea}>
-          {currentSource && (
+          {loading && (!currentSource || sources.length === 0) ? (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '360px', gap: '16px' }}>
+              <div style={{ width: '40px', height: '40px', border: '3px solid rgba(55, 243, 255, 0.2)', borderTopColor: '#37F3FF', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+              <div className="cyan-neon-text" style={{ fontFamily: 'var(--font-orbitron)', fontSize: '1.1rem', letterSpacing: '1px' }}>
+                LOADING EVIDENCE SOURCES...
+              </div>
+            </div>
+          ) : currentSource ? (
             <div className={styles.sourceCardContainer}>
               <div className="glass-card" style={{ padding: '40px', width: '100%', maxWidth: '800px', position: 'relative' }}>
                 {currentSource.content.authorName && (
@@ -453,7 +460,7 @@ export default function FamiliariseStagePage() {
                 </div>
               </div>
             </div>
-          )}
+          ) : null}
 
           {/* Note Creation Modal / Popover */}
           {isHighlighting && (

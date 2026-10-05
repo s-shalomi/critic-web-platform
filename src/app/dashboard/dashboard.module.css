@@ -188,3 +188,80 @@
   color: var(--color-accent-cyan);
   font-family: var(--font-space-mono);
 }
+
+.enterModuleBtnLoading {
+  background: #070B1A !important;
+  color: var(--color-accent-cyan) !important;
+  border-color: var(--color-accent-cyan) !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: wait;
+}
+
+.spinnerSmall {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(55, 243, 255, 0.3);
+  border-top-color: #37F3FF;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+}
+
+.loadingOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(7, 11, 26, 0.88);
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  gap: 16px;
+}
+
+.loadingGlowBox {
+  background: rgba(15, 23, 46, 0.95);
+  border: 1px solid var(--color-accent-cyan);
+  box-shadow: 0 0 30px rgba(55, 243, 255, 0.3);
+  border-radius: 12px;
+  padding: 36px 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  max-width: 480px;
+  text-align: center;
+}
+
+.spinnerLarge {
+  width: 44px;
+  height: 44px;
+  border: 3px solid rgba(55, 243, 255, 0.2);
+  border-top-color: var(--color-accent-cyan);
+  border-right-color: var(--color-accent-pink);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loadingOverlayTitle {
+  font-family: var(--font-orbitron);
+  font-size: 1.2rem;
+  letter-spacing: 1px;
+}
+
+.loadingOverlaySub {
+  font-family: var(--font-space-grotesk);
+  font-size: 0.9rem;
+  color: var(--color-text-soft);
+  margin: 0;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+

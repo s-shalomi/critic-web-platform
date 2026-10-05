@@ -15,6 +15,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const [topics, setTopics] = useState<Topic[]>([]);
   const [loading, setLoading] = useState(true);
+  const [enteringTopicId, setEnteringTopicId] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/topics')
@@ -26,13 +27,35 @@ export default function DashboardPage() {
   }, []);
 
   const handleEnterModule = (topicId: string) => {
+    if (enteringTopicId) return;
+    setEnteringTopicId(topicId);
+
     const moduleId = `mod_${topicId}_student_demo`;
     const savedStage = localStorage.getItem(`critic_current_stage_${topicId}`) || 'familiarise';
-    router.push(`/module/${moduleId}/${savedStage}`);
+    
+    // If student previously reached review/debrief, restart them at familiarise stage per user specification
+    const targetStage = savedStage === 'review' ? 'familiarise' : savedStage;
+    
+    router.push(`/module/${moduleId}/${targetStage}`);
   };
 
   return (
     <div className={styles.container}>
+      {/* Loading Overlay when Entering Module */}
+      {enteringTopicId && (
+        <div className={styles.loadingOverlay}>
+          <div className={styles.loadingGlowBox}>
+            <div className={styles.spinnerLarge} />
+            <h3 className={`cyan-neon-text ${styles.loadingOverlayTitle}`}>
+              INITIALIZING CASEFILE MODULE...
+            </h3>
+            <p className={styles.loadingOverlaySub}>
+              Loading evidence sources, syncing investigation notes & briefing Socratic Agent Aria.
+            </p>
+          </div>
+        </div>
+      )}
+
       <header className={styles.header}>
         <div className={styles.logoBadge}>
           <span className="cyan-neon-text">PROJECT</span> CRITIC
@@ -54,6 +77,8 @@ export default function DashboardPage() {
             ) : (
               topics.map((topic) => {
                 const isAvailable = topic.status === 'Available';
+                const isEntering = enteringTopicId === topic.id;
+
                 return (
                   <div
                     key={topic.id}
@@ -67,9 +92,17 @@ export default function DashboardPage() {
                     {isAvailable ? (
                       <button
                         onClick={() => handleEnterModule(topic.id)}
-                        className={styles.enterModuleBtn}
+                        disabled={!!enteringTopicId}
+                        className={`${styles.enterModuleBtn} ${isEntering ? styles.enterModuleBtnLoading : ''}`}
                       >
-                        enter module
+                        {isEntering ? (
+                          <>
+                            <span className={styles.spinnerSmall} />
+                            <span>ENTERING MODULE...</span>
+                          </>
+                        ) : (
+                          'enter module'
+                        )}
                       </button>
                     ) : (
                       <span className={styles.comingSoonBadge}>coming soon</span>
