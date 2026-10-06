@@ -23,22 +23,12 @@ export interface ModuleSnapshot {
   avatarName?: string;
 }
 
-const geminiApiKey = process.env.GEMINI_API_KEY || '';
-const groqApiKey = process.env.GROQ_API_KEY || '';
-
-const genAI = geminiApiKey ? new GoogleGenerativeAI(geminiApiKey) : null;
-const groqClient = groqApiKey ? new Groq({ apiKey: groqApiKey }) : null;
-
-if (!geminiApiKey && !groqApiKey) {
-  console.warn(
-    '[AI Service] ⚠️  NEITHER GEMINI_API_KEY nor GROQ_API_KEY is set in .env. ' +
-    'The agent will use fallback rule-based Socratic replies only. ' +
-    'Add your API keys to .env to enable real LLM responses.'
-  );
-} else if (!geminiApiKey) {
-  console.info('[AI Service] GEMINI_API_KEY not set — will use Groq only.');
-} else if (!groqApiKey) {
-  console.info('[AI Service] GROQ_API_KEY not set — Groq fallback unavailable if Gemini fails.');
+/**
+ * Sanitizes API keys by stripping quotes and whitespace
+ */
+function getSanitizedKey(keyName: string): string {
+  const val = process.env[keyName] || '';
+  return val.trim().replace(/^["']|["']$/g, '');
 }
 
 /**
@@ -101,51 +91,74 @@ export async function generateSocraticResponse(
   history: ChatTurn[],
   snapshot: ModuleSnapshot,
   mode: 'Socratic' | 'DevilsAdvocate' = 'Socratic'
-): Promise<{ text: string; provider: 'gemini' | 'groq' | 'fallback_rule' }> {
+): Promise<{ text: string; provider: 'gemini' | 'groq' | 'fallback_rule'; errorDetails?: string }> {
+  const geminiApiKey = getSanitizedKey('GEMINI_API_KEY');
+  const groqApiKey = getSanitizedKey('GROQ_API_KEY');
+
   const systemPrompt = buildSocraticSystemPrompt(snapshot, mode);
   const formattedHistory = compressChatHistory(history);
   const fullPrompt = `${systemPrompt}\n\nCHAT HISTORY:\n${formattedHistory}\n\nAGENT:`;
 
-  // 1. Try Gemini API first
-  if (genAI) {
+  // 1. Try Google Gemini API first
+  if (geminiApiKey) {
     try {
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-      const result = await model.generateContent(fullPrompt);
-      const responseText = result.response.text();
+      const genAI = new GoogleGenerativeAI(geminiApiKey);
+      const model = genAI.getGenerativeModel({
+        model: 'gemini-1.5-flash',
+        generationConfig: {
+          maxOutputTokens: 300,
+          temperature: 0.7,
+        },
+      });
+
+      // 9-second timeout promise race per requirements.md (~10s max perceived response time)
+      const apiPromise = model.generateContent(fullPrompt);
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Gemini API call timed out after 9s')), 9000)
+      );
+
+      const result = (await Promise.race([apiPromise, timeoutPromise])) as any;
+      const responseText = result?.response?.text();
       if (responseText && responseText.trim()) {
         return { text: responseText.trim(), provider: 'gemini' };
       }
-    } catch (err) {
-      console.warn('[AI Service] Gemini API call failed or rate-limited. Falling back to Groq API...', err);
+    } catch (err: any) {
+      console.warn('[AI Service] Gemini API call failed or timed out. Falling back to Groq...', err?.message || err);
     }
   }
 
-  // 2. Fallback to Groq API on Gemini 429/failure
-  if (groqClient) {
+  // 2. Fallback to Groq API on Gemini failure/timeout/rate-limit
+  if (groqApiKey) {
     try {
+      const groqClient = new Groq({ apiKey: groqApiKey });
       const completion = await groqClient.chat.completions.create({
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: formattedHistory },
         ],
         model: 'llama-3.3-70b-versatile',
+        max_tokens: 300,
+        temperature: 0.7,
       });
+
       const groqText = completion.choices[0]?.message?.content;
       if (groqText && groqText.trim()) {
         return { text: groqText.trim(), provider: 'groq' };
       }
-    } catch (err) {
-      console.warn('[AI Service] Groq API call failed as well.', err);
+    } catch (err: any) {
+      console.warn('[AI Service] Groq API call failed as well.', err?.message || err);
     }
   }
 
-  // 3. Fallback Socratic Rule Engine if both providers are unconfigured or rate-limited
+  // 3. Fallback Socratic Rule Engine if both providers are unconfigured or fail
   const fallbackSocraticReplies = [
     'What specific evidence from the sources supports that perspective? How might someone with an opposing view challenge it?',
     'If we look at long-term regional climate trends versus short-term weather anomalies, how does that affect your conclusion?',
     'What assumptions are embedded in that claim, and what additional data would you need to verify it?',
+    'How do the scientific observations in your notes compare with public social claims on this issue?',
   ];
 
   const randomReply = fallbackSocraticReplies[Math.floor(Math.random() * fallbackSocraticReplies.length)];
   return { text: randomReply, provider: 'fallback_rule' };
 }
+

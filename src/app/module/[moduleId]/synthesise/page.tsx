@@ -1,26 +1,12 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import styles from './synthesise.module.css';
 
 import { getStudentStorageKey } from '@/shared/utils/storage';
 import { reportStudentProgress } from '@/shared/utils/reportProgress';
-
-interface ConceptNode {
-  id: string;
-  text: string;
-  positionX: number;
-  positionY: number;
-  sourceNoteId?: string;
-  linkCount?: number;
-}
-
-interface ConceptLink {
-  id: string;
-  fromNodeId: string;
-  toNodeId: string;
-}
+import ConceptMapCanvas from '@/shared/components/ConceptMapCanvas/ConceptMapCanvas';
 
 export default function SynthesiseStagePage() {
   const router = useRouter();
@@ -32,40 +18,33 @@ export default function SynthesiseStagePage() {
   const [loading, setLoading] = useState<boolean>(false);
   const [showIntroModal, setShowIntroModal] = useState<boolean>(true);
 
-  // Concept Map Reference + Interactive State
-  const [nodes, setNodes] = useState<ConceptNode[]>([]);
-  const [links, setLinks] = useState<ConceptLink[]>([]);
+  // Evidence notes count for non-blocking AI nudge
   const [notesCount, setNotesCount] = useState<number>(0);
   const [showNudge, setShowNudge] = useState<boolean>(true);
 
-  // Canvas tool state
-  const [activeTool, setActiveTool] = useState<'pan' | 'add_node' | 'link'>('pan');
-  const [linkSourceNodeId, setLinkSourceNodeId] = useState<string | null>(null);
-  const [hoveredLinkId, setHoveredLinkId] = useState<string | null>(null);
-  const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
-  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
-  const [showAddNodeModal, setShowAddNodeModal] = useState<boolean>(false);
-  const [newNodeText, setNewNodeText] = useState<string>('');
-  const [zoomLevel, setZoomLevel] = useState<number>(1);
-  const dragOffsetRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
-
   useEffect(() => {
     const synthKey = getStudentStorageKey('critic_synthesis', moduleId);
-    const nodesKey = getStudentStorageKey('critic_nodes_canvas', moduleId);
-    const linksKey = getStudentStorageKey('critic_links_canvas', moduleId);
     const notesKey = getStudentStorageKey('critic_notes', moduleId);
 
     reportStudentProgress('synthesise');
 
-    // 0. Check notes count for nudge
+    // 0. Load notes count for AI nudge
     const localNotesStr = localStorage.getItem(notesKey);
     if (localNotesStr) {
-      try { setNotesCount(JSON.parse(localNotesStr).length); } catch (e) { console.error(e); }
-    } else {
-      fetch(`/api/modules/${moduleId}/notes`)
-        .then((res) => res.json())
-        .then((data) => { if (data.notes) setNotesCount(data.notes.length); });
+      try {
+        const parsed = JSON.parse(localNotesStr);
+        setNotesCount(parsed.length);
+      } catch (e) {
+        console.error(e);
+      }
     }
+    fetch(`/api/modules/${moduleId}/notes`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.notes) {
+          setNotesCount(data.notes.length);
+        }
+      });
 
     // 1. Load synthesis draft
     const localSynth = localStorage.getItem(synthKey);
@@ -74,64 +53,11 @@ export default function SynthesiseStagePage() {
     } else {
       fetch(`/api/modules/${moduleId}/synthesis`)
         .then((res) => res.json())
-        .then((data) => { if (data.synthesisDraft) setSynthesisText(data.synthesisDraft); });
+        .then((data) => {
+          if (data.synthesisDraft) setSynthesisText(data.synthesisDraft);
+        });
     }
-
-    // 2. Load concept nodes & links
-    const savedNodes = localStorage.getItem(nodesKey);
-    const savedLinks = localStorage.getItem(linksKey);
-
-    let initialNodes: ConceptNode[] = [];
-    if (savedNodes) {
-      try {
-        initialNodes = JSON.parse(savedNodes);
-        setNodes(initialNodes);
-      } catch (e) { console.error(e); }
-    }
-    if (savedLinks) {
-      try {
-        const parsedLinks: ConceptLink[] = JSON.parse(savedLinks);
-        const validIds = new Set(initialNodes.map((n) => n.id));
-        const filteredLinks = initialNodes.length > 0
-          ? parsedLinks.filter((l) => validIds.has(l.fromNodeId) && validIds.has(l.toNodeId))
-          : parsedLinks;
-        setLinks(filteredLinks);
-      } catch (e) { console.error(e); }
-    }
-
-    fetch(`/api/modules/${moduleId}/conceptualise`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.nodes && data.links && (!savedNodes || initialNodes.length === 0)) {
-          const validIds = new Set(data.nodes.map((n: ConceptNode) => n.id));
-          const cleanLinks = data.links.filter(
-            (l: ConceptLink) => validIds.has(l.fromNodeId) && validIds.has(l.toNodeId)
-          );
-          setNodes(data.nodes);
-          setLinks(cleanLinks);
-        }
-      });
   }, [moduleId]);
-
-  /** Persist canvas to student-scoped localStorage */
-  const saveCanvasState = (updatedNodes: ConceptNode[], updatedLinks: ConceptLink[]) => {
-    const nodesKey = getStudentStorageKey('critic_nodes_canvas', moduleId);
-    const linksKey = getStudentStorageKey('critic_links_canvas', moduleId);
-
-    const validNodeIds = new Set(updatedNodes.map((n) => n.id));
-    const cleanedLinks = updatedLinks.filter(
-      (l) => validNodeIds.has(l.fromNodeId) && validNodeIds.has(l.toNodeId)
-    );
-    const nodesWithCount = updatedNodes.map((n) => ({
-      ...n,
-      linkCount: cleanedLinks.filter((l) => l.fromNodeId === n.id || l.toNodeId === n.id).length,
-    }));
-
-    setNodes(nodesWithCount);
-    setLinks(cleanedLinks);
-    localStorage.setItem(nodesKey, JSON.stringify(nodesWithCount));
-    localStorage.setItem(linksKey, JSON.stringify(cleanedLinks));
-  };
 
   const handleSynthesisTextChange = (text: string) => {
     setSynthesisText(text);
@@ -158,7 +84,9 @@ export default function SynthesiseStagePage() {
         throw new Error('No feedback in response');
       }
     } catch (err) {
-      setAiFeedback('Have you considered connecting the evidence from the sources to your conclusions? What counter-arguments remain unaddressed in your synthesis?');
+      setAiFeedback(
+        'Have you considered connecting the evidence from the sources to your conclusions? What counter-arguments remain unaddressed in your synthesis?'
+      );
     } finally {
       setLoading(false);
     }
@@ -166,101 +94,6 @@ export default function SynthesiseStagePage() {
 
   const handleCompleteModule = () => {
     router.push(`/module/${moduleId}/review`);
-  };
-
-  // Canvas interaction handlers
-  const handleAddNode = async () => {
-    if (!newNodeText.trim()) return;
-    const posX = 80 + Math.random() * 300;
-    const posY = 80 + Math.random() * 200;
-
-    try {
-      const res = await fetch(`/api/modules/${moduleId}/concepts`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: newNodeText, positionX: posX, positionY: posY }),
-      });
-      const data = await res.json();
-      if (data.success && data.node) {
-        saveCanvasState([...nodes, { ...data.node, linkCount: 0 }], links);
-        setNewNodeText('');
-        setShowAddNodeModal(false);
-        setActiveTool('pan');
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleNodeClick = async (nodeId: string) => {
-    if (activeTool === 'link') {
-      if (!linkSourceNodeId) {
-        setLinkSourceNodeId(nodeId);
-      } else if (linkSourceNodeId !== nodeId) {
-        try {
-          const res = await fetch(`/api/modules/${moduleId}/concepts/links`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ fromNodeId: linkSourceNodeId, toNodeId: nodeId }),
-          });
-          const data = await res.json();
-          if (data.success && data.link) {
-            saveCanvasState(nodes, [...links, data.link]);
-          }
-        } finally {
-          setLinkSourceNodeId(null);
-        }
-      }
-    } else {
-      setSelectedNodeId(selectedNodeId === nodeId ? null : nodeId);
-    }
-  };
-
-  const handleDeleteNode = async (nodeId: string) => {
-    const updatedNodes = nodes.filter((n) => n.id !== nodeId);
-    const updatedLinks = links.filter((l) => l.fromNodeId !== nodeId && l.toNodeId !== nodeId);
-    saveCanvasState(updatedNodes, updatedLinks);
-    if (selectedNodeId === nodeId) setSelectedNodeId(null);
-    try { await fetch(`/api/concepts/${nodeId}`, { method: 'DELETE' }); } catch (err) { console.error(err); }
-  };
-
-  const handleDeleteLink = async (linkId: string) => {
-    saveCanvasState(nodes, links.filter((l) => l.id !== linkId));
-    try { await fetch(`/api/links/${linkId}`, { method: 'DELETE' }); } catch (err) { console.error(err); }
-  };
-
-  const handleMouseDownNode = (e: React.MouseEvent, nodeId: string) => {
-    if (activeTool === 'link') return;
-    e.stopPropagation();
-    setDraggingNodeId(nodeId);
-    const targetNode = nodes.find((n) => n.id === nodeId);
-    if (targetNode) {
-      dragOffsetRef.current = { x: e.clientX - targetNode.positionX, y: e.clientY - targetNode.positionY };
-    }
-  };
-
-  const handleMouseMoveCanvas = (e: React.MouseEvent) => {
-    if (!draggingNodeId) return;
-    setNodes((prev) => prev.map((n) =>
-      n.id === draggingNodeId
-        ? { ...n, positionX: e.clientX - dragOffsetRef.current.x, positionY: e.clientY - dragOffsetRef.current.y }
-        : n
-    ));
-  };
-
-  const handleMouseUpCanvas = () => {
-    if (draggingNodeId) {
-      const movedNode = nodes.find((n) => n.id === draggingNodeId);
-      if (movedNode) {
-        fetch(`/api/concepts/${draggingNodeId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ positionX: movedNode.positionX, positionY: movedNode.positionY }),
-        });
-        saveCanvasState(nodes, links);
-      }
-      setDraggingNodeId(null);
-    }
   };
 
   return (
@@ -274,13 +107,34 @@ export default function SynthesiseStagePage() {
 
       {/* Non-blocking AI Contextual Nudge Banner */}
       {notesCount === 0 && showNudge && (
-        <div style={{ background: 'rgba(55, 243, 255, 0.12)', borderBottom: '1px solid var(--primary-cyan)', padding: '10px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', color: 'var(--text-light)', fontSize: '0.9rem' }}>
+        <div
+          style={{
+            background: 'rgba(55, 243, 255, 0.12)',
+            borderBottom: '1px solid var(--primary-cyan)',
+            padding: '10px 24px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            color: 'var(--text-light)',
+            fontSize: '0.9rem',
+          }}
+        >
           <span>
-            💡 <strong>AI Learning Nudge:</strong> You are drafting a synthesis without having collected evidence notes in the <strong>Familiarise</strong> stage! Gathering evidence first leads to a stronger case synthesis. You can proceed or return to Familiarise.
+            💡 <strong>AI Learning Nudge:</strong> You haven&apos;t gathered evidence notes in the{' '}
+            <strong>Familiarise</strong> stage yet! Gathering notes helps Aria cross-reference your reasoning.
+            You can continue exploring here or return to Familiarise anytime.
           </span>
           <button
             onClick={() => setShowNudge(false)}
-            style={{ background: 'transparent', border: 'none', color: 'var(--primary-cyan)', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem', marginLeft: '16px' }}
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: 'var(--primary-cyan)',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              fontSize: '1rem',
+              marginLeft: '16px',
+            }}
           >
             ✕
           </button>
@@ -289,240 +143,129 @@ export default function SynthesiseStagePage() {
 
       {/* Main Workspace Split */}
       <div className={styles.workspace}>
-        {/* Left Case Synthesis Editor Panel */}
-        <aside className={styles.synthesisPanel}>
-          <div className={styles.promptHeader}>
-            <div className={styles.robotAvatarIcon} />
-            <h2 className={styles.promptText}>
-              Reflect on everything you learnt. What conclusions can you make?
+        {/* Left Interactive Synthesis Editor Panel */}
+        <aside className={styles.leftEditorPanel}>
+          <div className={styles.editorHeader}>
+            <h2 className="cyan-neon-text" style={{ fontFamily: 'var(--font-orbitron)', fontSize: '1.2rem' }}>
+              FINAL CASEFILE SYNTHESIS
             </h2>
+            <p className={styles.editorSubtitle}>
+              Synthesise your evidence, arguments, and evaluate opposing views into your final case.
+            </p>
           </div>
 
-          <div className={styles.editorWrapper}>
+          <div className={styles.textAreaContainer}>
             <textarea
               className={styles.synthesisTextArea}
-              placeholder="Write your case synthesis here. Summarize your evidence, concept map connections, and answers to counter-arguments..."
+              placeholder="Write your casefile conclusion here... Structure your reasoning, cite concepts from your map, and address counterarguments."
               value={synthesisText}
               onChange={(e) => handleSynthesisTextChange(e.target.value)}
             />
           </div>
 
+          {/* AI Cross-Check Feedback Box */}
+          {aiFeedback && (
+            <div className={styles.feedbackCard}>
+              <div className={styles.feedbackHeader}>
+                <div className={styles.feedbackAvatarIcon}>
+                  <div className={styles.robotHeadSmall} />
+                </div>
+                <strong className="cyan-neon-text">ARIA&apos;S REASONING AUDIT:</strong>
+              </div>
+              <p className={styles.feedbackText}>{aiFeedback}</p>
+            </div>
+          )}
+
           <div className={styles.actionRow}>
             <button
               onClick={handleCrossCheckSynthesis}
-              className="btn-primary-cyan"
+              className={`btn-primary-cyan ${styles.auditBtn}`}
               disabled={loading || !synthesisText.trim()}
             >
-              {loading ? 'AI CROSS-CHECKING...' : 'AI CROSS-CHECK SYNTHESIS →'}
+              {loading ? 'ANALYZING CASEFILE...' : '🔍 AUDIT REASONING (SOCRATIC CROSS-CHECK)'}
             </button>
-            <button
-              onClick={handleCompleteModule}
-              className="btn-secondary-pink"
-            >
-              COMPLETE CASEFILE →
+
+            <button onClick={handleCompleteModule} className={`btn-primary-pink ${styles.completeBtn}`}>
+              COMPLETE MODULE &amp; VIEW REVIEW →
             </button>
           </div>
-
-          {/* AI Cross-Check Socratic Feedback Panel */}
-          {aiFeedback && (
-            <div className={styles.feedbackCard}>
-              <h4 className="cyan-neon-text" style={{ fontFamily: 'var(--font-orbitron)', marginBottom: '8px' }}>
-                ARIA&apos;S CROSS-CHECK FEEDBACK
-              </h4>
-              <p>{aiFeedback}</p>
-            </div>
-          )}
         </aside>
 
-        {/* Right Interactive Concept Map Panel */}
-        <main
-          className={styles.rightCanvasPanel}
-          onMouseMove={handleMouseMoveCanvas}
-          onMouseUp={handleMouseUpCanvas}
-        >
-          <div className={styles.canvasHeader}>
-            <h1 className={styles.stageTitle}>synthesise</h1>
-          </div>
-
-          <div
-            className={styles.canvasPreviewStage}
-            style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'top left' }}
-          >
-            {/* Interactive Concept Nodes */}
-            {nodes.map((node) => {
-              const isSelected = selectedNodeId === node.id;
-              const isLinkSource = linkSourceNodeId === node.id;
-
-              return (
-                <div
-                  key={node.id}
-                  className={`${styles.conceptNodeCircle} ${isSelected ? styles.selectedNode : ''} ${activeTool === 'link' && isLinkSource ? styles.linkSourceNode : ''}`}
-                  style={{ left: `${node.positionX}px`, top: `${node.positionY}px`, width: '100px', height: '100px' }}
-                  onMouseDown={(e) => handleMouseDownNode(e, node.id)}
-                  onClick={() => handleNodeClick(node.id)}
-                >
-                  <span className={styles.nodeLabel}>{node.text}</span>
-                  {isSelected && activeTool === 'pan' && (
-                    <div className={styles.nodeControls} onClick={(e) => e.stopPropagation()}>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleDeleteNode(node.id); }}
-                        className={styles.nodeDeleteBtn}
-                        title="Delete node"
-                      >
-                        🗑️
-                      </button>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-
-            {/* SVG Links Layer */}
-            <svg className={styles.svgOverlay}>
-              <rect width="100%" height="100%" fill="none" pointerEvents="none" />
-              {links.map((link) => {
-                const fromNode = nodes.find((n) => n.id === link.fromNodeId);
-                const toNode = nodes.find((n) => n.id === link.toNodeId);
-                if (!fromNode || !toNode) return null;
-
-                const isHovered = hoveredLinkId === link.id;
-                const x1 = fromNode.positionX + 50;
-                const y1 = fromNode.positionY + 50;
-                const x2 = toNode.positionX + 50;
-                const y2 = toNode.positionY + 50;
-
-                return (
-                  <g
-                    key={link.id}
-                    onMouseEnter={() => setHoveredLinkId(link.id)}
-                    onMouseLeave={() => setHoveredLinkId(null)}
-                    onClick={(e) => { e.stopPropagation(); handleDeleteLink(link.id); }}
-                    style={{ cursor: 'pointer', pointerEvents: 'all' }}
-                  >
-                    <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="rgba(0,0,0,0)" strokeWidth="16" pointerEvents="stroke" />
-                    <line
-                      x1={x1} y1={y1} x2={x2} y2={y2}
-                      stroke={isHovered ? '#FF4FD8' : '#37F3FF'}
-                      strokeWidth={isHovered ? 4 : 3}
-                      className={styles.svgLineGlow}
-                      pointerEvents="stroke"
-                    />
-                  </g>
-                );
-              })}
-            </svg>
-          </div>
-
-          {/* Far Right Control Toolbar */}
-          <div className={styles.canvasToolbar}>
-            <button
-              onClick={() => setZoomLevel((z) => Math.min(z + 0.15, 1.8))}
-              className={styles.toolbarBtn}
-              title="Zoom In"
-            >
-              🔍+
-            </button>
-            <button
-              onClick={() => setZoomLevel((z) => Math.max(z - 0.15, 0.5))}
-              className={styles.toolbarBtn}
-              title="Zoom Out"
-            >
-              🔍-
-            </button>
-            <button
-              onClick={() => { setActiveTool('pan'); setLinkSourceNodeId(null); }}
-              className={`${styles.toolbarBtn} ${activeTool === 'pan' ? styles.activeToolBtn : ''}`}
-              title="Pan Tool"
-            >
-              ✋
-            </button>
-            <button
-              onClick={() => setShowAddNodeModal(true)}
-              className={`${styles.toolbarBtn} ${activeTool === 'add_node' ? styles.activeToolBtn : ''}`}
-              title="Create Concept Node"
-            >
-              ◯
-            </button>
-            <button
-              onClick={() => { setActiveTool('link'); setLinkSourceNodeId(null); }}
-              className={`${styles.toolbarBtn} ${activeTool === 'link' ? styles.activeToolBtn : ''}`}
-              title="Create Link (Click 2 nodes)"
-            >
-              🖋️
-            </button>
-          </div>
-        </main>
+        {/* Right Interactive Concept Map Canvas using shared component */}
+        <ConceptMapCanvas moduleId={moduleId} stageTitle="synthesise" />
       </div>
 
       {/* Bottom Stage Navigation Bar */}
       <footer className={styles.stageNavBar}>
-        <button onClick={() => router.push(`/module/${moduleId}/familiarise`)} className={styles.stageStep}>
+        <button
+          onClick={() => router.push(`/module/${moduleId}/familiarise`)}
+          className={styles.stageStep}
+        >
           01 familiarise
         </button>
-        <button onClick={() => router.push(`/module/${moduleId}/conceptualise`)} className={styles.stageStep}>
+        <button
+          onClick={() => router.push(`/module/${moduleId}/conceptualise`)}
+          className={styles.stageStep}
+        >
           02 conceptualise
         </button>
-        <button onClick={() => router.push(`/module/${moduleId}/inquire`)} className={styles.stageStep}>
+        <button
+          onClick={() => router.push(`/module/${moduleId}/inquire`)}
+          className={styles.stageStep}
+        >
           03 inquire + evaluate
         </button>
-        <button onClick={() => router.push(`/module/${moduleId}/synthesise`)} className={`${styles.stageStep} ${styles.stageStepActive}`}>
+        <button
+          onClick={() => router.push(`/module/${moduleId}/synthesise`)}
+          className={`${styles.stageStep} ${styles.stageStepActive}`}
+        >
           04 synthesise
         </button>
       </footer>
 
-      {/* Create Node Modal */}
-      {showAddNodeModal && (
-        <div className={styles.modalBackdrop}>
-          <div className="glass-card-glow" style={{ padding: '32px', maxWidth: '420px', width: '90%' }}>
-            <h3 className="cyan-neon-text" style={{ fontFamily: 'var(--font-orbitron)', marginBottom: '16px' }}>
-              CREATE CONCEPT NODE
-            </h3>
-            <input
-              type="text"
-              placeholder="e.g. key conclusion / insight"
-              value={newNodeText}
-              onChange={(e) => setNewNodeText(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleAddNode()}
-              style={{
-                width: '100%',
-                padding: '12px',
-                background: 'rgba(7, 11, 26, 0.9)',
-                border: '1px solid var(--color-accent-cyan-50)',
-                borderRadius: '8px',
-                color: 'var(--color-text-light)',
-                fontFamily: 'var(--font-exo2)',
-                fontSize: '0.95rem',
-              }}
-              autoFocus
-            />
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '20px' }}>
-              <button onClick={() => setShowAddNodeModal(false)} style={{ background: 'transparent', border: '1px solid var(--color-border-slate)', color: 'var(--color-text-light)', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer' }}>
-                Cancel
-              </button>
-              <button onClick={handleAddNode} className="btn-primary-cyan">
-                CREATE NODE
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Stage Intro Modal */}
       {showIntroModal && (
         <div className={styles.modalBackdrop}>
-          <div className="glass-card-glow" style={{ padding: '36px', maxWidth: '540px', width: '90%', textAlign: 'center' }}>
-            <h3 className="cyan-neon-text" style={{ fontFamily: 'var(--font-orbitron)', marginBottom: '16px', fontSize: '1.2rem' }}>
+          <div
+            className="glass-card-glow"
+            style={{ padding: '36px', maxWidth: '540px', width: '90%', textAlign: 'center' }}
+          >
+            <h3
+              className="cyan-neon-text"
+              style={{ fontFamily: 'var(--font-orbitron)', marginBottom: '16px', fontSize: '1.2rem' }}
+            >
               📝 SYNTHESISE CASEFILE DISCLOSURE
             </h3>
             <p className={styles.introModalText} style={{ marginBottom: '16px' }}>
-              Reflect on everything you learnt. Write your synthesis, and trigger the AI cross-check to evaluate missing links or unaddressed arguments. You can also add concept nodes to your map on the right.
+              Reflect on everything you learnt. Write your synthesis, and trigger the AI cross-check to evaluate
+              missing links or unaddressed arguments. You can also build and link concept nodes on the right.
             </p>
-            <div style={{ background: 'rgba(7, 11, 26, 0.7)', border: '1px solid var(--accent-magenta)', borderRadius: '10px', padding: '16px', textAlign: 'left', fontSize: '0.88rem', color: '#D9DFF7', lineHeight: '1.5' }}>
-              <strong style={{ color: 'var(--accent-magenta)', display: 'block', marginBottom: '8px' }}>⚠️ Mandatory Socratic Peer Disclosure:</strong>
+            <div
+              style={{
+                background: 'rgba(7, 11, 26, 0.7)',
+                border: '1px solid var(--accent-magenta)',
+                borderRadius: '10px',
+                padding: '16px',
+                textAlign: 'left',
+                fontSize: '0.88rem',
+                color: '#D9DFF7',
+                lineHeight: '1.5',
+              }}
+            >
+              <strong style={{ color: 'var(--accent-magenta)', display: 'block', marginBottom: '8px' }}>
+                ⚠️ Mandatory Socratic Peer Disclosure:
+              </strong>
               <ul style={{ paddingLeft: '18px', margin: 0 }}>
-                <li style={{ marginBottom: '6px' }}><strong>Socratic Cross-Checking:</strong> The AI agent (Aria) checks your synthesis against earlier evidence and concept nodes to question unaddressed arguments.</li>
-                <li style={{ marginBottom: '6px' }}><strong>Reasoning Test:</strong> Aria presents questions rather than factual corrections.</li>
-                <li><strong>No Verified Facts:</strong> Do not treat agent questions or statements as verified facts.</li>
+                <li style={{ marginBottom: '6px' }}>
+                  <strong>Socratic Cross-Checking:</strong> The AI agent (Aria) checks your synthesis against
+                  earlier evidence and concept nodes to question unaddressed arguments.
+                </li>
+                <li style={{ marginBottom: '6px' }}>
+                  <strong>Reasoning Test:</strong> Aria presents questions rather than factual corrections.
+                </li>
+                <li>
+                  <strong>No Verified Facts:</strong> Do not treat agent questions or statements as verified facts.
+                </li>
               </ul>
             </div>
             <button

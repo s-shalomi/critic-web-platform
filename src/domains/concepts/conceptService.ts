@@ -24,7 +24,7 @@ export interface ConceptLink {
   updatedAt: string;
 }
 
-import { conceptNodesStore, conceptLinksStore } from '@/shared/db/sessionStore';
+import { conceptNodesStore, conceptLinksStore, notesStore } from '@/shared/db/sessionStore';
 import { revertNoteConvertedToNode } from '../notes/noteService';
 
 export async function getConceptualiseData(moduleId: string): Promise<{
@@ -115,6 +115,18 @@ export async function deleteConceptNode(nodeId: string): Promise<boolean> {
       // Revert convertedToNode on associated note in familiarise stage
       if (deletedNode.sourceNoteId) {
         await revertNoteConvertedToNode(deletedNode.sourceNoteId);
+      } else {
+        // Fallback: match note by text content across modules
+        for (const [modId, nList] of notesStore.entries()) {
+          const notesArr = nList as any[];
+          notesArr.forEach((n) => {
+            if (n.noteText === deletedNode.text || n.highlightedText === deletedNode.text) {
+              n.convertedToNode = false;
+              n.updatedAt = new Date().toISOString();
+            }
+          });
+          notesStore.set(modId, notesArr);
+        }
       }
     }
   }

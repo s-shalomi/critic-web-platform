@@ -77,13 +77,35 @@ export default function FamiliariseStagePage() {
 
     fetchSources();
     const sourcesInterval = setInterval(fetchSources, 4000);
-    window.addEventListener('focus', fetchSources);
+    // Cross-validate convertedToNode against actual existing canvas nodes
+    const syncNotesWithCanvas = (loadedNotes: Note[]) => {
+      const canvasKey = getStudentStorageKey('critic_nodes_canvas', moduleId);
+      const canvasStr = localStorage.getItem(canvasKey);
+      let canvasNodes: Array<{ id: string; text: string; sourceNoteId?: string }> = [];
+      if (canvasStr) {
+        try { canvasNodes = JSON.parse(canvasStr); } catch (e) { /* ignore */ }
+      }
+
+      return loadedNotes.map((note) => {
+        if (!note.convertedToNode) return note;
+        // Verify if a node actually exists for this note
+        const hasNode = canvasNodes.some(
+          (cn) => (cn.sourceNoteId && cn.sourceNoteId === note.id) ||
+                  cn.text === note.noteText ||
+                  cn.text === note.highlightedText
+        );
+        return hasNode ? note : { ...note, convertedToNode: false };
+      });
+    };
 
     // Check localStorage fallback first for instant offline reload persistence
     const localSaved = localStorage.getItem(notesKey);
     if (localSaved) {
       try {
-        setNotes(JSON.parse(localSaved));
+        const parsed = JSON.parse(localSaved);
+        const verified = syncNotesWithCanvas(parsed);
+        setNotes(verified);
+        localStorage.setItem(notesKey, JSON.stringify(verified));
       } catch (e) {
         console.error(e);
       }
@@ -94,14 +116,31 @@ export default function FamiliariseStagePage() {
       .then((res) => res.json())
       .then((data) => {
         if (data.notes && data.notes.length > 0) {
-          setNotes(data.notes);
-          localStorage.setItem(notesKey, JSON.stringify(data.notes));
+          const verified = syncNotesWithCanvas(data.notes);
+          setNotes(verified);
+          localStorage.setItem(notesKey, JSON.stringify(verified));
         }
       });
+
+    const handleFocusSync = () => {
+      fetchSources();
+      const currentNotes = localStorage.getItem(notesKey);
+      if (currentNotes) {
+        try {
+          const parsed = JSON.parse(currentNotes);
+          const verified = syncNotesWithCanvas(parsed);
+          setNotes(verified);
+          localStorage.setItem(notesKey, JSON.stringify(verified));
+        } catch (e) { /* ignore */ }
+      }
+    };
+
+    window.addEventListener('focus', handleFocusSync);
 
     return () => {
       clearInterval(sourcesInterval);
       window.removeEventListener('focus', fetchSources);
+      window.removeEventListener('focus', handleFocusSync);
     };
   }, [moduleId]);
 

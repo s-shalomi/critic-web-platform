@@ -341,26 +341,54 @@
 
 .nodeControls {
   position: absolute;
-  bottom: -32px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: -36px;
   display: flex;
-  gap: 4px;
-  z-index: 10;
+  gap: 6px;
+  background: rgba(7, 11, 26, 0.9);
+  border: 1px solid var(--color-accent-pink);
+  padding: 4px 8px;
+  border-radius: 20px;
+  z-index: 25;
 }
 
-.nodeDeleteBtn {
-  background: rgba(255, 79, 216, 0.2);
-  border: 1px solid var(--color-accent-pink);
-  color: white;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
+.nodeActionBtn, .nodeDeleteBtn {
+  background: transparent;
+  border: none;
+  font-size: 0.85rem;
   cursor: pointer;
-  font-size: 0.75rem;
+}
+
+.inlineEditWrapper {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  gap: 4px;
+}
+
+.inlineEditInput {
+  width: 90px;
+  background: rgba(7, 11, 26, 0.9);
+  border: 1px solid #37F3FF;
+  color: #FFF;
+  font-family: var(--font-orbitron);
+  font-size: 0.8rem;
+  padding: 4px;
+  border-radius: 4px;
+  text-align: center;
+  outline: none;
+}
+
+.inlineEditBtns {
+  display: flex;
+  gap: 4px;
+}
+
+.nodeSaveBtn, .nodeCancelBtn {
+  background: transparent;
+  border: none;
+  color: #FFF;
+  cursor: pointer;
+  font-size: 0.8rem;
 }
 
 .nodeLabel {
