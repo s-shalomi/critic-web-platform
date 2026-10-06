@@ -4,7 +4,7 @@
  */
 
 import { createConceptNode, ConceptNode } from '../concepts/conceptService';
-import { notesStore } from '@/shared/db/sessionStore';
+import { notesStore, saveStoreToDisk } from '@/shared/db/sessionStore';
 
 export interface Note {
   id: string;
@@ -41,21 +41,46 @@ export async function createNote(data: {
   const existing = (notesStore.get(data.moduleId) as Note[]) || [];
   existing.push(note);
   notesStore.set(data.moduleId, existing);
+  saveStoreToDisk();
 
   return note;
 }
 
-export async function updateNote(noteId: string, noteText: string): Promise<Note | null> {
+export async function updateNote(
+  noteId: string,
+  noteText: string,
+  extra?: { moduleId?: string; sourceId?: string; highlightedText?: string }
+): Promise<Note> {
   for (const [moduleId, notes] of notesStore.entries()) {
     const note = (notes as Note[]).find((n) => n.id === noteId);
     if (note) {
       note.noteText = noteText;
       note.updatedAt = new Date().toISOString();
       notesStore.set(moduleId, notes);
+      saveStoreToDisk();
       return note;
     }
   }
-  return null;
+
+  // Resilient upsert: if note was loaded from local storage / initial state and wasn't in memory yet,
+  // save it smoothly without throwing 404
+  const targetModuleId = extra?.moduleId || 'mod_climate_change_demo';
+  const newNote: Note = {
+    id: noteId,
+    moduleId: targetModuleId,
+    sourceId: extra?.sourceId || 'src-1',
+    highlightedText: extra?.highlightedText || noteText,
+    noteText: noteText,
+    convertedToNode: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  const existing = (notesStore.get(targetModuleId) as Note[]) || [];
+  existing.push(newNote);
+  notesStore.set(targetModuleId, existing);
+  saveStoreToDisk();
+  return newNote;
 }
 
 export async function deleteNote(noteId: string): Promise<boolean> {
@@ -64,6 +89,7 @@ export async function deleteNote(noteId: string): Promise<boolean> {
     if (index !== -1) {
       (notes as Note[]).splice(index, 1);
       notesStore.set(moduleId, notes);
+      saveStoreToDisk();
       return true;
     }
   }
@@ -76,6 +102,7 @@ export async function convertNoteToNode(noteId: string): Promise<{ success: bool
     if (note) {
       note.convertedToNode = true;
       note.updatedAt = new Date().toISOString();
+      saveStoreToDisk();
       
       // Automatically generate concept node in concept canvas store
       const conceptNode = await createConceptNode({
@@ -99,6 +126,7 @@ export async function revertNoteConvertedToNode(noteId: string): Promise<boolean
       note.convertedToNode = false;
       note.updatedAt = new Date().toISOString();
       notesStore.set(moduleId, notes);
+      saveStoreToDisk();
       return true;
     }
   }

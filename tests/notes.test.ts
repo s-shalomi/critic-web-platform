@@ -66,4 +66,20 @@ describe('Notes Domain Tests', () => {
     const convertedNote = notes.find((n) => n.id === note.id);
     expect(convertedNote?.convertedToNode).toBe(true);
   });
+
+  test('Resiliently updates and persists note even when not preloaded in memory', async () => {
+    const freshNoteId = `note_client_${Date.now()}`;
+    const updated = await updateNote(freshNoteId, 'Resiliently saved note text', {
+      moduleId: 'mod_resilient_test',
+      sourceId: 'src-1',
+      highlightedText: 'Evidence snippet',
+    });
+
+    expect(updated).toBeDefined();
+    expect(updated.id).toBe(freshNoteId);
+    expect(updated.noteText).toBe('Resiliently saved note text');
+
+    const notes = await getNotesForModule('mod_resilient_test');
+    expect(notes.some((n) => n.id === freshNoteId)).toBe(true);
+  });
 });

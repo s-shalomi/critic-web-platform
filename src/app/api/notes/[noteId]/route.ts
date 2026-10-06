@@ -6,17 +6,18 @@ export async function PUT(
   { params }: { params: { noteId: string } }
 ) {
   try {
-    const body = await request.json();
-    const { noteText } = body;
+    const body = await request.json().catch(() => ({}));
+    const { noteText, moduleId, sourceId, highlightedText } = body;
 
-    if (!noteText) {
+    if (noteText === undefined || noteText === null) {
       return NextResponse.json({ error: 'noteText is required' }, { status: 400 });
     }
 
-    const updated = await updateNote(params.noteId, noteText);
-    if (!updated) {
-      return NextResponse.json({ error: 'Note not found' }, { status: 404 });
-    }
+    const updated = await updateNote(params.noteId, noteText, {
+      moduleId,
+      sourceId,
+      highlightedText,
+    });
 
     return NextResponse.json({ success: true, note: updated });
   } catch (error) {

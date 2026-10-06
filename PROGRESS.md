@@ -498,7 +498,24 @@
   - `npm test` (29/29 tests passing across 8 test suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
   - `npm run build` (100% successful Next.js App Router build with 0 compilation errors across 11 routes).
-- **Immediate Next Step**: Seek approval for Fix 4 and report full task completion.
+- **Immediate Next Step**: Completed and approved.
+
+---
+
+### [2026-10-07] - Note Management: Fixed 404 Error on Note Edit & Save (PUT)
+
+- **Role**: Full Stack Developer
+- **Code Built & Updated**:
+  - **Full Store Disk Persistence**: Updated `saveStoreToDisk()` and `loadStoreFromDisk()` in [`src/shared/db/sessionStore.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/db/sessionStore.ts) to serialize and hydrate `notesStore`, `conceptNodesStore`, `conceptLinksStore`, and `reviewStatsStore` to `.critic_session_store.json`.
+  - **Resilient Note Upsert on PUT**: Enhanced `updateNote` in [`src/domains/notes/noteService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/notes/noteService.ts) and [`src/app/api/notes/[noteId]/route.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/api/notes/%5BnoteId%5D/route.ts) to accept contextual payload metadata (`moduleId`, `sourceId`, `highlightedText`) and cleanly save/upsert notes into the store even if not pre-populated in server memory.
+  - **Client-Side Optimistic Note Updates**: Updated `handleUpdateNote` in [`src/app/module/[moduleId]/familiarise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/familiarise/page.tsx) to optimistically update local state immediately and pass full metadata in the PUT payload.
+  - **Test Suite Expansion**: Added unit test in `tests/notes.test.ts` verifying resilient note update and persistence.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (30/30 tests passing across 8 test suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+- **Immediate Next Step**: Seek approval for Note Edit 404 Fix, then proceed to "Ensure gemini access falls back to groq".
+
 
 
 

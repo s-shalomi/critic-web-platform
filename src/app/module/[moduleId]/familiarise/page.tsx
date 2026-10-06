@@ -195,20 +195,25 @@ export default function FamiliariseStagePage() {
 
   const handleUpdateNote = async (noteId: string) => {
     if (!editText.trim()) return;
+    const targetNote = notes.find((n) => n.id === noteId);
+
+    // Optimistically update local state immediately
+    updateNotesState((prev) =>
+      prev.map((n) => (n.id === noteId ? { ...n, noteText: editText } : n))
+    );
+    setEditingNoteId(null);
+
     try {
-      const res = await fetch(`/api/notes/${noteId}`, {
+      await fetch(`/api/notes/${noteId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ noteText: editText }),
+        body: JSON.stringify({
+          noteText: editText,
+          moduleId,
+          sourceId: targetNote?.sourceId || selectedSourceId,
+          highlightedText: targetNote?.highlightedText,
+        }),
       });
-      const data = await res.json();
-
-      if (data.success) {
-        updateNotesState((prev) =>
-          prev.map((n) => (n.id === noteId ? { ...n, noteText: editText } : n))
-        );
-        setEditingNoteId(null);
-      }
     } catch (err) {
       console.error(err);
     }

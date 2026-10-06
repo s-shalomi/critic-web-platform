@@ -53,6 +53,10 @@ export function saveStoreToDisk(): void {
       dynamicSources: Array.from(criticGlobal.dynamicSourcesStore?.entries() || []),
       accessCodes: Array.from(criticGlobal.accessCodeStore?.entries() || []),
       studentProgress: Array.from(criticGlobal.studentProgressStore?.entries() || []),
+      notes: Array.from(criticGlobal.notesStore?.entries() || []),
+      conceptNodes: Array.from(criticGlobal.conceptNodesStore?.entries() || []),
+      conceptLinks: Array.from(criticGlobal.conceptLinksStore?.entries() || []),
+      reviewStats: Array.from(criticGlobal.reviewStatsStore?.entries() || []),
     };
     fs.writeFileSync(CACHE_FILE, JSON.stringify(data, null, 2), 'utf-8');
   } catch (err) {
@@ -78,6 +82,26 @@ function loadStoreFromDisk(): void {
       if (Array.isArray(data.studentProgress)) {
         data.studentProgress.forEach(([k, v]: [string, StudentProgressEntry]) => {
           criticGlobal.studentProgressStore?.set(k, v);
+        });
+      }
+      if (Array.isArray(data.notes)) {
+        data.notes.forEach(([k, v]: [string, any[]]) => {
+          criticGlobal.notesStore?.set(k, v);
+        });
+      }
+      if (Array.isArray(data.conceptNodes)) {
+        data.conceptNodes.forEach(([k, v]: [string, any[]]) => {
+          criticGlobal.conceptNodesStore?.set(k, v);
+        });
+      }
+      if (Array.isArray(data.conceptLinks)) {
+        data.conceptLinks.forEach(([k, v]: [string, any[]]) => {
+          criticGlobal.conceptLinksStore?.set(k, v);
+        });
+      }
+      if (Array.isArray(data.reviewStats)) {
+        data.reviewStats.forEach(([k, v]: [string, any]) => {
+          criticGlobal.reviewStatsStore?.set(k, v);
         });
       }
     }
