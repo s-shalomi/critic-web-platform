@@ -324,3 +324,70 @@
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
   - `npm run build` (100% clean production build with 0 compilation errors across 11 routes).
 - **Immediate Next Step**: Platform is fully updated, verified, tested, and ready.
+
+---
+
+### [2026-10-06] - Fix 1: Unified Reusable ConceptMapCanvas Component Across Stages
+
+- **Role**: Full Stack Developer
+- **Code Built & Updated**:
+  - **Shared Component Extraction**: Built [`src/shared/components/ConceptMapCanvas/ConceptMapCanvas.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/ConceptMapCanvas/ConceptMapCanvas.tsx) and [`ConceptMapCanvas.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/ConceptMapCanvas/ConceptMapCanvas.module.css).
+  - **Exact Feature Parity Across Stages**:
+    - Replaced divergent duplicate canvas implementations in [`src/app/module/[moduleId]/conceptualise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/conceptualise/page.tsx), [`src/app/module/[moduleId]/inquire/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/inquire/page.tsx), and [`src/app/module/[moduleId]/synthesise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/synthesise/page.tsx) with `<ConceptMapCanvas />`.
+    - Node creation modal with autofocus and Enter-key submission works identically across all three stages.
+    - Drag-and-drop coordinate persistence, double-click inline editing, click-to-link with audio feedback, link deletion, node deletion, and zoom controls operate uniformly with 100% code reuse.
+  - **Storage Synchronization**: Real-time cross-tab and cross-stage synchronization via student-scoped localStorage keys (`critic_nodes_canvas_${moduleId}` and `critic_links_canvas_${moduleId}`) and window focus event listeners.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (28/28 tests passing across 8 suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+  - `npm run build` (100% successful Next.js App Router build with 0 errors across 11 routes).
+- **Immediate Next Step**: Seek approval for Fix 1, Fix 2, and Fix 3.
+
+---
+
+### [2026-10-06] - Fix 2: Revert Note Converted Status and Re-appearance of 'Convert to node' Button
+
+- **Role**: Full Stack Developer
+- **Code Built & Updated**:
+  - **Client-Side Reversion**: In `ConceptMapCanvas.tsx`, when `handleDeleteNode` is called, it identifies the node's `sourceNoteId` (or matching text), finds the corresponding note in `critic_notes_${moduleId}`, and flips `convertedToNode` to `false`.
+  - **Server-Side Store Reversion**: In [`src/domains/concepts/conceptService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/concepts/conceptService.ts), `deleteConceptNode` calls `revertNoteConvertedToNode(sourceNoteId)` or sweeps `notesStore` to ensure `convertedToNode` is reset to `false`.
+  - **Familiarise Stage Cross-Validation**: [`src/app/module/[moduleId]/familiarise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/familiarise/page.tsx) runs `syncNotesWithCanvas` on load and window focus, checking existing notes against current canvas nodes in localStorage. If a converted note's node was deleted, its status is instantly reset and the `+ Convert to node` button immediately re-appears in the hover/pin tooltip.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (28/28 tests passing across 8 suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+- **Immediate Next Step**: Seek approval for Fix 2.
+
+---
+
+### [2026-10-06] - Fix 3: LLM Access & Resilient Provider Failover
+
+- **Role**: Full Stack Developer
+- **Code Built & Updated**:
+  - **Sanitized Key Handling**: Added `getSanitizedKey` in [`src/domains/ai/aiService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/ai/aiService.ts) to strip surrounding quotes and whitespace from `.env` environment variables.
+  - **Resilient Multi-Tier Fallback Engine**:
+    1. **Tier 1 (Google Gemini 1.5 Flash)**: Configured with 9-second `Promise.race` timeout to guarantee compliance with the ~10s perceived response time requirement.
+    2. **Tier 2 (Groq LLaMA 3.3 70B Versatile)**: Automatically and seamlessly invoked if Gemini experiences quota limits, 429 rate limits, invalid keys, or network timeouts.
+    3. **Tier 3 (Contextual Socratic Rule Engine)**: Gracefully returns high-quality, non-opinionated Socratic questions if both external API providers fail or are unconfigured, preventing any 500 error or UI breakage.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (28/28 tests passing across 8 suites).
+  - `npm run build` (100% clean production build).
+- **Immediate Next Step**: Ready for user review and approval.
+
+---
+
+### [2026-10-06] - UI Layout Refinement: Synthesise Stage Viewport & Layout Consistency
+
+- **Role**: Full Stack Developer
+- **Code Built & Updated**:
+  - **Zero Viewport Overflow**: Standardized [`src/app/module/[moduleId]/synthesise/synthesise.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/synthesise/synthesise.module.css) with exact layout rules from the Inquire & Conceptualise stages (`height: 100vh; overflow: hidden;` on `.container`, `min-height: 0;` on `.workspace` and `.leftEditorPanel`).
+  - **Left Editor Panel**: Set `width: 520px; overflow-y: auto;` with themed cyber-cyan slim scrollbars, matching `.chatPanel` in the Inquire stage.
+  - **Interactive Concept Canvas**: Seamlessly integrated `<ConceptMapCanvas />` in the right partition with flex expansion and zero overflow.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (28/28 tests passing across 8 suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+  - `npx next build` (100% clean production build).
+- **Immediate Next Step**: Ready for user review and approval.

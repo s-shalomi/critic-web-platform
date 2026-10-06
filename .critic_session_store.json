@@ -66,72 +66,6 @@
             "authorName": "my name",
             "text": "some content"
           }
-        },
-        {
-          "id": "source_1791287327948_v7t38",
-          "topicId": "climate-change",
-          "orderIndex": 5,
-          "title": "Teacher Supplementary Report",
-          "content": {
-            "type": "article",
-            "authorName": "Dr. Jane Smith",
-            "text": "Supplementary findings on Arctic sea ice extent trends."
-          }
-        },
-        {
-          "id": "source_1791287327954_7rhgh",
-          "topicId": "climate-change",
-          "orderIndex": 6,
-          "title": "Updated Title",
-          "content": {
-            "type": "article",
-            "authorName": "Teacher Added",
-            "text": "Updated Text Content"
-          }
-        },
-        {
-          "id": "source_1791291159181_ewdr4",
-          "topicId": "climate-change",
-          "orderIndex": 7,
-          "title": "Teacher Supplementary Report",
-          "content": {
-            "type": "article",
-            "authorName": "Dr. Jane Smith",
-            "text": "Supplementary findings on Arctic sea ice extent trends."
-          }
-        },
-        {
-          "id": "source_1791291159184_rjrfu",
-          "topicId": "climate-change",
-          "orderIndex": 8,
-          "title": "Updated Title",
-          "content": {
-            "type": "article",
-            "authorName": "Teacher Added",
-            "text": "Updated Text Content"
-          }
-        },
-        {
-          "id": "source_1791291200061_y8qaz",
-          "topicId": "climate-change",
-          "orderIndex": 9,
-          "title": "Teacher Supplementary Report",
-          "content": {
-            "type": "article",
-            "authorName": "Dr. Jane Smith",
-            "text": "Supplementary findings on Arctic sea ice extent trends."
-          }
-        },
-        {
-          "id": "source_1791291200093_lftq5",
-          "topicId": "climate-change",
-          "orderIndex": 10,
-          "title": "Updated Title",
-          "content": {
-            "type": "article",
-            "authorName": "Teacher Added",
-            "text": "Updated Text Content"
-          }
         }
       ]
     ],
@@ -166,21 +100,21 @@
     [
       "CLASS_B_2026",
       {
-        "id": "code_1791291200150",
+        "id": "code_1791292082668",
         "code": "CLASS_B_2026",
         "teacherId": "teacher-123",
-        "createdAt": "2026-10-06T12:53:20.150Z",
-        "expiresAt": "2026-11-05T12:53:20.150Z"
+        "createdAt": "2026-10-06T13:08:02.668Z",
+        "expiresAt": "2026-11-05T13:08:02.668Z"
       }
     ],
     [
       "EXP_CHEM_2026",
       {
-        "id": "code_1791291200324",
+        "id": "code_1791292082927",
         "code": "EXP_CHEM_2026",
         "teacherId": "teacher-demo",
-        "createdAt": "2026-10-06T12:53:20.324Z",
-        "expiresAt": "2026-11-05T12:53:20.324Z"
+        "createdAt": "2026-10-06T13:08:02.927Z",
+        "expiresAt": "2026-11-05T13:08:02.927Z"
       }
     ],
     [
@@ -223,7 +157,7 @@
         "topicTitle": "Climate Change",
         "currentStage": "synthesise",
         "status": "in_progress",
-        "lastActive": "2026-10-06T12:53:20.155Z"
+        "lastActive": "2026-10-06T13:08:02.679Z"
       }
     ],
     [
@@ -234,7 +168,7 @@
         "topicTitle": "Climate Change",
         "currentStage": "familiarise",
         "status": "in_progress",
-        "lastActive": "2026-10-06T11:38:38.097Z"
+        "lastActive": "2026-10-06T12:58:30.248Z"
       }
     ],
     [
@@ -246,6 +180,17 @@
         "currentStage": "inquire",
         "status": "in_progress",
         "lastActive": "2026-10-06T11:42:08.435Z"
+      }
+    ],
+    [
+      "P1",
+      {
+        "studentId": "student_5031",
+        "accessCode": "P1",
+        "topicTitle": "Climate Change",
+        "currentStage": "conceptualise",
+        "status": "in_progress",
+        "lastActive": "2026-10-06T13:09:50.227Z"
       }
     ]
   ]
