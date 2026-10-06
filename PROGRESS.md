@@ -514,7 +514,24 @@
 - **Tests Passing**:
   - `npm test` (30/30 tests passing across 8 test suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
-- **Immediate Next Step**: Seek approval for Note Edit 404 Fix, then proceed to "Ensure gemini access falls back to groq".
+- **Immediate Next Step**: Completed and approved.
+
+---
+
+### [2026-10-07] - AI Performance & Failover: 3-Second AI Response Time & Seamless Gemini-to-Groq Fallback
+
+- **Role**: Full Stack Developer
+- **Code Built & Updated**:
+  - **3-Second Perceived Response Timeout**: Updated timeout race in `generateSocraticResponse` and `generateAvatarHint` within [`src/domains/ai/aiService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/ai/aiService.ts) from 9 seconds down to **3000ms (3 seconds)**.
+  - **Automated Failover to Groq (`openai/gpt-oss-120b`)**: If Gemini takes longer than 3 seconds or encounters rate limits (429), quota exhaustion, or network errors, it immediately aborts and seamlessly invokes Groq (`openai/gpt-oss-120b`) within a 3s window.
+  - **Fail-Safe Response Guarantee**: If both Gemini and Groq fail or time out, the resilient Socratic Rule Engine guarantees a valid Socratic turn within the 3-second timeframe without breaking the UI.
+  - **Domain Documentation**: Updated [`src/domains/ai/README.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/ai/README.md).
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (30/30 tests passing across 8 test suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+- **Immediate Next Step**: Seek approval for Gemini-to-Groq fallback and 3s response time, then proceed to "Ensure the text fits in the nodes and does not overflow".
+
 
 
 

@@ -138,7 +138,7 @@ export async function generateSocraticResponse(
 
   let hadRateLimit = false;
 
-  // 1. Try Google Gen AI (@google/genai SDK) with gemini-3.7-flash and gemini-3.8-flash
+  // 1. Try Google Gen AI (@google/genai SDK) with gemini-3.7-flash and gemini-3.8-flash (3s timeout)
   if (geminiApiKey) {
     try {
       const ai = new GoogleGenAI({ apiKey: geminiApiKey });
@@ -154,7 +154,7 @@ export async function generateSocraticResponse(
           });
 
           const timeoutPromise = new Promise<never>((_, reject) =>
-            setTimeout(() => reject(new Error('Gemini API call timed out after 9s')), 9000)
+            setTimeout(() => reject(new Error(`Gemini (${modelName}) timed out after 3s`)), 3000)
           );
 
           const response = (await Promise.race([apiPromise, timeoutPromise])) as any;
@@ -164,7 +164,7 @@ export async function generateSocraticResponse(
           }
         } catch (mErr: any) {
           if (isRateLimitError(mErr)) hadRateLimit = true;
-          console.warn(`[AI Service] @google/genai (${modelName}) failed:`, mErr?.message || mErr);
+          console.warn(`[AI Service] @google/genai (${modelName}) failed or timed out (3s). Trying next/fallback...`, mErr?.message || mErr);
         }
       }
     } catch (err: any) {
@@ -173,12 +173,12 @@ export async function generateSocraticResponse(
     }
   }
 
-  // 2. Fallback to Groq API (openai/gpt-oss-120b only)
+  // 2. Fallback to Groq API (openai/gpt-oss-120b only, 3s timeout)
   if (groqApiKey) {
     const groqClient = new Groq({ apiKey: groqApiKey });
     for (const modelName of GROQ_FALLBACK_MODELS) {
       try {
-        const completion = await groqClient.chat.completions.create({
+        const groqPromise = groqClient.chat.completions.create({
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: formattedHistory },
@@ -188,18 +188,23 @@ export async function generateSocraticResponse(
           temperature: 0.7,
         });
 
+        const groqTimeoutPromise = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error(`Groq (${modelName}) timed out after 3s`)), 3000)
+        );
+
+        const completion = (await Promise.race([groqPromise, groqTimeoutPromise])) as any;
         const groqText = completion.choices[0]?.message?.content;
         if (groqText && groqText.trim()) {
           return { text: groqText.trim(), provider: 'groq' };
         }
       } catch (err: any) {
         if (isRateLimitError(err)) hadRateLimit = true;
-        console.warn(`[AI Service] Groq (${modelName}) failed:`, err?.message || err);
+        console.warn(`[AI Service] Groq (${modelName}) failed or timed out (3s):`, err?.message || err);
       }
     }
   }
 
-  // If rate limits were encountered on configured providers, return explicit rate limit error
+  // If rate limits were encountered on configured providers and both failed, return explicit rate limit error
   if (hadRateLimit) {
     return {
       text: '⚠️ The AI service is currently rate limited due to high demand. Please wait a few moments and try your response again.',
@@ -208,7 +213,7 @@ export async function generateSocraticResponse(
     };
   }
 
-  // 3. Fallback Socratic Rule Engine if providers are unconfigured
+  // 3. Fallback Socratic Rule Engine if providers are unconfigured or fail
   const fallbackSocraticReplies = [
     'What specific evidence from the sources supports that perspective? How might someone with an opposing view challenge it?',
     'If we look at long-term regional climate trends versus short-term weather anomalies, how does that affect your conclusion?',
@@ -294,22 +299,28 @@ REQUIREMENTS:
 
   let hadRateLimit = false;
 
-  // 1. Try Google Gen AI (@google/genai SDK) with gemini-3.7-flash and gemini-3.8-flash
+  // 1. Try Google Gen AI (@google/genai SDK) with gemini-3.7-flash and gemini-3.8-flash (3s timeout)
   if (geminiApiKey) {
     try {
       const ai = new GoogleGenAI({ apiKey: geminiApiKey });
       for (const modelName of GEMINI_FALLBACK_MODELS) {
         try {
-          const res = await ai.models.generateContent({
+          const apiPromise = ai.models.generateContent({
             model: modelName,
             contents: prompt,
             config: { maxOutputTokens: 1024, temperature: 0.7 },
           });
+
+          const timeoutPromise = new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error(`Gemini hint (${modelName}) timed out after 3s`)), 3000)
+          );
+
+          const res = (await Promise.race([apiPromise, timeoutPromise])) as any;
           const text = res?.text;
           if (text && text.trim()) return { text: text.trim(), provider: 'gemini' };
         } catch (e: any) {
           if (isRateLimitError(e)) hadRateLimit = true;
-          console.warn(`[AI Service Hint] @google/genai (${modelName}) failed:`, e?.message || e);
+          console.warn(`[AI Service Hint] @google/genai (${modelName}) failed or timed out (3s). Falling back...`, e?.message || e);
         }
       }
     } catch (err: any) {
@@ -318,22 +329,28 @@ REQUIREMENTS:
     }
   }
 
-  // 2. Try Groq (openai/gpt-oss-120b only)
+  // 2. Try Groq (openai/gpt-oss-120b only, 3s timeout)
   if (groqApiKey) {
     const groqClient = new Groq({ apiKey: groqApiKey });
     for (const modelName of GROQ_FALLBACK_MODELS) {
       try {
-        const completion = await groqClient.chat.completions.create({
+        const groqPromise = groqClient.chat.completions.create({
           messages: [{ role: 'user', content: prompt }],
           model: modelName,
           max_tokens: 1024,
           temperature: 0.7,
         });
+
+        const groqTimeoutPromise = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error(`Groq hint (${modelName}) timed out after 3s`)), 3000)
+        );
+
+        const completion = (await Promise.race([groqPromise, groqTimeoutPromise])) as any;
         const text = completion.choices[0]?.message?.content;
         if (text && text.trim()) return { text: text.trim(), provider: 'groq' };
       } catch (e: any) {
         if (isRateLimitError(e)) hadRateLimit = true;
-        console.warn(`[AI Service Hint] Groq (${modelName}) failed:`, e?.message || e);
+        console.warn(`[AI Service Hint] Groq (${modelName}) failed or timed out (3s):`, e?.message || e);
       }
     }
   }
