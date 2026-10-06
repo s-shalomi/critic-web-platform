@@ -13,6 +13,15 @@ export interface ConceptNode {
   linkCount?: number;
 }
 
+export function getNodeDiameter(text: string): number {
+  const len = (text || '').trim().length;
+  if (len <= 15) return 120;
+  if (len <= 30) return 145;
+  if (len <= 55) return 175;
+  if (len <= 85) return 205;
+  return 240;
+}
+
 export interface ConceptLink {
   id: string;
   fromNodeId: string;
@@ -380,13 +389,7 @@ export default function ConceptMapCanvas({
           const isSelected = selectedNodeId === node.id;
           const isLinkSource = linkSourceNodeId === node.id;
           const isEditing = editingNodeId === node.id;
-
-          const labelClass =
-            node.text.length > 28
-              ? styles.nodeLabelExtraSmall
-              : node.text.length > 16
-              ? styles.nodeLabelSmall
-              : styles.nodeLabel;
+          const diameter = getNodeDiameter(node.text);
 
           return (
             <div
@@ -397,8 +400,8 @@ export default function ConceptMapCanvas({
               style={{
                 left: `${node.positionX}px`,
                 top: `${node.positionY}px`,
-                width: '110px',
-                height: '110px',
+                width: `${diameter}px`,
+                height: `${diameter}px`,
               }}
               title={node.text}
               onMouseDown={(e) => handleMouseDownNode(e, node.id)}
@@ -441,7 +444,7 @@ export default function ConceptMapCanvas({
                 </div>
               ) : (
                 <>
-                  <span className={labelClass} title={node.text}>
+                  <span className={styles.nodeLabel} title={node.text}>
                     {node.text}
                   </span>
 
@@ -485,10 +488,12 @@ export default function ConceptMapCanvas({
             if (!fromNode || !toNode) return null;
 
             const isHovered = hoveredLinkId === link.id;
-            const x1 = fromNode.positionX + 55;
-            const y1 = fromNode.positionY + 55;
-            const x2 = toNode.positionX + 55;
-            const y2 = toNode.positionY + 55;
+            const fromDiameter = getNodeDiameter(fromNode.text);
+            const toDiameter = getNodeDiameter(toNode.text);
+            const x1 = fromNode.positionX + fromDiameter / 2;
+            const y1 = fromNode.positionY + fromDiameter / 2;
+            const x2 = toNode.positionX + toDiameter / 2;
+            const y2 = toNode.positionY + toDiameter / 2;
 
             return (
               <g
