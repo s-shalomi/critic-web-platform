@@ -276,7 +276,11 @@ export default function FamiliariseStagePage() {
       const res = await fetch(`/api/modules/${moduleId}/agent/hint`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ stage: 'familiarise' }),
+        body: JSON.stringify({
+          stage: 'familiarise',
+          sourceTitle: currentSource?.title,
+          sourceText: currentSource?.content?.text,
+        }),
       });
       const data = await res.json();
       if (data.hint) {

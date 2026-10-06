@@ -89,10 +89,15 @@ export default function ConceptualiseStagePage() {
       const current = parseInt(localStorage.getItem(hintKey) || '0', 10);
       localStorage.setItem(hintKey, String(current + 1));
 
+      const activeSource = sources[0];
       const res = await fetch(`/api/modules/${moduleId}/agent/hint`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ stage: 'conceptualise' }),
+        body: JSON.stringify({
+          stage: 'conceptualise',
+          sourceTitle: activeSource?.title,
+          sourceText: activeSource?.content?.text,
+        }),
       });
       const data = await res.json();
       if (data.hint) setAgentSpeech(data.hint);

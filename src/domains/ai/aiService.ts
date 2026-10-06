@@ -1,7 +1,8 @@
 /**
  * Socratic AI Agent Service
  * Handles Gemini free tier API calls with automatic, seamless fallback to Groq on rate limit (429) or failure.
- * Enforces Socratic questioning, Devil's Advocate mode, non-definitive guardrails, and context window compression.
+ * Enforces Socratic questioning, Devil's Advocate mode, non-definitive guardrails, context window compression,
+ * and dynamic avatar hint generation for Familiarise and Conceptualise stages per requirements.md.
  */
 
 import { GoogleGenerativeAI } from '@google/generative-ai';
@@ -32,13 +33,24 @@ function getSanitizedKey(keyName: string): string {
 }
 
 /**
+ * Candidate model lists for resilience against provider model deprecations/updates
+ */
+const GEMINI_MODELS = ['gemini-3.8-flash', 'gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-pro'];
+const GROQ_MODELS = ['openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'qwen/qwen3.8-27b', 'allam-2-7b'];
+
+/**
  * Constructs system prompt enforcing Socratic guardrails and persona tone
  */
-export function buildSocraticSystemPrompt(snapshot: ModuleSnapshot, mode: 'Socratic' | 'DevilsAdvocate' = 'Socratic'): string {
+export function buildSocraticSystemPrompt(
+  snapshot: ModuleSnapshot,
+  mode: 'Socratic' | 'DevilsAdvocate' = 'Socratic'
+): string {
   const avatarName = snapshot.avatarName || 'Aria';
   const tone = snapshot.agentPersonality || 'Socratic Peer';
 
-  const notesText = snapshot.notes.map((n) => `-[Highlight: "${n.highlightedText}"] Note: "${n.noteText}"`).join('\n');
+  const notesText = snapshot.notes
+    .map((n) => `-[Highlight: "${n.highlightedText}"] Note: "${n.noteText}"`)
+    .join('\n');
   const nodesText = snapshot.conceptNodes.map((n) => `-[Concept Node: "${n.text}"]`).join('\n');
 
   return `
@@ -63,7 +75,11 @@ ${nodesText || '(No concept nodes created yet)'}
 
 ${snapshot.synthesisDraft ? `STUDENT DRAFT SYNTHESIS:\n${snapshot.synthesisDraft}` : ''}
 
-CURRENT MODE: ${mode === 'DevilsAdvocate' ? "DEVIL'S ADVOCATE MODE (Simulate a common opposing argument or popular climate skepticism claim, clearly asking the student to critique its validity without claiming it is your true belief)." : 'SOCRATIC INQUIRY MODE'}
+CURRENT MODE: ${
+    mode === 'DevilsAdvocate'
+      ? "DEVIL'S ADVOCATE MODE (Simulate a common opposing argument or popular climate skepticism claim, clearly asking the student to critique its validity without claiming it is your true belief)."
+      : 'SOCRATIC INQUIRY MODE'
+  }
   `.trim();
 }
 
@@ -101,52 +117,55 @@ export async function generateSocraticResponse(
 
   // 1. Try Google Gemini API first
   if (geminiApiKey) {
-    try {
-      const genAI = new GoogleGenerativeAI(geminiApiKey);
-      const model = genAI.getGenerativeModel({
-        model: 'gemini-1.5-flash',
-        generationConfig: {
-          maxOutputTokens: 300,
-          temperature: 0.7,
-        },
-      });
+    const genAI = new GoogleGenerativeAI(geminiApiKey);
+    for (const modelName of GEMINI_MODELS) {
+      try {
+        const model = genAI.getGenerativeModel({
+          model: modelName,
+          generationConfig: {
+            maxOutputTokens: 300,
+            temperature: 0.7,
+          },
+        });
 
-      // 9-second timeout promise race per requirements.md (~10s max perceived response time)
-      const apiPromise = model.generateContent(fullPrompt);
-      const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error('Gemini API call timed out after 9s')), 9000)
-      );
+        const apiPromise = model.generateContent(fullPrompt);
+        const timeoutPromise = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('Gemini API call timed out after 9s')), 9000)
+        );
 
-      const result = (await Promise.race([apiPromise, timeoutPromise])) as any;
-      const responseText = result?.response?.text();
-      if (responseText && responseText.trim()) {
-        return { text: responseText.trim(), provider: 'gemini' };
+        const result = (await Promise.race([apiPromise, timeoutPromise])) as any;
+        const responseText = result?.response?.text();
+        if (responseText && responseText.trim()) {
+          return { text: responseText.trim(), provider: 'gemini' };
+        }
+      } catch (err: any) {
+        console.warn(`[AI Service] Gemini (${modelName}) failed:`, err?.message || err);
       }
-    } catch (err: any) {
-      console.warn('[AI Service] Gemini API call failed or timed out. Falling back to Groq...', err?.message || err);
     }
   }
 
   // 2. Fallback to Groq API on Gemini failure/timeout/rate-limit
   if (groqApiKey) {
-    try {
-      const groqClient = new Groq({ apiKey: groqApiKey });
-      const completion = await groqClient.chat.completions.create({
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: formattedHistory },
-        ],
-        model: 'llama-3.3-70b-versatile',
-        max_tokens: 300,
-        temperature: 0.7,
-      });
+    const groqClient = new Groq({ apiKey: groqApiKey });
+    for (const modelName of GROQ_MODELS) {
+      try {
+        const completion = await groqClient.chat.completions.create({
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: formattedHistory },
+          ],
+          model: modelName,
+          max_tokens: 300,
+          temperature: 0.7,
+        });
 
-      const groqText = completion.choices[0]?.message?.content;
-      if (groqText && groqText.trim()) {
-        return { text: groqText.trim(), provider: 'groq' };
+        const groqText = completion.choices[0]?.message?.content;
+        if (groqText && groqText.trim()) {
+          return { text: groqText.trim(), provider: 'groq' };
+        }
+      } catch (err: any) {
+        console.warn(`[AI Service] Groq (${modelName}) failed:`, err?.message || err);
       }
-    } catch (err: any) {
-      console.warn('[AI Service] Groq API call failed as well.', err?.message || err);
     }
   }
 
@@ -158,7 +177,105 @@ export async function generateSocraticResponse(
     'How do the scientific observations in your notes compare with public social claims on this issue?',
   ];
 
-  const randomReply = fallbackSocraticReplies[Math.floor(Math.random() * fallbackSocraticReplies.length)];
+  const randomReply =
+    fallbackSocraticReplies[Math.floor(Math.random() * fallbackSocraticReplies.length)];
   return { text: randomReply, provider: 'fallback_rule' };
 }
 
+/**
+ * Dynamic Avatar Socratic Hint Generator for Familiarise and Conceptualise stages per requirements.md:
+ * "When student clicks on avatar, the agent asks one Socratic Question related to the source currently in view and the student's existing notes/nodes"
+ */
+export async function generateAvatarHint(params: {
+  stage: string;
+  topicTitle?: string;
+  sourceTitle?: string;
+  sourceText?: string;
+  notes?: Array<{ highlightedText: string; noteText: string }>;
+  conceptNodes?: Array<{ text: string }>;
+  agentPersonality?: string;
+  avatarName?: string;
+}): Promise<{ text: string; provider: 'gemini' | 'groq' | 'fallback_rule' }> {
+  const geminiApiKey = getSanitizedKey('GEMINI_API_KEY');
+  const groqApiKey = getSanitizedKey('GROQ_API_KEY');
+
+  const avatarName = params.avatarName || 'Aria';
+  const tone = params.agentPersonality || 'Socratic Peer';
+  const stage = params.stage || 'familiarise';
+  const topicTitle = params.topicTitle || 'Climate Change';
+
+  const notesList = (params.notes || []).map((n) => `"${n.noteText}"`).join(', ');
+  const nodesList = (params.conceptNodes || []).map((n) => `"${n.text}"`).join(', ');
+
+  const prompt = `
+You are ${avatarName}, an AI peer acting as a ${tone} on the topic of "${topicTitle}".
+The student is currently on the "${stage}" stage and just clicked on your avatar for guidance.
+
+CONTEXT:
+Source currently in view: ${params.sourceTitle || 'Climate Evidence Source'}
+Source content excerpt: "${params.sourceText ? params.sourceText.slice(0, 350) : 'General evidence on climate patterns'}"
+Student's existing notes: ${notesList || 'None yet'}
+Student's concept nodes: ${nodesList || 'None yet'}
+
+REQUIREMENTS:
+1. Provide exactly ONE concise, probing Socratic Question related to the source currently on screen and the student's reasoning.
+2. DO NOT deliver any direct factual statements, conclusions, or answers.
+3. Keep the response to 1-2 short sentences ending in a question.
+  `.trim();
+
+  // 1. Try Gemini
+  if (geminiApiKey) {
+    const genAI = new GoogleGenerativeAI(geminiApiKey);
+    for (const modelName of GEMINI_MODELS) {
+      try {
+        const model = genAI.getGenerativeModel({
+          model: modelName,
+          generationConfig: { maxOutputTokens: 120, temperature: 0.7 },
+        });
+        const res = await model.generateContent(prompt);
+        const text = res?.response?.text();
+        if (text && text.trim()) return { text: text.trim(), provider: 'gemini' };
+      } catch (e: any) {
+        console.warn(`[AI Service Hint] Gemini (${modelName}) failed:`, e?.message || e);
+      }
+    }
+  }
+
+  // 2. Try Groq
+  if (groqApiKey) {
+    const groqClient = new Groq({ apiKey: groqApiKey });
+    for (const modelName of GROQ_MODELS) {
+      try {
+        const completion = await groqClient.chat.completions.create({
+          messages: [{ role: 'user', content: prompt }],
+          model: modelName,
+          max_tokens: 120,
+          temperature: 0.7,
+        });
+        const text = completion.choices[0]?.message?.content;
+        if (text && text.trim()) return { text: text.trim(), provider: 'groq' };
+      } catch (e: any) {
+        console.warn(`[AI Service Hint] Groq (${modelName}) failed:`, e?.message || e);
+      }
+    }
+  }
+
+  // 3. Fallback hints
+  const fallbackHints: Record<string, string[]> = {
+    familiarise: [
+      'What underlying assumptions might the author be making in this claim?',
+      'What evidence in this source could challenge or support your initial thoughts?',
+      'How does this evidence distinguish between short-term weather anomalies and long-term climate trends?',
+      'What additional data would you need before trusting the claim in this source?',
+    ],
+    conceptualise: [
+      'How does this concept node connect to the evidence you highlighted earlier?',
+      'What cause-and-effect relationship might exist between these two connected nodes?',
+      'Is there an intermediate assumption or missing link connecting your concepts?',
+    ],
+  };
+
+  const list = fallbackHints[stage] || fallbackHints.familiarise;
+  const hint = list[Math.floor(Math.random() * list.length)];
+  return { text: hint, provider: 'fallback_rule' };
+}

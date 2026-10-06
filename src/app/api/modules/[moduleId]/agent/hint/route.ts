@@ -1,18 +1,7 @@
 import { NextResponse } from 'next/server';
-
-const SOCRATIC_HINTS: Record<string, string[]> = {
-  familiarise: [
-    'What underlying assumptions might the author be making in this claim?',
-    'What evidence would change your mind about the statement you just read?',
-    'How might someone with a different background interpret this source?',
-    'Is this statement describing a short-term weather observation or a long-term climate trend?',
-  ],
-  conceptualise: [
-    'How does this concept connect to the evidence you highlighted earlier?',
-    'What cause-and-effect relationship exists between these two nodes?',
-    'Is there a missing intermediate concept between these links?',
-  ],
-};
+import { generateAvatarHint } from '@/domains/ai/aiService';
+import { getNotesForModule } from '@/domains/notes/noteService';
+import { getConceptualiseData } from '@/domains/concepts/conceptService';
 
 export async function POST(
   request: Request,
@@ -21,15 +10,35 @@ export async function POST(
   try {
     const body = await request.json().catch(() => ({}));
     const stage = body.stage || 'familiarise';
+    const sourceTitle = body.sourceTitle;
+    const sourceText = body.sourceText;
+    const agentPersonality = body.agentPersonality;
+    const avatarName = body.avatarName;
 
-    const hints = SOCRATIC_HINTS[stage] || SOCRATIC_HINTS.familiarise;
-    const randomHint = hints[Math.floor(Math.random() * hints.length)];
+    // Retrieve active module notes and concept nodes
+    const notesData = await getNotesForModule(params.moduleId);
+    const conceptsData = await getConceptualiseData(params.moduleId);
+
+    const hintResult = await generateAvatarHint({
+      stage,
+      topicTitle: 'Climate Change',
+      sourceTitle,
+      sourceText,
+      notes: notesData.map((n) => ({
+        highlightedText: n.highlightedText,
+        noteText: n.noteText,
+      })),
+      conceptNodes: conceptsData.nodes.map((n) => ({ text: n.text })),
+      agentPersonality,
+      avatarName,
+    });
 
     return NextResponse.json({
       success: true,
-      hint: randomHint,
-      agentName: 'Aria',
-      personality: 'Socratic Peer',
+      hint: hintResult.text,
+      provider: hintResult.provider,
+      agentName: avatarName || 'Aria',
+      personality: agentPersonality || 'Socratic Peer',
     });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to generate agent hint' }, { status: 500 });

@@ -391,3 +391,22 @@
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
   - `npx next build` (100% clean production build).
 - **Immediate Next Step**: Ready for user review and approval.
+
+---
+
+### [2026-10-06] - LLM Integration: Dynamic Hints in Familiarise/Conceptualise & Updated Model Handlers
+
+- **Role**: Full Stack Developer
+- **Code Built & Updated**:
+  - **Dynamic LLM Avatar Hints for Familiarise & Conceptualise**:
+    - Created `generateAvatarHint` in [`src/domains/ai/aiService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/ai/aiService.ts) per `requirements.md` ("When student clicks on avatar, the agent asks one Socratic Question related to the source currently in view and the student's existing notes/nodes").
+    - Updated [`src/app/api/modules/[moduleId]/agent/hint/route.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/api/modules/%5BmoduleId%5D/agent/hint/route.ts) to gather active notes and concept nodes snapshot and invoke `generateAvatarHint`.
+    - Updated avatar click handlers in [`src/app/module/[moduleId]/familiarise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/familiarise/page.tsx) and [`src/app/module/[moduleId]/conceptualise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/conceptualise/page.tsx) to pass current source title and content into the hint API request.
+  - **Updated LLM Model Resiliency**:
+    - Updated candidate models in `aiService.ts` for Gemini (`gemini-3.8-flash`, `gemini-1.5-flash`, `gemini-pro`) and Groq (`openai/gpt-oss-120b`, `openai/gpt-oss-20b`, `qwen/qwen3.8-27b`, `allam-2-7b`).
+    - Handled fallback gracefully to contextual Socratic rule engine on network / provider rate limits.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (28/28 tests passing across 8 suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+- **Immediate Next Step**: Ready for user review and approval.
