@@ -35,6 +35,7 @@ export default function ConceptualiseStagePage() {
 
   const [showIntroModal, setShowIntroModal] = useState<boolean>(true);
   const [agentSpeech, setAgentSpeech] = useState<string | null>(null);
+  const [agentLoading, setAgentLoading] = useState<boolean>(false);
 
   // Left Sources & Notes State
   const [sources, setSources] = useState<Source[]>([]);
@@ -84,6 +85,10 @@ export default function ConceptualiseStagePage() {
   }, [moduleId]);
 
   const handleAgentClick = async () => {
+    if (agentLoading) return;
+    setAgentLoading(true);
+    setAgentSpeech(null);
+
     try {
       const hintKey = getStudentStorageKey('critic_hints', moduleId);
       const current = parseInt(localStorage.getItem(hintKey) || '0', 10);
@@ -116,9 +121,15 @@ export default function ConceptualiseStagePage() {
         }),
       });
       const data = await res.json();
-      if (data.hint) setAgentSpeech(data.hint);
+      if (data.hint) {
+        setAgentSpeech(data.hint);
+      } else if (data.error) {
+        setAgentSpeech('⚠️ AI service is experiencing high demand. Please try clicking again in a few moments.');
+      }
     } catch (err) {
       setAgentSpeech('How does this concept connect to the evidence you highlighted earlier?');
+    } finally {
+      setAgentLoading(false);
     }
   };
 
@@ -257,7 +268,13 @@ export default function ConceptualiseStagePage() {
 
       {/* Socratic Agent Avatar */}
       <div className={styles.agentContainer}>
-        {agentSpeech && (
+        {agentLoading && (
+          <div className={styles.loadingSpeechBubble}>
+            <div className={styles.spinnerSmall} />
+            <span className={styles.loadingBubbleText}>Aria is analyzing your concept map &amp; formulating hint...</span>
+          </div>
+        )}
+        {!agentLoading && agentSpeech && (
           <div className={styles.speechBubble}>
             <div className={styles.speechHeader}>Aria (Socratic Peer)</div>
             <p>{agentSpeech}</p>
@@ -268,8 +285,9 @@ export default function ConceptualiseStagePage() {
         )}
         <button
           onClick={handleAgentClick}
-          className={styles.agentAvatarBtn}
-          title="Click Aria for Socratic Hints"
+          disabled={agentLoading}
+          className={`${styles.agentAvatarBtn} ${agentLoading ? styles.agentAvatarBtnLoading : ''}`}
+          title={agentLoading ? 'Aria is analyzing concept map...' : 'Click Aria for Socratic Hints'}
         >
           <div className={styles.robotHead}>
             <div className={styles.robotEyes} />

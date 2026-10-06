@@ -480,7 +480,26 @@
 - **Tests Passing**:
   - `npm test` (29/29 tests passing across 8 test suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
-- **Immediate Next Step**: Seek approval for Fix 3, then proceed to Fix 4 ("need loading indicator for ai in familiarise and conceptualise").
+- **Immediate Next Step**: Completed and approved. Proceed to Fix 4.
+
+---
+
+### [2026-10-07] - Fix 4: AI Loading Indicators in Familiarise and Conceptualise Stages
+
+- **Role**: Full Stack Developer
+- **Code Built & Updated**:
+  - **Asynchronous AI Request Management**: Added `agentLoading` state and try/finally lifecycle handling in [`src/app/module/[moduleId]/familiarise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/familiarise/page.tsx) and [`src/app/module/[moduleId]/conceptualise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/conceptualise/page.tsx).
+  - **Animated Cyberpunk Loading Speech Bubbles**: Created `.loadingSpeechBubble`, `.spinnerSmall`, and `.loadingBubbleText` showing animated spinning cyan indicators and context messages:
+    - Familiarise: *"Aria is analyzing evidence & formulating hint..."*
+    - Conceptualise: *"Aria is analyzing your concept map & formulating hint..."*
+  - **Interactive Button States**: Styled `.agentAvatarBtnLoading` with glowing pulse animations (`@keyframes agentPulse`), wait cursor, and disabled click handling while requests are in flight to prevent duplicate requests.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (29/29 tests passing across 8 test suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+  - `npm run build` (100% successful Next.js App Router build with 0 compilation errors across 11 routes).
+- **Immediate Next Step**: Seek approval for Fix 4 and report full task completion.
+
 
 
 

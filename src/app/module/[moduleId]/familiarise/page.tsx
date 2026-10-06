@@ -38,6 +38,7 @@ export default function FamiliariseStagePage() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [showIntroModal, setShowIntroModal] = useState<boolean>(true);
   const [agentSpeech, setAgentSpeech] = useState<string | null>(null);
+  const [agentLoading, setAgentLoading] = useState<boolean>(false);
 
   // Highlighting creation state
   const [selectedText, setSelectedText] = useState<string>('');
@@ -268,6 +269,10 @@ export default function FamiliariseStagePage() {
   };
 
   const handleAgentClick = async () => {
+    if (agentLoading) return;
+    setAgentLoading(true);
+    setAgentSpeech(null);
+
     try {
       const hintKey = getStudentStorageKey('critic_hints', moduleId);
       const current = parseInt(localStorage.getItem(hintKey) || '0', 10);
@@ -285,9 +290,13 @@ export default function FamiliariseStagePage() {
       const data = await res.json();
       if (data.hint) {
         setAgentSpeech(data.hint);
+      } else if (data.error) {
+        setAgentSpeech('⚠️ AI service is experiencing high demand. Please try clicking again in a few moments.');
       }
     } catch (err) {
       setAgentSpeech('What underlying assumptions might the author be making in this claim?');
+    } finally {
+      setAgentLoading(false);
     }
   };
 
@@ -543,14 +552,25 @@ export default function FamiliariseStagePage() {
 
       {/* Socratic Agent Avatar */}
       <div className={styles.agentContainer}>
-        {agentSpeech && (
+        {agentLoading && (
+          <div className={styles.loadingSpeechBubble}>
+            <div className={styles.spinnerSmall} />
+            <span className={styles.loadingBubbleText}>Aria is analyzing evidence &amp; formulating hint...</span>
+          </div>
+        )}
+        {!agentLoading && agentSpeech && (
           <div className={styles.speechBubble}>
             <div className={styles.speechHeader}>Aria (Socratic Peer)</div>
             <p>{agentSpeech}</p>
             <button onClick={() => setAgentSpeech(null)} className={styles.closeSpeechBtn}>✕</button>
           </div>
         )}
-        <button onClick={handleAgentClick} className={styles.agentAvatarBtn} title="Click Aria for Socratic Hints">
+        <button
+          onClick={handleAgentClick}
+          disabled={agentLoading}
+          className={`${styles.agentAvatarBtn} ${agentLoading ? styles.agentAvatarBtnLoading : ''}`}
+          title={agentLoading ? 'Aria is analyzing evidence...' : 'Click Aria for Socratic Hints'}
+        >
           <div className={styles.robotHead}>
             <div className={styles.robotEyes} />
           </div>
