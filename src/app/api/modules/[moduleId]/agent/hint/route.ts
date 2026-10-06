@@ -15,9 +15,18 @@ export async function POST(
     const agentPersonality = body.agentPersonality;
     const avatarName = body.avatarName;
 
-    // Retrieve active module notes and concept nodes
+    // Retrieve active module notes and concept nodes (combining client payload with server store)
     const notesData = await getNotesForModule(params.moduleId);
     const conceptsData = await getConceptualiseData(params.moduleId);
+
+    // Prefer client's real-time canvas concept nodes if provided
+    const conceptNodes = Array.isArray(body.conceptNodes) && body.conceptNodes.length > 0
+      ? body.conceptNodes
+      : conceptsData.nodes.map((n) => ({ text: n.text }));
+
+    const conceptLinks = Array.isArray(body.conceptLinks)
+      ? body.conceptLinks
+      : conceptsData.links;
 
     const hintResult = await generateAvatarHint({
       stage,
@@ -28,7 +37,8 @@ export async function POST(
         highlightedText: n.highlightedText,
         noteText: n.noteText,
       })),
-      conceptNodes: conceptsData.nodes.map((n) => ({ text: n.text })),
+      conceptNodes,
+      conceptLinks,
       agentPersonality,
       avatarName,
     });

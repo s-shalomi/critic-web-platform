@@ -460,7 +460,28 @@
 - **Tests Passing**:
   - `npm test` (28/28 tests passing across 8 test suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
-- **Immediate Next Step**: Seek approval for Fix 2, then proceed to Fix 3 ("llm for conceptualise stage should be based on concept nodes").
+- **Immediate Next Step**: Completed and approved. Proceed to Fix 3.
+
+---
+
+### [2026-10-07] - Fix 3: LLM for Conceptualise Stage Based on Concept Nodes & Canvas Links
+
+- **Role**: Full Stack Developer
+- **Code Built & Updated**:
+  - **Live Concept Nodes & Links Extraction**: In [`src/app/module/[moduleId]/conceptualise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/conceptualise/page.tsx), updated `handleAgentClick` to extract the student's live canvas concept nodes (`critic_nodes_canvas_${moduleId}`) and connection links (`critic_links_canvas_${moduleId}`) and send them in the hint API payload.
+  - **Hint Route Handler Aggregation**: Updated [`src/app/api/modules/[moduleId]/agent/hint/route.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/api/modules/%5BmoduleId%5D/agent/hint/route.ts) to receive client canvas state and merge with the database store.
+  - **Concept-Centric Socratic Prompt Strategy**: Updated `generateAvatarHint` in [`src/domains/ai/aiService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/ai/aiService.ts) to specialize the Conceptualise stage prompt:
+    - If multiple concept nodes exist: Aria questions the relationship, causation, or underlying assumptions connecting specific student-created nodes (e.g. comparing node A and node B) or asks what mechanism connects them.
+    - If one concept node exists: Aria prompts for counter-evidence or expanding concepts to connect.
+    - If no concept nodes exist: Aria guides the student to convert evidence claims into their initial nodes.
+  - **Dynamic Fallback Hints**: Implemented node-aware fallback rules in `aiService.ts` that dynamically inject the student's actual concept node titles into Socratic questions when offline.
+  - **Test Suite Expansion**: Added unit test in `tests/ai.test.ts` for concept-node hint generation.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (29/29 tests passing across 8 test suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+- **Immediate Next Step**: Seek approval for Fix 3, then proceed to Fix 4 ("need loading indicator for ai in familiarise and conceptualise").
+
 
 
 

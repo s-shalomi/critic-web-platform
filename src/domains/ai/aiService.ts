@@ -232,6 +232,7 @@ export async function generateAvatarHint(params: {
   sourceText?: string;
   notes?: Array<{ highlightedText: string; noteText: string }>;
   conceptNodes?: Array<{ text: string }>;
+  conceptLinks?: Array<{ fromNodeId?: string; toNodeId?: string }>;
   agentPersonality?: string;
   avatarName?: string;
 }): Promise<{ text: string; provider: 'gemini' | 'groq' | 'fallback_rule' | 'rate_limit_error'; isError?: boolean }> {
@@ -245,29 +246,32 @@ export async function generateAvatarHint(params: {
 
   const notesList = (params.notes || []).map((n) => `"${n.noteText}"`).join(', ');
   const nodesList = (params.conceptNodes || []).map((n) => `"${n.text}"`).join(', ');
+  const linksCount = (params.conceptLinks || []).length;
 
   let prompt = '';
   if (stage === 'conceptualise') {
-    // Conceptualise stage: LLM hint is specifically driven by concept nodes
+    // Conceptualise stage: LLM hint is specifically driven by concept nodes and links
     prompt = `
 You are ${avatarName}, an AI peer acting as a ${tone} on the topic of "${topicTitle}".
 The student is currently on the "conceptualise" stage, where they build a visual concept map of ideas and evidence.
-The student just clicked on your avatar for guidance.
+The student just clicked on your avatar for guidance on their concept map.
 
 STUDENT'S EXISTING CONCEPT NODES:
 ${nodesList || '(No concept nodes created yet on the canvas)'}
 
+STUDENT'S CONCEPT CONNECTIONS / LINKS:
+${linksCount > 0 ? `${linksCount} links connected between nodes` : 'No connections linked between nodes yet'}
+
 STUDENT'S EVIDENCE NOTES:
 ${notesList || '(No notes taken yet)'}
 
-CURRENT SOURCE IN VIEW:
-${params.sourceTitle || 'Climate Evidence Source'}: "${params.sourceText ? params.sourceText.slice(0, 300) : ''}"
-
-REQUIREMENTS:
-1. If the student has created concept nodes, ask a probing Socratic Question specifically about how their concept nodes relate to each other, what underlying assumptions connect them, or what key concept node might be missing.
-2. If the student has NO concept nodes yet, ask a Socratic question prompting them to convert key ideas from their evidence notes into their first concept nodes.
-3. DO NOT deliver any direct factual claims, answers, or verdicts.
-4. Keep the response to 1-2 concise, complete sentences ending in a question. Do not leave thoughts unfinished.
+REQUIREMENTS (CONCEPT-NODE BASED GUIDANCE):
+1. Focus your Socratic Question specifically on the student's concept nodes:
+   - If multiple concept nodes exist: Ask a probing question about the relationship, causation, or underlying assumptions between specific nodes (e.g. comparing "${params.conceptNodes?.[0]?.text || 'Node A'}" with "${params.conceptNodes?.[1]?.text || 'Node B'}").
+   - If only 1 concept node exists: Ask what counter-claim or supporting concept from their notes should be added to connect to "${params.conceptNodes?.[0]?.text}".
+   - If 0 concept nodes exist: Ask a question prompting them to convert a key claim from their evidence notes into their first concept node.
+2. DO NOT deliver any direct factual claims, answers, or verdicts.
+3. Keep the response to 1-2 concise, complete sentences ending in a question. Ensure sentences are fully finished.
     `.trim();
   } else {
     // Familiarise stage: driven by source in view and evidence notes
@@ -343,6 +347,27 @@ REQUIREMENTS:
   }
 
   // 3. Fallback hints
+  const nodeA = params.conceptNodes?.[0]?.text;
+  const nodeB = params.conceptNodes?.[1]?.text;
+
+  const conceptualiseFallbackHints = nodeA && nodeB
+    ? [
+        `How do you see "${nodeA}" influencing or causing "${nodeB}" in your reasoning?`,
+        `What underlying evidence or assumption connects "${nodeA}" and "${nodeB}"?`,
+        `Is there an intermediate assumption or missing link connecting "${nodeA}" and "${nodeB}"?`,
+      ]
+    : nodeA
+    ? [
+        `What counter-evidence or complementary concept could you link to "${nodeA}"?`,
+        `What assumptions are embedded inside your concept node "${nodeA}"?`,
+        `How does "${nodeA}" relate back to the climate evidence you gathered?`,
+      ]
+    : [
+        'What key concept from the evidence could you turn into your first concept node?',
+        'How might you represent the cause-and-effect relationships from the sources as nodes?',
+        'Which claim from your notes would make the strongest starting concept node?',
+      ];
+
   const fallbackHints: Record<string, string[]> = {
     familiarise: [
       'What underlying assumptions might the author be making in this claim?',
@@ -350,11 +375,7 @@ REQUIREMENTS:
       'How does this evidence distinguish between short-term weather anomalies and long-term climate trends?',
       'What additional data would you need before trusting the claim in this source?',
     ],
-    conceptualise: [
-      'How does this concept node connect to the evidence you highlighted earlier?',
-      'What cause-and-effect relationship might exist between your connected concept nodes?',
-      'Is there an intermediate assumption or missing link connecting your concepts?',
-    ],
+    conceptualise: conceptualiseFallbackHints,
   };
 
   const list = fallbackHints[stage] || fallbackHints.familiarise;

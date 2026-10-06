@@ -51,6 +51,19 @@ describe('Socratic AI Engine Tests', () => {
     const response = await generateSocraticResponse(history, snapshot);
     expect(response.text).toBeDefined();
     expect(response.text.length).toBeGreaterThan(10);
-    expect(['gemini', 'groq', 'fallback_rule']).toContain(response.provider);
+    expect(['gemini', 'groq', 'fallback_rule', 'rate_limit_error']).toContain(response.provider);
+  });
+
+  test('generateAvatarHint generates concept-node based hint in conceptualise stage', async () => {
+    const { generateAvatarHint } = await import('../src/domains/ai/aiService');
+    const hint = await generateAvatarHint({
+      stage: 'conceptualise',
+      topicTitle: 'Climate Change',
+      conceptNodes: [{ text: 'Carbon Emissions' }, { text: 'Global Temperature Rise' }],
+    });
+
+    expect(hint.text).toBeDefined();
+    expect(hint.text.length).toBeGreaterThan(10);
+    expect(['gemini', 'groq', 'fallback_rule', 'rate_limit_error']).toContain(hint.provider);
   });
 });

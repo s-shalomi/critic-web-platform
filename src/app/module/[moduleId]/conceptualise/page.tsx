@@ -89,6 +89,20 @@ export default function ConceptualiseStagePage() {
       const current = parseInt(localStorage.getItem(hintKey) || '0', 10);
       localStorage.setItem(hintKey, String(current + 1));
 
+      // Retrieve live concept nodes and links from client canvas storage
+      const nodesKey = getStudentStorageKey('critic_nodes_canvas', moduleId);
+      const linksKey = getStudentStorageKey('critic_links_canvas', moduleId);
+      let localNodes: Array<{ text: string }> = [];
+      let localLinks: any[] = [];
+      try {
+        const parsedNodes = JSON.parse(localStorage.getItem(nodesKey) || '[]');
+        if (Array.isArray(parsedNodes)) localNodes = parsedNodes.map((n: any) => ({ text: n.text || '' })).filter((n) => n.text);
+        const parsedLinks = JSON.parse(localStorage.getItem(linksKey) || '[]');
+        if (Array.isArray(parsedLinks)) localLinks = parsedLinks;
+      } catch (e) {
+        /* ignore parse error */
+      }
+
       const activeSource = sources[0];
       const res = await fetch(`/api/modules/${moduleId}/agent/hint`, {
         method: 'POST',
@@ -97,6 +111,8 @@ export default function ConceptualiseStagePage() {
           stage: 'conceptualise',
           sourceTitle: activeSource?.title,
           sourceText: activeSource?.content?.text,
+          conceptNodes: localNodes,
+          conceptLinks: localLinks,
         }),
       });
       const data = await res.json();
