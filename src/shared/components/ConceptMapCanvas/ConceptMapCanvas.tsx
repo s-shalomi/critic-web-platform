@@ -381,6 +381,13 @@ export default function ConceptMapCanvas({
           const isLinkSource = linkSourceNodeId === node.id;
           const isEditing = editingNodeId === node.id;
 
+          const labelClass =
+            node.text.length > 28
+              ? styles.nodeLabelExtraSmall
+              : node.text.length > 16
+              ? styles.nodeLabelSmall
+              : styles.nodeLabel;
+
           return (
             <div
               key={node.id}
@@ -390,9 +397,10 @@ export default function ConceptMapCanvas({
               style={{
                 left: `${node.positionX}px`,
                 top: `${node.positionY}px`,
-                width: '100px',
-                height: '100px',
+                width: '110px',
+                height: '110px',
               }}
+              title={node.text}
               onMouseDown={(e) => handleMouseDownNode(e, node.id)}
               onDoubleClick={(e) => {
                 e.stopPropagation();
@@ -433,7 +441,9 @@ export default function ConceptMapCanvas({
                 </div>
               ) : (
                 <>
-                  <span className={styles.nodeLabel}>{node.text}</span>
+                  <span className={labelClass} title={node.text}>
+                    {node.text}
+                  </span>
 
                   {/* Node Action Controls (Edit / Delete) */}
                   {isSelected && (
@@ -475,10 +485,10 @@ export default function ConceptMapCanvas({
             if (!fromNode || !toNode) return null;
 
             const isHovered = hoveredLinkId === link.id;
-            const x1 = fromNode.positionX + 50;
-            const y1 = fromNode.positionY + 50;
-            const x2 = toNode.positionX + 50;
-            const y2 = toNode.positionY + 50;
+            const x1 = fromNode.positionX + 55;
+            const y1 = fromNode.positionY + 55;
+            const x2 = toNode.positionX + 55;
+            const y2 = toNode.positionY + 55;
 
             return (
               <g

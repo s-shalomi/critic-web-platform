@@ -530,7 +530,25 @@
 - **Tests Passing**:
   - `npm test` (30/30 tests passing across 8 test suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
-- **Immediate Next Step**: Seek approval for Gemini-to-Groq fallback and 3s response time, then proceed to "Ensure the text fits in the nodes and does not overflow".
+- **Immediate Next Step**: Completed and approved.
+
+---
+
+### [2026-10-07] - Canvas & Visualization: Concept Node Text Fitting & Overflow Prevention
+
+- **Role**: Full Stack Developer
+- **Code Built & Updated**:
+  - **Dynamic Multi-Tier Label Typography**: In [`src/shared/components/ConceptMapCanvas/ConceptMapCanvas.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/ConceptMapCanvas/ConceptMapCanvas.tsx) and [`ConceptMapCanvas.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/ConceptMapCanvas/ConceptMapCanvas.module.css), implemented adaptive font scaling based on text character length (`.nodeLabel` for <=16 chars, `.nodeLabelSmall` for 17-28 chars, and `.nodeLabelExtraSmall` for >28 chars).
+  - **Strict Box Constraints & Line Clamping**: Added multi-line clamping (`-webkit-line-clamp: 4` / `5`), `max-width: 92px`, `max-height: 85px`, `word-break: break-word`, and `overflow: hidden; text-overflow: ellipsis` on all concept nodes.
+  - **Standardized Node Proportions & SVG Alignment**: Standardized concept node circle dimensions to 110px with `overflow: hidden` and `padding: 8px 10px`, with SVG connection line endpoints updated to exact circle centers (`positionX + 55, positionY + 55`).
+  - **Native Tooltip Popovers**: Attached `title={node.text}` to each node circle and label so students can hover over any node to view its complete unabridged text.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (30/30 tests passing across 8 test suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+  - `npm run build` (100% successful Next.js App Router build with 0 compilation errors across 11 routes).
+- **Immediate Next Step**: Seek approval for Concept Node text fitting and summarize all completed fixes.
+
 
 
 
