@@ -29,6 +29,18 @@ const groqApiKey = process.env.GROQ_API_KEY || '';
 const genAI = geminiApiKey ? new GoogleGenerativeAI(geminiApiKey) : null;
 const groqClient = groqApiKey ? new Groq({ apiKey: groqApiKey }) : null;
 
+if (!geminiApiKey && !groqApiKey) {
+  console.warn(
+    '[AI Service] ⚠️  NEITHER GEMINI_API_KEY nor GROQ_API_KEY is set in .env. ' +
+    'The agent will use fallback rule-based Socratic replies only. ' +
+    'Add your API keys to .env to enable real LLM responses.'
+  );
+} else if (!geminiApiKey) {
+  console.info('[AI Service] GEMINI_API_KEY not set — will use Groq only.');
+} else if (!groqApiKey) {
+  console.info('[AI Service] GROQ_API_KEY not set — Groq fallback unavailable if Gemini fails.');
+}
+
 /**
  * Constructs system prompt enforcing Socratic guardrails and persona tone
  */

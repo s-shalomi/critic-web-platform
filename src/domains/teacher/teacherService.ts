@@ -7,6 +7,7 @@
 import {
   accessCodeStore,
   studentProgressStore,
+  saveStoreToDisk,
   AccessCodeEntry,
   StudentProgressEntry,
 } from '@/shared/db/sessionStore';
@@ -42,6 +43,7 @@ export async function generateAccessCode(teacherId: string, customCode?: string)
   };
 
   accessCodeStore.set(codeString, accessCode);
+  saveStoreToDisk();
   return accessCode;
 }
 

@@ -30,12 +30,25 @@ export default function DashboardPage() {
     if (enteringTopicId) return;
     setEnteringTopicId(topicId);
 
-    const moduleId = `mod_${topicId}_student_demo`;
-    const savedStage = localStorage.getItem(`critic_current_stage_${topicId}`) || 'familiarise';
-    
-    // If student previously reached review/debrief, restart them at familiarise stage per user specification
+    // Use the logged-in student's actual ID for isolation — not a shared 'demo' suffix
+    let studentId = 'student_demo';
+    try {
+      const userStr = localStorage.getItem('critic_user');
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        studentId = user.id || user.email || user.accessCode || 'student_demo';
+      }
+    } catch (e) {
+      console.error('Could not read critic_user from localStorage', e);
+    }
+
+    const moduleId = `mod_${topicId}_${studentId}`;
+    const stageKey = `critic_current_stage_${studentId}_${topicId}`;
+    const savedStage = localStorage.getItem(stageKey) || localStorage.getItem(`critic_current_stage_${topicId}`) || 'familiarise';
+
+    // If student previously reached review/debrief, restart them at familiarise stage
     const targetStage = savedStage === 'review' ? 'familiarise' : savedStage;
-    
+
     router.push(`/module/${moduleId}/${targetStage}`);
   };
 
@@ -130,16 +143,11 @@ export default function DashboardPage() {
               </div>
               <div className={styles.journeyItem}>
                 <span className={styles.stageNumber}>03</span>
-                <h4 className={styles.stageTitle}>inquire</h4>
-                <p className={styles.stageDesc}>challenge the material</p>
+                <h4 className={styles.stageTitle}>inquire + evaluate</h4>
+                <p className={styles.stageDesc}>challenge the material &amp; assess credibility</p>
               </div>
               <div className={styles.journeyItem}>
                 <span className={styles.stageNumber}>04</span>
-                <h4 className={styles.stageTitle}>evaluate</h4>
-                <p className={styles.stageDesc}>find evidence. assess credibility</p>
-              </div>
-              <div className={styles.journeyItem}>
-                <span className={styles.stageNumber}>05</span>
                 <h4 className={styles.stageTitle}>synthesise</h4>
                 <p className={styles.stageDesc}>reflect and make a conclusion</p>
               </div>

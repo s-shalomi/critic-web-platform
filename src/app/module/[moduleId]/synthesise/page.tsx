@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import styles from './synthesise.module.css';
 
@@ -32,11 +32,22 @@ export default function SynthesiseStagePage() {
   const [loading, setLoading] = useState<boolean>(false);
   const [showIntroModal, setShowIntroModal] = useState<boolean>(true);
 
-  // Concept Map Reference State
+  // Concept Map Reference + Interactive State
   const [nodes, setNodes] = useState<ConceptNode[]>([]);
   const [links, setLinks] = useState<ConceptLink[]>([]);
   const [notesCount, setNotesCount] = useState<number>(0);
   const [showNudge, setShowNudge] = useState<boolean>(true);
+
+  // Canvas tool state
+  const [activeTool, setActiveTool] = useState<'pan' | 'add_node' | 'link'>('pan');
+  const [linkSourceNodeId, setLinkSourceNodeId] = useState<string | null>(null);
+  const [hoveredLinkId, setHoveredLinkId] = useState<string | null>(null);
+  const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [showAddNodeModal, setShowAddNodeModal] = useState<boolean>(false);
+  const [newNodeText, setNewNodeText] = useState<string>('');
+  const [zoomLevel, setZoomLevel] = useState<number>(1);
+  const dragOffsetRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
   useEffect(() => {
     const synthKey = getStudentStorageKey('critic_synthesis', moduleId);
@@ -44,34 +55,29 @@ export default function SynthesiseStagePage() {
     const linksKey = getStudentStorageKey('critic_links_canvas', moduleId);
     const notesKey = getStudentStorageKey('critic_notes', moduleId);
 
-    // Inform teacher portal this student is on the Synthesise stage
     reportStudentProgress('synthesise');
 
-    // 0. Check student evidence notes count for AI Nudge
+    // 0. Check notes count for nudge
     const localNotesStr = localStorage.getItem(notesKey);
     if (localNotesStr) {
       try { setNotesCount(JSON.parse(localNotesStr).length); } catch (e) { console.error(e); }
     } else {
       fetch(`/api/modules/${moduleId}/notes`)
         .then((res) => res.json())
-        .then((data) => {
-          if (data.notes) setNotesCount(data.notes.length);
-        });
+        .then((data) => { if (data.notes) setNotesCount(data.notes.length); });
     }
 
-    // 1. Fetch Existing Draft Synthesis
+    // 1. Load synthesis draft
     const localSynth = localStorage.getItem(synthKey);
     if (localSynth) {
       setSynthesisText(localSynth);
     } else {
       fetch(`/api/modules/${moduleId}/synthesis`)
         .then((res) => res.json())
-        .then((data) => {
-          if (data.synthesisDraft) setSynthesisText(data.synthesisDraft);
-        });
+        .then((data) => { if (data.synthesisDraft) setSynthesisText(data.synthesisDraft); });
     }
 
-    // 2. Fetch Concept Map Nodes for right panel reference
+    // 2. Load concept nodes & links
     const savedNodes = localStorage.getItem(nodesKey);
     const savedLinks = localStorage.getItem(linksKey);
 
@@ -107,7 +113,26 @@ export default function SynthesiseStagePage() {
       });
   }, [moduleId]);
 
-  // Save student synthesis draft to student-scoped localStorage
+  /** Persist canvas to student-scoped localStorage */
+  const saveCanvasState = (updatedNodes: ConceptNode[], updatedLinks: ConceptLink[]) => {
+    const nodesKey = getStudentStorageKey('critic_nodes_canvas', moduleId);
+    const linksKey = getStudentStorageKey('critic_links_canvas', moduleId);
+
+    const validNodeIds = new Set(updatedNodes.map((n) => n.id));
+    const cleanedLinks = updatedLinks.filter(
+      (l) => validNodeIds.has(l.fromNodeId) && validNodeIds.has(l.toNodeId)
+    );
+    const nodesWithCount = updatedNodes.map((n) => ({
+      ...n,
+      linkCount: cleanedLinks.filter((l) => l.fromNodeId === n.id || l.toNodeId === n.id).length,
+    }));
+
+    setNodes(nodesWithCount);
+    setLinks(cleanedLinks);
+    localStorage.setItem(nodesKey, JSON.stringify(nodesWithCount));
+    localStorage.setItem(linksKey, JSON.stringify(cleanedLinks));
+  };
+
   const handleSynthesisTextChange = (text: string) => {
     setSynthesisText(text);
     const synthKey = getStudentStorageKey('critic_synthesis', moduleId);
@@ -129,9 +154,11 @@ export default function SynthesiseStagePage() {
       const data = await res.json();
       if (data.success && data.feedback) {
         setAiFeedback(data.feedback);
+      } else {
+        throw new Error('No feedback in response');
       }
     } catch (err) {
-      setAiFeedback('Have you considered connecting the polar vortex destabilization evidence to your conclusions on regional cold spells?');
+      setAiFeedback('Have you considered connecting the evidence from the sources to your conclusions? What counter-arguments remain unaddressed in your synthesis?');
     } finally {
       setLoading(false);
     }
@@ -139,6 +166,101 @@ export default function SynthesiseStagePage() {
 
   const handleCompleteModule = () => {
     router.push(`/module/${moduleId}/review`);
+  };
+
+  // Canvas interaction handlers
+  const handleAddNode = async () => {
+    if (!newNodeText.trim()) return;
+    const posX = 80 + Math.random() * 300;
+    const posY = 80 + Math.random() * 200;
+
+    try {
+      const res = await fetch(`/api/modules/${moduleId}/concepts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: newNodeText, positionX: posX, positionY: posY }),
+      });
+      const data = await res.json();
+      if (data.success && data.node) {
+        saveCanvasState([...nodes, { ...data.node, linkCount: 0 }], links);
+        setNewNodeText('');
+        setShowAddNodeModal(false);
+        setActiveTool('pan');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleNodeClick = async (nodeId: string) => {
+    if (activeTool === 'link') {
+      if (!linkSourceNodeId) {
+        setLinkSourceNodeId(nodeId);
+      } else if (linkSourceNodeId !== nodeId) {
+        try {
+          const res = await fetch(`/api/modules/${moduleId}/concepts/links`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fromNodeId: linkSourceNodeId, toNodeId: nodeId }),
+          });
+          const data = await res.json();
+          if (data.success && data.link) {
+            saveCanvasState(nodes, [...links, data.link]);
+          }
+        } finally {
+          setLinkSourceNodeId(null);
+        }
+      }
+    } else {
+      setSelectedNodeId(selectedNodeId === nodeId ? null : nodeId);
+    }
+  };
+
+  const handleDeleteNode = async (nodeId: string) => {
+    const updatedNodes = nodes.filter((n) => n.id !== nodeId);
+    const updatedLinks = links.filter((l) => l.fromNodeId !== nodeId && l.toNodeId !== nodeId);
+    saveCanvasState(updatedNodes, updatedLinks);
+    if (selectedNodeId === nodeId) setSelectedNodeId(null);
+    try { await fetch(`/api/concepts/${nodeId}`, { method: 'DELETE' }); } catch (err) { console.error(err); }
+  };
+
+  const handleDeleteLink = async (linkId: string) => {
+    saveCanvasState(nodes, links.filter((l) => l.id !== linkId));
+    try { await fetch(`/api/links/${linkId}`, { method: 'DELETE' }); } catch (err) { console.error(err); }
+  };
+
+  const handleMouseDownNode = (e: React.MouseEvent, nodeId: string) => {
+    if (activeTool === 'link') return;
+    e.stopPropagation();
+    setDraggingNodeId(nodeId);
+    const targetNode = nodes.find((n) => n.id === nodeId);
+    if (targetNode) {
+      dragOffsetRef.current = { x: e.clientX - targetNode.positionX, y: e.clientY - targetNode.positionY };
+    }
+  };
+
+  const handleMouseMoveCanvas = (e: React.MouseEvent) => {
+    if (!draggingNodeId) return;
+    setNodes((prev) => prev.map((n) =>
+      n.id === draggingNodeId
+        ? { ...n, positionX: e.clientX - dragOffsetRef.current.x, positionY: e.clientY - dragOffsetRef.current.y }
+        : n
+    ));
+  };
+
+  const handleMouseUpCanvas = () => {
+    if (draggingNodeId) {
+      const movedNode = nodes.find((n) => n.id === draggingNodeId);
+      if (movedNode) {
+        fetch(`/api/concepts/${draggingNodeId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ positionX: movedNode.positionX, positionY: movedNode.positionY }),
+        });
+        saveCanvasState(nodes, links);
+      }
+      setDraggingNodeId(null);
+    }
   };
 
   return (
@@ -212,60 +334,122 @@ export default function SynthesiseStagePage() {
           )}
         </aside>
 
-        {/* Right Concept Map Reference Panel */}
-        <main className={styles.rightCanvasPanel}>
+        {/* Right Interactive Concept Map Panel */}
+        <main
+          className={styles.rightCanvasPanel}
+          onMouseMove={handleMouseMoveCanvas}
+          onMouseUp={handleMouseUpCanvas}
+        >
           <div className={styles.canvasHeader}>
             <h1 className={styles.stageTitle}>synthesise</h1>
           </div>
 
-          <div className={styles.canvasPreviewStage}>
+          <div
+            className={styles.canvasPreviewStage}
+            style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'top left' }}
+          >
+            {/* Interactive Concept Nodes */}
+            {nodes.map((node) => {
+              const isSelected = selectedNodeId === node.id;
+              const isLinkSource = linkSourceNodeId === node.id;
+
+              return (
+                <div
+                  key={node.id}
+                  className={`${styles.conceptNodeCircle} ${isSelected ? styles.selectedNode : ''} ${activeTool === 'link' && isLinkSource ? styles.linkSourceNode : ''}`}
+                  style={{ left: `${node.positionX}px`, top: `${node.positionY}px`, width: '100px', height: '100px' }}
+                  onMouseDown={(e) => handleMouseDownNode(e, node.id)}
+                  onClick={() => handleNodeClick(node.id)}
+                >
+                  <span className={styles.nodeLabel}>{node.text}</span>
+                  {isSelected && activeTool === 'pan' && (
+                    <div className={styles.nodeControls} onClick={(e) => e.stopPropagation()}>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleDeleteNode(node.id); }}
+                        className={styles.nodeDeleteBtn}
+                        title="Delete node"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+
+            {/* SVG Links Layer */}
             <svg className={styles.svgOverlay}>
+              <rect width="100%" height="100%" fill="none" pointerEvents="none" />
               {links.map((link) => {
                 const fromNode = nodes.find((n) => n.id === link.fromNodeId);
                 const toNode = nodes.find((n) => n.id === link.toNodeId);
                 if (!fromNode || !toNode) return null;
 
+                const isHovered = hoveredLinkId === link.id;
+                const x1 = fromNode.positionX + 50;
+                const y1 = fromNode.positionY + 50;
+                const x2 = toNode.positionX + 50;
+                const y2 = toNode.positionY + 50;
+
                 return (
-                  <line
+                  <g
                     key={link.id}
-                    x1={fromNode.positionX + 50}
-                    y1={fromNode.positionY + 50}
-                    x2={toNode.positionX + 50}
-                    y2={toNode.positionY + 50}
-                    stroke="#37F3FF"
-                    strokeWidth="3"
-                    className={styles.svgLineGlow}
-                  />
+                    onMouseEnter={() => setHoveredLinkId(link.id)}
+                    onMouseLeave={() => setHoveredLinkId(null)}
+                    onClick={(e) => { e.stopPropagation(); handleDeleteLink(link.id); }}
+                    style={{ cursor: 'pointer', pointerEvents: 'all' }}
+                  >
+                    <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="rgba(0,0,0,0)" strokeWidth="16" pointerEvents="stroke" />
+                    <line
+                      x1={x1} y1={y1} x2={x2} y2={y2}
+                      stroke={isHovered ? '#FF4FD8' : '#37F3FF'}
+                      strokeWidth={isHovered ? 4 : 3}
+                      className={styles.svgLineGlow}
+                      pointerEvents="stroke"
+                    />
+                  </g>
                 );
               })}
             </svg>
-
-            {nodes.map((node) => {
-              return (
-                <div
-                  key={node.id}
-                  className={styles.conceptNodeCircle}
-                  style={{
-                    left: `${node.positionX}px`,
-                    top: `${node.positionY}px`,
-                    width: '100px',
-                    height: '100px',
-                  }}
-                >
-                  <span className={styles.nodeLabel}>{node.text}</span>
-                </div>
-              );
-            })}
           </div>
 
           {/* Far Right Control Toolbar */}
           <div className={styles.canvasToolbar}>
-            <button className={styles.toolbarBtn} title="Zoom In">🔍+</button>
-            <button className={styles.toolbarBtn} title="Zoom Out">🔍-</button>
-            <button className={`${styles.toolbarBtn} ${styles.activeToolBtn}`} title="Pan">✋</button>
-            <button className={styles.toolbarBtn} title="Concept Node">◯</button>
-            <button className={styles.toolbarBtn} title="Link Tool">🖋️</button>
-            <button className={styles.toolbarBtn} title="Text Tool">Tᴛ</button>
+            <button
+              onClick={() => setZoomLevel((z) => Math.min(z + 0.15, 1.8))}
+              className={styles.toolbarBtn}
+              title="Zoom In"
+            >
+              🔍+
+            </button>
+            <button
+              onClick={() => setZoomLevel((z) => Math.max(z - 0.15, 0.5))}
+              className={styles.toolbarBtn}
+              title="Zoom Out"
+            >
+              🔍-
+            </button>
+            <button
+              onClick={() => { setActiveTool('pan'); setLinkSourceNodeId(null); }}
+              className={`${styles.toolbarBtn} ${activeTool === 'pan' ? styles.activeToolBtn : ''}`}
+              title="Pan Tool"
+            >
+              ✋
+            </button>
+            <button
+              onClick={() => setShowAddNodeModal(true)}
+              className={`${styles.toolbarBtn} ${activeTool === 'add_node' ? styles.activeToolBtn : ''}`}
+              title="Create Concept Node"
+            >
+              ◯
+            </button>
+            <button
+              onClick={() => { setActiveTool('link'); setLinkSourceNodeId(null); }}
+              className={`${styles.toolbarBtn} ${activeTool === 'link' ? styles.activeToolBtn : ''}`}
+              title="Create Link (Click 2 nodes)"
+            >
+              🖋️
+            </button>
           </div>
         </main>
       </div>
@@ -279,15 +463,49 @@ export default function SynthesiseStagePage() {
           02 conceptualise
         </button>
         <button onClick={() => router.push(`/module/${moduleId}/inquire`)} className={styles.stageStep}>
-          03 inquire
-        </button>
-        <button onClick={() => router.push(`/module/${moduleId}/inquire`)} className={styles.stageStep}>
-          04 evaluate
+          03 inquire + evaluate
         </button>
         <button onClick={() => router.push(`/module/${moduleId}/synthesise`)} className={`${styles.stageStep} ${styles.stageStepActive}`}>
-          05 synthesise
+          04 synthesise
         </button>
       </footer>
+
+      {/* Create Node Modal */}
+      {showAddNodeModal && (
+        <div className={styles.modalBackdrop}>
+          <div className="glass-card-glow" style={{ padding: '32px', maxWidth: '420px', width: '90%' }}>
+            <h3 className="cyan-neon-text" style={{ fontFamily: 'var(--font-orbitron)', marginBottom: '16px' }}>
+              CREATE CONCEPT NODE
+            </h3>
+            <input
+              type="text"
+              placeholder="e.g. key conclusion / insight"
+              value={newNodeText}
+              onChange={(e) => setNewNodeText(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleAddNode()}
+              style={{
+                width: '100%',
+                padding: '12px',
+                background: 'rgba(7, 11, 26, 0.9)',
+                border: '1px solid var(--color-accent-cyan-50)',
+                borderRadius: '8px',
+                color: 'var(--color-text-light)',
+                fontFamily: 'var(--font-exo2)',
+                fontSize: '0.95rem',
+              }}
+              autoFocus
+            />
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '20px' }}>
+              <button onClick={() => setShowAddNodeModal(false)} style={{ background: 'transparent', border: '1px solid var(--color-border-slate)', color: 'var(--color-text-light)', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer' }}>
+                Cancel
+              </button>
+              <button onClick={handleAddNode} className="btn-primary-cyan">
+                CREATE NODE
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Stage Intro Modal */}
       {showIntroModal && (
@@ -297,7 +515,7 @@ export default function SynthesiseStagePage() {
               📝 SYNTHESISE CASEFILE DISCLOSURE
             </h3>
             <p className={styles.introModalText} style={{ marginBottom: '16px' }}>
-              Reflect on everything you learnt. Write your synthesis, and trigger the AI cross-check to evaluate missing links or unaddressed arguments.
+              Reflect on everything you learnt. Write your synthesis, and trigger the AI cross-check to evaluate missing links or unaddressed arguments. You can also add concept nodes to your map on the right.
             </p>
             <div style={{ background: 'rgba(7, 11, 26, 0.7)', border: '1px solid var(--accent-magenta)', borderRadius: '10px', padding: '16px', textAlign: 'left', fontSize: '0.88rem', color: '#D9DFF7', lineHeight: '1.5' }}>
               <strong style={{ color: 'var(--accent-magenta)', display: 'block', marginBottom: '8px' }}>⚠️ Mandatory Socratic Peer Disclosure:</strong>
@@ -312,7 +530,7 @@ export default function SynthesiseStagePage() {
               className="btn-primary-cyan"
               style={{ marginTop: '24px', padding: '12px 36px', fontWeight: 'bold' }}
             >
-              UNDERSTOOD & START
+              UNDERSTOOD &amp; START
             </button>
           </div>
         </div>

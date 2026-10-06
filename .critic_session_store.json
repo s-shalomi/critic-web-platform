@@ -1,0 +1,56 @@
+{
+  "dynamicSources": [],
+  "accessCodes": [
+    [
+      "CLIMATE2026",
+      {
+        "id": "code-1",
+        "code": "CLIMATE2026",
+        "teacherId": "teacher-demo",
+        "createdAt": "2026-10-06T11:30:32.316Z"
+      }
+    ],
+    [
+      "STUDENT123",
+      {
+        "id": "code-2",
+        "code": "STUDENT123",
+        "teacherId": "teacher-demo",
+        "createdAt": "2026-10-06T11:30:32.318Z"
+      }
+    ],
+    [
+      "CLASS_B_2026",
+      {
+        "id": "code_1791286232339",
+        "code": "CLASS_B_2026",
+        "teacherId": "teacher-123",
+        "createdAt": "2026-10-06T11:30:32.339Z",
+        "expiresAt": "2026-11-05T11:30:32.339Z"
+      }
+    ],
+    [
+      "EXP_CHEM_2026",
+      {
+        "id": "code_1791286232609",
+        "code": "EXP_CHEM_2026",
+        "teacherId": "teacher-demo",
+        "createdAt": "2026-10-06T11:30:32.609Z",
+        "expiresAt": "2026-11-05T11:30:32.609Z"
+      }
+    ]
+  ],
+  "studentProgress": [
+    [
+      "TEST_CODE_2026",
+      {
+        "studentId": "student_test_abc",
+        "accessCode": "TEST_CODE_2026",
+        "topicTitle": "Climate Change",
+        "currentStage": "synthesise",
+        "status": "in_progress",
+        "lastActive": "2026-10-06T11:30:32.350Z"
+      }
+    ]
+  ]
+}

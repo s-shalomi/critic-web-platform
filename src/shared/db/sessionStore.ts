@@ -11,6 +11,8 @@
  * - Registered access codes (code -> teacherId)
  */
 
+import fs from 'fs';
+import path from 'path';
 import type { Source } from '@/domains/topics/topicService';
 
 export interface StudentProgressEntry {
@@ -42,6 +44,47 @@ interface CriticGlobalStore {
 }
 
 const criticGlobal = globalThis as unknown as CriticGlobalStore;
+
+const CACHE_FILE = path.join(process.cwd(), '.critic_session_store.json');
+
+export function saveStoreToDisk(): void {
+  try {
+    const data = {
+      dynamicSources: Array.from(criticGlobal.dynamicSourcesStore?.entries() || []),
+      accessCodes: Array.from(criticGlobal.accessCodeStore?.entries() || []),
+      studentProgress: Array.from(criticGlobal.studentProgressStore?.entries() || []),
+    };
+    fs.writeFileSync(CACHE_FILE, JSON.stringify(data, null, 2), 'utf-8');
+  } catch (err) {
+    // Non-blocking fallback for read-only environments
+  }
+}
+
+function loadStoreFromDisk(): void {
+  try {
+    if (fs.existsSync(CACHE_FILE)) {
+      const raw = fs.readFileSync(CACHE_FILE, 'utf-8');
+      const data = JSON.parse(raw);
+      if (Array.isArray(data.dynamicSources)) {
+        data.dynamicSources.forEach(([k, v]: [string, Source[]]) => {
+          criticGlobal.dynamicSourcesStore?.set(k, v);
+        });
+      }
+      if (Array.isArray(data.accessCodes)) {
+        data.accessCodes.forEach(([k, v]: [string, AccessCodeEntry]) => {
+          criticGlobal.accessCodeStore?.set(k, v);
+        });
+      }
+      if (Array.isArray(data.studentProgress)) {
+        data.studentProgress.forEach(([k, v]: [string, StudentProgressEntry]) => {
+          criticGlobal.studentProgressStore?.set(k, v);
+        });
+      }
+    }
+  } catch (err) {
+    // Silent fallback
+  }
+}
 
 if (!criticGlobal.dynamicSourcesStore) {
   criticGlobal.dynamicSourcesStore = new Map<string, Source[]>();
@@ -82,6 +125,9 @@ if (!criticGlobal.reviewStatsStore) {
   criticGlobal.reviewStatsStore = new Map<string, any>();
 }
 
+// Hydrate from disk on initial boot
+loadStoreFromDisk();
+
 export const dynamicSourcesStore = criticGlobal.dynamicSourcesStore!;
 export const studentProgressStore = criticGlobal.studentProgressStore!;
 export const accessCodeStore = criticGlobal.accessCodeStore!;
@@ -100,6 +146,7 @@ export function upsertStudentProgress(entry: StudentProgressEntry): void {
     ...entry,
     lastActive: new Date().toISOString(),
   });
+  saveStoreToDisk();
 }
 
 /**
@@ -111,4 +158,5 @@ export function getAllStudentProgress(): StudentProgressEntry[] {
     (a, b) => new Date(b.lastActive).getTime() - new Date(a.lastActive).getTime()
   );
 }
+
 

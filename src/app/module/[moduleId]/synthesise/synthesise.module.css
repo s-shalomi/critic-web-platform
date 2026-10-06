@@ -1,5 +1,5 @@
 .container {
-  min-height: 100vh;
+  height: 100vh;
   background: var(--color-bg-deep);
   display: flex;
   flex-direction: column;
@@ -31,6 +31,7 @@
   display: flex;
   position: relative;
   overflow: hidden;
+  min-height: 0;
 }
 
 .synthesisPanel {
@@ -41,6 +42,8 @@
   flex-direction: column;
   padding: 28px;
   z-index: 10;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .promptHeader {
@@ -157,6 +160,48 @@
   text-align: center;
   padding: 12px;
   box-shadow: 0 0 25px rgba(255, 79, 216, 0.5);
+  cursor: pointer;
+  user-select: none;
+}
+
+.selectedNode {
+  border-color: #FF4FD8;
+  box-shadow: 0 0 30px rgba(255, 79, 216, 0.8);
+}
+
+.linkSourceNode {
+  border-color: #37F3FF;
+  box-shadow: 0 0 30px rgba(55, 243, 255, 0.8);
+  animation: pulseCyanSynth 1s infinite alternate;
+}
+
+@keyframes pulseCyanSynth {
+  0% { box-shadow: 0 0 10px rgba(55, 243, 255, 0.5); }
+  100% { box-shadow: 0 0 30px rgba(55, 243, 255, 1); }
+}
+
+.nodeControls {
+  position: absolute;
+  bottom: -32px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+  z-index: 10;
+}
+
+.nodeDeleteBtn {
+  background: rgba(255, 79, 216, 0.2);
+  border: 1px solid var(--color-accent-pink);
+  color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .nodeLabel {

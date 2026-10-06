@@ -718,13 +718,10 @@ export default function ConceptualiseStagePage() {
           02 conceptualise
         </button>
         <button onClick={() => router.push(`/module/${moduleId}/inquire`)} className={styles.stageStep}>
-          03 inquire
-        </button>
-        <button onClick={() => router.push(`/module/${moduleId}/inquire`)} className={styles.stageStep}>
-          04 evaluate
+          03 inquire + evaluate
         </button>
         <button onClick={() => router.push(`/module/${moduleId}/synthesise`)} className={styles.stageStep}>
-          05 synthesise
+          04 synthesise
         </button>
       </footer>
 

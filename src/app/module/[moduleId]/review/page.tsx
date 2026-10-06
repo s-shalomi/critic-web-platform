@@ -285,8 +285,9 @@ export default function ModuleReviewPage() {
   if (loading || !review) {
     return (
       <div className={styles.loadingContainer}>
+        <div className="spinner" style={{ marginBottom: '1.5rem' }} />
         <div className="cyan-neon-text" style={{ fontFamily: 'var(--font-orbitron)', fontSize: '1.4rem' }}>
-          CALCULATING REASONING ANALYTICS & REASONING BADGES...
+          CALCULATING REASONING ANALYTICS &amp; REASONING BADGES...
         </div>
       </div>
     );

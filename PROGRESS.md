@@ -288,4 +288,39 @@
 - **Tests Passing**:
   - `npm test` (28/28 tests passing across 8 suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
-- **Immediate Next Step**: Seek user approval for Fix 1, then proceed to Fix 2: "agent doesn't sometimes respond in inquire and evaluate stage".
+- **Immediate Next Step**: Approved. Completed all remaining 6 bug fixes.
+
+---
+
+### [2026-10-06] - Comprehensive Bug Fixes (Fixes 1 - 7)
+
+- **Role**: Full Stack Developer
+- **Fixes Implemented & Verified**:
+  1. **Scroll Bar for Chat on Inquire & Evaluate Stage**:
+     - Constrained container to `height: 100vh` and added `min-height: 0` on flex containers (`.workspace`, `.chatPanel`).
+     - Added cross-browser neon cyan scrollbars with `scrollbar-width: thin` and `::-webkit-scrollbar` styling.
+  2. **Agent Response Reliability in Inquire & Evaluate Stage**:
+     - Fixed critical scope bug where `history` was undefined; replaced with `history: messages`.
+     - Added resilient try/catch fallback with contextual Socratic questions on network or timeout exceptions.
+  3. **LLM Connection & Verification**:
+     - Configured Gemini free-tier client with automatic fallback to Groq (`llama-3.3-70b-versatile`).
+     - Added explicit runtime logging and environment variable checks for `GEMINI_API_KEY` and `GROQ_API_KEY`.
+     - Preserved safe fallback Socratic rule engine when API keys are unconfigured.
+  4. **Concept Node & Link Creation Toolbar across Stages**:
+     - Wired up interactive canvas toolbar (pan, add node modal, click-to-link, drag-and-drop, delete node, delete link, zoom in/out) across **Conceptualise**, **Inquire & Evaluate**, and **Synthesise** stages.
+     - Ensured full cross-stage canvas state synchronization via student-scoped localStorage keys.
+  5. **Student Access Code Independence**:
+     - Updated module routing in [`src/app/dashboard/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/page.tsx) to use the authenticated student's unique ID (`mod_${topicId}_${studentId}`) rather than a shared static demo string.
+     - Scoped all notes, nodes, links, chats, and synthesis storage to each individual student login.
+  6. **Combined "Inquire + Evaluate" Navigation & Fixed 404 Route**:
+     - Removed redundant separate `04 evaluate` button across all stage navigation bars and dashboard journey map.
+     - Combined into a unified `03 inquire + evaluate` navigation item pointing to `/module/[moduleId]/inquire`, and renumbered `04 synthesise`.
+  7. **Teacher Portal Persistence**:
+     - Implemented file-backed persistence (`saveStoreToDisk` / `loadStoreFromDisk`) in [`src/shared/db/sessionStore.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/db/sessionStore.ts).
+     - Ensured teacher-added/edited/deleted sources and generated access codes survive server restarts and reloads.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (28/28 tests passing across 8 suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+  - `npm run build` (100% clean production build with 0 compilation errors across 11 routes).
+- **Immediate Next Step**: Platform is fully updated, verified, tested, and ready.

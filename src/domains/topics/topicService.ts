@@ -4,7 +4,7 @@
  * Adding a new topic requires only new rows in Topics and Sources without modifying core application code.
  */
 
-import { dynamicSourcesStore } from '@/shared/db/sessionStore';
+import { dynamicSourcesStore, saveStoreToDisk } from '@/shared/db/sessionStore';
 
 export interface Topic {
   id: string;
@@ -156,6 +156,7 @@ export async function addSourceToTopic(
 
   currentSources.push(newSource);
   dynamicSourcesStore.set(topicId, currentSources);
+  saveStoreToDisk();
 
   return newSource;
 }
@@ -190,6 +191,7 @@ export async function updateSourceInTopic(
       };
       sources[idx] = updated;
       dynamicSourcesStore.set(topicId, sources);
+      saveStoreToDisk();
       return updated;
     }
   }
@@ -211,6 +213,7 @@ export async function deleteSourceFromTopic(sourceId: string): Promise<boolean> 
         s.orderIndex = i;
       });
       dynamicSourcesStore.set(topicId, sources);
+      saveStoreToDisk();
       return true;
     }
   }
