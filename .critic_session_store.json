@@ -117,9 +117,9 @@
         "studentId": "student_53545544454e",
         "accessCode": "STUDENT123",
         "topicTitle": "Climate Change",
-        "currentStage": "conceptualise",
+        "currentStage": "inquire",
         "status": "in_progress",
-        "lastActive": "2026-10-06T16:03:16.436Z"
+        "lastActive": "2026-10-06T16:10:19.605Z"
       }
     ],
     [
@@ -146,7 +146,7 @@
           "noteText": "emphasises coldness to mock climate change",
           "convertedToNode": true,
           "createdAt": "2026-10-06T15:30:05.762Z",
-          "updatedAt": "2026-10-06T15:43:14.389Z"
+          "updatedAt": "2026-10-06T16:08:33.068Z"
         },
         {
           "id": "note_1791300783687_1g36v",
@@ -206,6 +206,17 @@
           "linkCount": 0,
           "createdAt": "2026-10-06T15:34:29.445Z",
           "updatedAt": "2026-10-06T15:34:45.747Z"
+        },
+        {
+          "id": "node_1791302913070_0kcps",
+          "moduleId": "mod_climate-change_student_53545544454e",
+          "text": "emphasises coldness to mock climate change",
+          "positionX": 304.2116420291104,
+          "positionY": 185.856454721305,
+          "sourceNoteId": "note_1791300605762_evbqg",
+          "linkCount": 0,
+          "createdAt": "2026-10-06T16:08:33.070Z",
+          "updatedAt": "2026-10-06T16:08:33.070Z"
         }
       ]
     ]
