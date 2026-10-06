@@ -272,4 +272,20 @@
 - **Tests Passing**:
   - `npm test` (28/28 tests passing across 8 suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
-- **Immediate Next Step**: Seek approval, then proceed to "loading indicators on all pages".
+- **Immediate Next Step**: Completed Fix 5 revision. Proceeding with user-requested bug fixes.
+
+---
+
+### [2026-10-06] - Fix 1: Scroll Bar for Chat on Inquire & Evaluate Stage
+
+- **Role**: Full Stack Developer
+- **Issues Reported**: Chat on Inquire & Evaluate stage was not scrollable when conversation grew.
+- **Root Causes & Fixes**:
+  - **Flex Sizing & Viewport Constraints**: `.chatPanel` and `.workspace` in [`src/app/module/[moduleId]/inquire/inquire.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/inquire/inquire.module.css) previously allowed overflowing without triggering child flex shrink. Fixed by setting `height: 100vh` on `.container`, `min-height: 0` on `.workspace`, and `min-height: 0` on `.chatPanel`.
+  - **Cyberpunk Custom Scrollbar**: Added cross-browser scrollbar styling with `scrollbar-width: thin`, `scrollbar-color`, and `-webkit-scrollbar` styling featuring glowing cyan accents.
+  - **Auto-Scroll Preservation**: Maintained `chatBottomRef.scrollIntoView({ behavior: 'smooth' })` on message addition and loading state transitions.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (28/28 tests passing across 8 suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+- **Immediate Next Step**: Seek user approval for Fix 1, then proceed to Fix 2: "agent doesn't sometimes respond in inquire and evaluate stage".
