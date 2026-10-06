@@ -100,21 +100,21 @@
     [
       "CLASS_B_2026",
       {
-        "id": "code_1791292798262",
+        "id": "code_1791293498862",
         "code": "CLASS_B_2026",
         "teacherId": "teacher-123",
-        "createdAt": "2026-10-06T13:19:58.262Z",
-        "expiresAt": "2026-11-05T13:19:58.262Z"
+        "createdAt": "2026-10-06T13:31:38.862Z",
+        "expiresAt": "2026-11-05T13:31:38.862Z"
       }
     ],
     [
       "EXP_CHEM_2026",
       {
-        "id": "code_1791292798574",
+        "id": "code_1791293499544",
         "code": "EXP_CHEM_2026",
         "teacherId": "teacher-demo",
-        "createdAt": "2026-10-06T13:19:58.574Z",
-        "expiresAt": "2026-11-05T13:19:58.574Z"
+        "createdAt": "2026-10-06T13:31:39.544Z",
+        "expiresAt": "2026-11-05T13:31:39.544Z"
       }
     ],
     [
@@ -157,7 +157,7 @@
         "topicTitle": "Climate Change",
         "currentStage": "synthesise",
         "status": "in_progress",
-        "lastActive": "2026-10-06T13:19:58.268Z"
+        "lastActive": "2026-10-06T13:31:38.871Z"
       }
     ],
     [
@@ -188,9 +188,9 @@
         "studentId": "student_5031",
         "accessCode": "P1",
         "topicTitle": "Climate Change",
-        "currentStage": "familiarise",
-        "status": "in_progress",
-        "lastActive": "2026-10-06T13:21:11.242Z"
+        "currentStage": "review",
+        "status": "completed",
+        "lastActive": "2026-10-06T13:39:06.362Z"
       }
     ]
   ]

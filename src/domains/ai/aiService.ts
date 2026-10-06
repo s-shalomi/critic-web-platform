@@ -1,11 +1,11 @@
 /**
  * Socratic AI Agent Service
- * Handles Gemini free tier API calls with automatic, seamless fallback to Groq on rate limit (429) or failure.
+ * Handles Google Gen AI (@google/genai SDK with gemini-3.7-flash) with automatic, seamless fallback to Groq (openai/gpt-oss-120b).
  * Enforces Socratic questioning, Devil's Advocate mode, non-definitive guardrails, context window compression,
  * and dynamic avatar hint generation for Familiarise and Conceptualise stages per requirements.md.
  */
 
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 import Groq from 'groq-sdk';
 
 export interface ChatTurn {
@@ -33,10 +33,13 @@ function getSanitizedKey(keyName: string): string {
 }
 
 /**
- * Candidate model lists for resilience against provider model deprecations/updates
+ * Primary and fallback model definitions
  */
-const GEMINI_MODELS = ['gemini-3.8-flash', 'gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-pro'];
-const GROQ_MODELS = ['openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'qwen/qwen3.8-27b', 'allam-2-7b'];
+const GEMINI_PRIMARY_MODEL = 'gemini-3.7-flash';
+const GEMINI_FALLBACK_MODELS = ['gemini-3.7-flash', 'gemini-2.5-flash', 'gemini-2.0-flash'];
+
+const GROQ_PRIMARY_MODEL = 'openai/gpt-oss-120b';
+const GROQ_FALLBACK_MODELS = ['openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'qwen/qwen3.8-27b'];
 
 /**
  * Constructs system prompt enforcing Socratic guardrails and persona tone
@@ -101,7 +104,7 @@ export function compressChatHistory(history: ChatTurn[]): string {
 }
 
 /**
- * Primary LLM caller with automatic Gemini -> Groq fallback execution
+ * Primary LLM caller using @google/genai SDK with automatic Groq fallback execution
  */
 export async function generateSocraticResponse(
   history: ChatTurn[],
@@ -115,39 +118,43 @@ export async function generateSocraticResponse(
   const formattedHistory = compressChatHistory(history);
   const fullPrompt = `${systemPrompt}\n\nCHAT HISTORY:\n${formattedHistory}\n\nAGENT:`;
 
-  // 1. Try Google Gemini API first
+  // 1. Try Google Gen AI (@google/genai SDK) with gemini-3.7-flash
   if (geminiApiKey) {
-    const genAI = new GoogleGenerativeAI(geminiApiKey);
-    for (const modelName of GEMINI_MODELS) {
-      try {
-        const model = genAI.getGenerativeModel({
-          model: modelName,
-          generationConfig: {
-            maxOutputTokens: 300,
-            temperature: 0.7,
-          },
-        });
+    try {
+      const ai = new GoogleGenAI({ apiKey: geminiApiKey });
+      for (const modelName of GEMINI_FALLBACK_MODELS) {
+        try {
+          const apiPromise = ai.models.generateContent({
+            model: modelName,
+            contents: fullPrompt,
+            config: {
+              maxOutputTokens: 300,
+              temperature: 0.7,
+            },
+          });
 
-        const apiPromise = model.generateContent(fullPrompt);
-        const timeoutPromise = new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('Gemini API call timed out after 9s')), 9000)
-        );
+          const timeoutPromise = new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error('Gemini API call timed out after 9s')), 9000)
+          );
 
-        const result = (await Promise.race([apiPromise, timeoutPromise])) as any;
-        const responseText = result?.response?.text();
-        if (responseText && responseText.trim()) {
-          return { text: responseText.trim(), provider: 'gemini' };
+          const response = (await Promise.race([apiPromise, timeoutPromise])) as any;
+          const responseText = response?.text;
+          if (responseText && responseText.trim()) {
+            return { text: responseText.trim(), provider: 'gemini' };
+          }
+        } catch (mErr: any) {
+          console.warn(`[AI Service] @google/genai (${modelName}) failed:`, mErr?.message || mErr);
         }
-      } catch (err: any) {
-        console.warn(`[AI Service] Gemini (${modelName}) failed:`, err?.message || err);
       }
+    } catch (err: any) {
+      console.warn('[AI Service] @google/genai client failed. Falling back to Groq...', err?.message || err);
     }
   }
 
-  // 2. Fallback to Groq API on Gemini failure/timeout/rate-limit
+  // 2. Fallback to Groq API (openai/gpt-oss-120b)
   if (groqApiKey) {
     const groqClient = new Groq({ apiKey: groqApiKey });
-    for (const modelName of GROQ_MODELS) {
+    for (const modelName of GROQ_FALLBACK_MODELS) {
       try {
         const completion = await groqClient.chat.completions.create({
           messages: [
@@ -223,28 +230,32 @@ REQUIREMENTS:
 3. Keep the response to 1-2 short sentences ending in a question.
   `.trim();
 
-  // 1. Try Gemini
+  // 1. Try Google Gen AI (@google/genai SDK) with gemini-3.7-flash
   if (geminiApiKey) {
-    const genAI = new GoogleGenerativeAI(geminiApiKey);
-    for (const modelName of GEMINI_MODELS) {
-      try {
-        const model = genAI.getGenerativeModel({
-          model: modelName,
-          generationConfig: { maxOutputTokens: 120, temperature: 0.7 },
-        });
-        const res = await model.generateContent(prompt);
-        const text = res?.response?.text();
-        if (text && text.trim()) return { text: text.trim(), provider: 'gemini' };
-      } catch (e: any) {
-        console.warn(`[AI Service Hint] Gemini (${modelName}) failed:`, e?.message || e);
+    try {
+      const ai = new GoogleGenAI({ apiKey: geminiApiKey });
+      for (const modelName of GEMINI_FALLBACK_MODELS) {
+        try {
+          const res = await ai.models.generateContent({
+            model: modelName,
+            contents: prompt,
+            config: { maxOutputTokens: 120, temperature: 0.7 },
+          });
+          const text = res?.text;
+          if (text && text.trim()) return { text: text.trim(), provider: 'gemini' };
+        } catch (e: any) {
+          console.warn(`[AI Service Hint] @google/genai (${modelName}) failed:`, e?.message || e);
+        }
       }
+    } catch (err: any) {
+      console.warn('[AI Service Hint] @google/genai client error:', err?.message || err);
     }
   }
 
-  // 2. Try Groq
+  // 2. Try Groq (openai/gpt-oss-120b)
   if (groqApiKey) {
     const groqClient = new Groq({ apiKey: groqApiKey });
-    for (const modelName of GROQ_MODELS) {
+    for (const modelName of GROQ_FALLBACK_MODELS) {
       try {
         const completion = await groqClient.chat.completions.create({
           messages: [{ role: 'user', content: prompt }],

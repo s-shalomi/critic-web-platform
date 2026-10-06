@@ -410,3 +410,22 @@
   - `npm test` (28/28 tests passing across 8 suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
 - **Immediate Next Step**: Ready for user review and approval.
+
+---
+
+### [2026-10-06] - LLM Modernization: Migration to @google/genai SDK (gemini-3.7-flash & openai/gpt-oss-120b)
+
+- **Role**: Full Stack Developer
+- **Code Built & Updated**:
+  - **SDK Migration to `@google/genai`**: Installed and migrated all Google Gen AI operations from legacy `@google/generative-ai` to the official `@google/genai` SDK with `GoogleGenAI` client.
+  - **Modern Model Specifications**:
+    - **Google Gemini**: Standardized on `gemini-3.7-flash` (with `gemini-2.5-flash` and `gemini-2.0-flash` fallbacks) for high-speed Socratic inquiry and dynamic avatar hints.
+    - **Groq**: Standardized on `openai/gpt-oss-120b` (with `openai/gpt-oss-20b` and `qwen/qwen3.8-27b` fallbacks), fully replacing decommissioned LLaMA aliases.
+  - **Tested & Verified Live Execution**: Validated live generation via `@google/genai` (`gemini-3.7-flash`) and `groq-sdk` (`openai/gpt-oss-120b`) with successful responses and zero 404 errors.
+  - **Domain Documentation**: Updated [`src/domains/ai/README.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/ai/README.md).
+- **Dependencies Introduced**:
+  - `@google/genai`: `^0.1.2` (in `package.json`).
+- **Tests Passing**:
+  - `npm test` (28/28 tests passing across 8 suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+- **Immediate Next Step**: Ready for user review and approval.
