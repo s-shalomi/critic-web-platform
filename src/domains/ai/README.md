@@ -4,9 +4,10 @@
 The AI Agent domain encapsulates the Socratic AI Engine, Google Gen AI (`@google/genai`) + Groq API clients with automatic fallback execution, persona tone management, and strict non-definitive guardrails.
 
 ## Provider Resilience Architecture
-1. **Primary LLM**: Google Gen AI SDK (`@google/genai`) using Gemini models 3.1 and up (`gemini-3.7-flash`, `gemini-3.1-flash`, `gemini-3.1-pro`, `gemini-3.8-flash`) with 9s timeout race.
-2. **Fallback LLM**: Groq Cloud SDK using `openai/gpt-oss-120b` (with `openai/gpt-oss-20b`, `llama-3.3-70b-versatile`, and `qwen/qwen3.8-27b` fallbacks).
-3. **Fallback Rule Engine**: Guarantees a valid, high-quality Socratic response if both external providers fail or rate-limit, keeping UI unblocked without 500 errors.
+1. **Primary LLM**: Google Gen AI SDK (`@google/genai`) using strictly `gemini-3.7-flash` and `gemini-3.8-flash` with 9s timeout race and 2048 token headroom.
+2. **Fallback LLM**: Groq Cloud SDK using strictly `openai/gpt-oss-120b` (2048 tokens).
+3. **Rate Limit & Error Handling**: Explicitly captures rate limits (429 / quota limits) and surfaces user-friendly error messages and retry guidance.
+4. **Fallback Rule Engine**: Guarantees a valid, high-quality Socratic response if both external providers fail or are unconfigured, keeping UI unblocked without 500 errors.
 
 ## Features
 - **Socratic Inquiry Chat**: Evaluates arguments and challenges assumptions across stages.

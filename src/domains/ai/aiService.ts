@@ -34,13 +34,29 @@ function getSanitizedKey(keyName: string): string {
 
 /**
  * Primary and fallback model definitions
- * Ensures Gemini models 3.1 and up are used with Groq as fallback
+ * Strictly Gemini 3.7 and 3.8 with Groq openai/gpt-oss-120b as fallback
  */
 const GEMINI_PRIMARY_MODEL = 'gemini-3.7-flash';
-const GEMINI_FALLBACK_MODELS = ['gemini-3.7-flash', 'gemini-3.1-flash', 'gemini-3.1-pro', 'gemini-3.8-flash'];
+const GEMINI_FALLBACK_MODELS = ['gemini-3.7-flash', 'gemini-3.8-flash'];
 
 const GROQ_PRIMARY_MODEL = 'openai/gpt-oss-120b';
-const GROQ_FALLBACK_MODELS = ['openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'llama-3.3-70b-versatile', 'qwen/qwen3.8-27b'];
+const GROQ_FALLBACK_MODELS = ['openai/gpt-oss-120b'];
+
+/**
+ * Checks if an error is a rate limit / quota exceeded error
+ */
+function isRateLimitError(err: any): boolean {
+  if (!err) return false;
+  if (err.status === 429 || err.statusCode === 429) return true;
+  const msg = (err.message || String(err)).toLowerCase();
+  return (
+    msg.includes('429') ||
+    msg.includes('rate limit') ||
+    msg.includes('resource_exhausted') ||
+    msg.includes('quota') ||
+    msg.includes('too many requests')
+  );
+}
 
 /**
  * Constructs system prompt enforcing Socratic guardrails and persona tone
@@ -66,6 +82,7 @@ CRITICAL SOCRATIC GUARDRAILS (MUST OBEY strictly):
 3. EVERY substantive turn MUST end with a probing Socratic question, a counter-perspective, or a prompt to evaluate evidence credibility.
 4. Reference the student's prior notes and concept map nodes where relevant.
 5. If asked for factual evidence, direct the student back to the provided topic sources or ask how they could verify the claim.
+6. Always complete your thoughts and sentences fully. Never stop mid-sentence.
 
 CURRENT INVESTIGATION CONTEXT:
 Topic: ${snapshot.topicTitle}
@@ -111,7 +128,7 @@ export async function generateSocraticResponse(
   history: ChatTurn[],
   snapshot: ModuleSnapshot,
   mode: 'Socratic' | 'DevilsAdvocate' = 'Socratic'
-): Promise<{ text: string; provider: 'gemini' | 'groq' | 'fallback_rule'; errorDetails?: string }> {
+): Promise<{ text: string; provider: 'gemini' | 'groq' | 'fallback_rule' | 'rate_limit_error'; isError?: boolean }> {
   const geminiApiKey = getSanitizedKey('GEMINI_API_KEY');
   const groqApiKey = getSanitizedKey('GROQ_API_KEY');
 
@@ -119,7 +136,9 @@ export async function generateSocraticResponse(
   const formattedHistory = compressChatHistory(history);
   const fullPrompt = `${systemPrompt}\n\nCHAT HISTORY:\n${formattedHistory}\n\nAGENT:`;
 
-  // 1. Try Google Gen AI (@google/genai SDK) with gemini-3.7-flash
+  let hadRateLimit = false;
+
+  // 1. Try Google Gen AI (@google/genai SDK) with gemini-3.7-flash and gemini-3.8-flash
   if (geminiApiKey) {
     try {
       const ai = new GoogleGenAI({ apiKey: geminiApiKey });
@@ -129,7 +148,7 @@ export async function generateSocraticResponse(
             model: modelName,
             contents: fullPrompt,
             config: {
-              maxOutputTokens: 300,
+              maxOutputTokens: 2048,
               temperature: 0.7,
             },
           });
@@ -144,15 +163,17 @@ export async function generateSocraticResponse(
             return { text: responseText.trim(), provider: 'gemini' };
           }
         } catch (mErr: any) {
+          if (isRateLimitError(mErr)) hadRateLimit = true;
           console.warn(`[AI Service] @google/genai (${modelName}) failed:`, mErr?.message || mErr);
         }
       }
     } catch (err: any) {
+      if (isRateLimitError(err)) hadRateLimit = true;
       console.warn('[AI Service] @google/genai client failed. Falling back to Groq...', err?.message || err);
     }
   }
 
-  // 2. Fallback to Groq API (openai/gpt-oss-120b)
+  // 2. Fallback to Groq API (openai/gpt-oss-120b only)
   if (groqApiKey) {
     const groqClient = new Groq({ apiKey: groqApiKey });
     for (const modelName of GROQ_FALLBACK_MODELS) {
@@ -163,7 +184,7 @@ export async function generateSocraticResponse(
             { role: 'user', content: formattedHistory },
           ],
           model: modelName,
-          max_tokens: 300,
+          max_tokens: 2048,
           temperature: 0.7,
         });
 
@@ -172,12 +193,22 @@ export async function generateSocraticResponse(
           return { text: groqText.trim(), provider: 'groq' };
         }
       } catch (err: any) {
+        if (isRateLimitError(err)) hadRateLimit = true;
         console.warn(`[AI Service] Groq (${modelName}) failed:`, err?.message || err);
       }
     }
   }
 
-  // 3. Fallback Socratic Rule Engine if both providers are unconfigured or fail
+  // If rate limits were encountered on configured providers, return explicit rate limit error
+  if (hadRateLimit) {
+    return {
+      text: '⚠️ The AI service is currently rate limited due to high demand. Please wait a few moments and try your response again.',
+      provider: 'rate_limit_error',
+      isError: true,
+    };
+  }
+
+  // 3. Fallback Socratic Rule Engine if providers are unconfigured
   const fallbackSocraticReplies = [
     'What specific evidence from the sources supports that perspective? How might someone with an opposing view challenge it?',
     'If we look at long-term regional climate trends versus short-term weather anomalies, how does that affect your conclusion?',
@@ -203,7 +234,7 @@ export async function generateAvatarHint(params: {
   conceptNodes?: Array<{ text: string }>;
   agentPersonality?: string;
   avatarName?: string;
-}): Promise<{ text: string; provider: 'gemini' | 'groq' | 'fallback_rule' }> {
+}): Promise<{ text: string; provider: 'gemini' | 'groq' | 'fallback_rule' | 'rate_limit_error'; isError?: boolean }> {
   const geminiApiKey = getSanitizedKey('GEMINI_API_KEY');
   const groqApiKey = getSanitizedKey('GROQ_API_KEY');
 
@@ -215,7 +246,32 @@ export async function generateAvatarHint(params: {
   const notesList = (params.notes || []).map((n) => `"${n.noteText}"`).join(', ');
   const nodesList = (params.conceptNodes || []).map((n) => `"${n.text}"`).join(', ');
 
-  const prompt = `
+  let prompt = '';
+  if (stage === 'conceptualise') {
+    // Conceptualise stage: LLM hint is specifically driven by concept nodes
+    prompt = `
+You are ${avatarName}, an AI peer acting as a ${tone} on the topic of "${topicTitle}".
+The student is currently on the "conceptualise" stage, where they build a visual concept map of ideas and evidence.
+The student just clicked on your avatar for guidance.
+
+STUDENT'S EXISTING CONCEPT NODES:
+${nodesList || '(No concept nodes created yet on the canvas)'}
+
+STUDENT'S EVIDENCE NOTES:
+${notesList || '(No notes taken yet)'}
+
+CURRENT SOURCE IN VIEW:
+${params.sourceTitle || 'Climate Evidence Source'}: "${params.sourceText ? params.sourceText.slice(0, 300) : ''}"
+
+REQUIREMENTS:
+1. If the student has created concept nodes, ask a probing Socratic Question specifically about how their concept nodes relate to each other, what underlying assumptions connect them, or what key concept node might be missing.
+2. If the student has NO concept nodes yet, ask a Socratic question prompting them to convert key ideas from their evidence notes into their first concept nodes.
+3. DO NOT deliver any direct factual claims, answers, or verdicts.
+4. Keep the response to 1-2 concise, complete sentences ending in a question. Do not leave thoughts unfinished.
+    `.trim();
+  } else {
+    // Familiarise stage: driven by source in view and evidence notes
+    prompt = `
 You are ${avatarName}, an AI peer acting as a ${tone} on the topic of "${topicTitle}".
 The student is currently on the "${stage}" stage and just clicked on your avatar for guidance.
 
@@ -228,10 +284,13 @@ Student's concept nodes: ${nodesList || 'None yet'}
 REQUIREMENTS:
 1. Provide exactly ONE concise, probing Socratic Question related to the source currently on screen and the student's reasoning.
 2. DO NOT deliver any direct factual statements, conclusions, or answers.
-3. Keep the response to 1-2 short sentences ending in a question.
-  `.trim();
+3. Keep the response to 1-2 complete sentences ending in a question. Ensure sentences are fully finished.
+    `.trim();
+  }
 
-  // 1. Try Google Gen AI (@google/genai SDK) with gemini-3.7-flash
+  let hadRateLimit = false;
+
+  // 1. Try Google Gen AI (@google/genai SDK) with gemini-3.7-flash and gemini-3.8-flash
   if (geminiApiKey) {
     try {
       const ai = new GoogleGenAI({ apiKey: geminiApiKey });
@@ -240,20 +299,22 @@ REQUIREMENTS:
           const res = await ai.models.generateContent({
             model: modelName,
             contents: prompt,
-            config: { maxOutputTokens: 120, temperature: 0.7 },
+            config: { maxOutputTokens: 1024, temperature: 0.7 },
           });
           const text = res?.text;
           if (text && text.trim()) return { text: text.trim(), provider: 'gemini' };
         } catch (e: any) {
+          if (isRateLimitError(e)) hadRateLimit = true;
           console.warn(`[AI Service Hint] @google/genai (${modelName}) failed:`, e?.message || e);
         }
       }
     } catch (err: any) {
+      if (isRateLimitError(err)) hadRateLimit = true;
       console.warn('[AI Service Hint] @google/genai client error:', err?.message || err);
     }
   }
 
-  // 2. Try Groq (openai/gpt-oss-120b)
+  // 2. Try Groq (openai/gpt-oss-120b only)
   if (groqApiKey) {
     const groqClient = new Groq({ apiKey: groqApiKey });
     for (const modelName of GROQ_FALLBACK_MODELS) {
@@ -261,15 +322,24 @@ REQUIREMENTS:
         const completion = await groqClient.chat.completions.create({
           messages: [{ role: 'user', content: prompt }],
           model: modelName,
-          max_tokens: 120,
+          max_tokens: 1024,
           temperature: 0.7,
         });
         const text = completion.choices[0]?.message?.content;
         if (text && text.trim()) return { text: text.trim(), provider: 'groq' };
       } catch (e: any) {
+        if (isRateLimitError(e)) hadRateLimit = true;
         console.warn(`[AI Service Hint] Groq (${modelName}) failed:`, e?.message || e);
       }
     }
+  }
+
+  if (hadRateLimit) {
+    return {
+      text: '⚠️ The AI hint service is temporarily rate limited. Please try clicking Aria again in a few moments.',
+      provider: 'rate_limit_error',
+      isError: true,
+    };
   }
 
   // 3. Fallback hints
@@ -282,7 +352,7 @@ REQUIREMENTS:
     ],
     conceptualise: [
       'How does this concept node connect to the evidence you highlighted earlier?',
-      'What cause-and-effect relationship might exist between these two connected nodes?',
+      'What cause-and-effect relationship might exist between your connected concept nodes?',
       'Is there an intermediate assumption or missing link connecting your concepts?',
     ],
   };
@@ -291,3 +361,4 @@ REQUIREMENTS:
   const hint = list[Math.floor(Math.random() * list.length)];
   return { text: hint, provider: 'fallback_rule' };
 }
+
