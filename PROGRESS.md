@@ -428,4 +428,20 @@
 - **Tests Passing**:
   - `npm test` (28/28 tests passing across 8 suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
-- **Immediate Next Step**: Ready for user review and approval.
+- **Immediate Next Step**: Completed.
+
+---
+
+### [2026-10-06] - Fix 1: Gemini Models 3.1+ and Groq Fallback Enforcement
+
+- **Role**: Full Stack Developer
+- **Code Built & Updated**:
+  - **Gemini 3.1+ Model Standardization**: Configured [`src/domains/ai/aiService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/ai/aiService.ts) to strictly use Google Gemini models 3.1 and up (`gemini-3.7-flash`, `gemini-3.1-flash`, `gemini-3.1-pro`, `gemini-3.8-flash`) via the `@google/genai` SDK. Removed any sub-3.1 models.
+  - **Groq Fallback Integration**: Ensured Groq models (`openai/gpt-oss-120b`, `openai/gpt-oss-20b`, `llama-3.3-70b-versatile`, `qwen/qwen3.8-27b`) act as the seamless automated secondary fallback tier before the offline contextual Socratic rule engine.
+  - **Domain Documentation**: Updated [`src/domains/ai/README.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/ai/README.md) with the verified model architecture.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (28/28 tests passing across 8 test suites).
+  - `npx tsc --noEmit` (0 errors).
+- **Immediate Next Step**: Seek approval for Fix 1, then proceed to Fix 2 ("llm response is cut-off sometimes (often)").
+

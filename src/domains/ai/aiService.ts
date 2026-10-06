@@ -34,12 +34,13 @@ function getSanitizedKey(keyName: string): string {
 
 /**
  * Primary and fallback model definitions
+ * Ensures Gemini models 3.1 and up are used with Groq as fallback
  */
 const GEMINI_PRIMARY_MODEL = 'gemini-3.7-flash';
-const GEMINI_FALLBACK_MODELS = ['gemini-3.7-flash', 'gemini-2.5-flash', 'gemini-2.0-flash'];
+const GEMINI_FALLBACK_MODELS = ['gemini-3.7-flash', 'gemini-3.1-flash', 'gemini-3.1-pro', 'gemini-3.8-flash'];
 
 const GROQ_PRIMARY_MODEL = 'openai/gpt-oss-120b';
-const GROQ_FALLBACK_MODELS = ['openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'qwen/qwen3.8-27b'];
+const GROQ_FALLBACK_MODELS = ['openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'llama-3.3-70b-versatile', 'qwen/qwen3.8-27b'];
 
 /**
  * Constructs system prompt enforcing Socratic guardrails and persona tone
