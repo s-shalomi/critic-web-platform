@@ -63,9 +63,18 @@ export default function ConceptMapCanvas({
   const [showAddNodeModal, setShowAddNodeModal] = useState<boolean>(false);
   const [newNodeText, setNewNodeText] = useState<string>('');
 
-  // Drag State
+  // Panning & Drag State
+  const [panOffset, setPanOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState<boolean>(false);
+  const panStartRef = useRef<{ x: number; y: number; startPanX: number; startPanY: number }>({
+    x: 0,
+    y: 0,
+    startPanX: 0,
+    startPanY: 0,
+  });
   const [draggingNodeId, setDraggingNodeId] = useState<string | null>(null);
   const dragOffsetRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const canvasStageRef = useRef<HTMLDivElement>(null);
 
   const playLinkAudioSound = () => {
     try {
@@ -200,8 +209,14 @@ export default function ConceptMapCanvas({
   // Handle Add Concept Node
   const handleAddNode = async () => {
     if (!newNodeText.trim()) return;
-    const posX = 180 + Math.random() * 200;
-    const posY = 120 + Math.random() * 180;
+
+    // Center new node in currently visible viewport
+    const canvasWidth = canvasStageRef.current?.clientWidth || 800;
+    const canvasHeight = canvasStageRef.current?.clientHeight || 600;
+    const centerX = (canvasWidth / 2 - panOffset.x) / zoomLevel;
+    const centerY = (canvasHeight / 2 - panOffset.y) / zoomLevel;
+    const posX = Math.round(centerX - 60 + (Math.random() * 60 - 30));
+    const posY = Math.round(centerY - 60 + (Math.random() * 60 - 30));
 
     try {
       const res = await fetch(`/api/modules/${moduleId}/concepts`, {
@@ -328,7 +343,26 @@ export default function ConceptMapCanvas({
     }
   };
 
-  // Drag Handlers
+  // Canvas Mouse & Drag Handlers
+  const handleMouseDownCanvas = (e: React.MouseEvent) => {
+    // If clicking on toolbar, modal, or input, do not start canvas pan
+    if (
+      (e.target as HTMLElement).closest(`.${styles.conceptNodeCircle}`) ||
+      (e.target as HTMLElement).closest(`.${styles.canvasToolbar}`) ||
+      (e.target as HTMLElement).closest(`.${styles.modalBackdrop}`)
+    ) {
+      return;
+    }
+
+    setIsPanning(true);
+    panStartRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      startPanX: panOffset.x,
+      startPanY: panOffset.y,
+    };
+  };
+
   const handleMouseDownNode = (e: React.MouseEvent, nodeId: string) => {
     if (activeTool === 'link') return;
     e.stopPropagation();
@@ -337,24 +371,38 @@ export default function ConceptMapCanvas({
     const targetNode = nodes.find((n) => n.id === nodeId);
     if (targetNode) {
       dragOffsetRef.current = {
-        x: e.clientX - targetNode.positionX,
-        y: e.clientY - targetNode.positionY,
+        x: (e.clientX - panOffset.x) / zoomLevel - targetNode.positionX,
+        y: (e.clientY - panOffset.y) / zoomLevel - targetNode.positionY,
       };
     }
   };
 
   const handleMouseMoveCanvas = (e: React.MouseEvent) => {
-    if (!draggingNodeId) return;
+    if (isPanning) {
+      const dx = e.clientX - panStartRef.current.x;
+      const dy = e.clientY - panStartRef.current.y;
+      setPanOffset({
+        x: panStartRef.current.startPanX + dx,
+        y: panStartRef.current.startPanY + dy,
+      });
+      return;
+    }
 
-    const newX = e.clientX - dragOffsetRef.current.x;
-    const newY = e.clientY - dragOffsetRef.current.y;
+    if (draggingNodeId) {
+      const newX = (e.clientX - panOffset.x) / zoomLevel - dragOffsetRef.current.x;
+      const newY = (e.clientY - panOffset.y) / zoomLevel - dragOffsetRef.current.y;
 
-    setNodes((prev) =>
-      prev.map((n) => (n.id === draggingNodeId ? { ...n, positionX: newX, positionY: newY } : n))
-    );
+      setNodes((prev) =>
+        prev.map((n) => (n.id === draggingNodeId ? { ...n, positionX: Math.round(newX), positionY: Math.round(newY) } : n))
+      );
+    }
   };
 
   const handleMouseUpCanvas = () => {
+    if (isPanning) {
+      setIsPanning(false);
+    }
+
     if (draggingNodeId) {
       const movedNode = nodes.find((n) => n.id === draggingNodeId);
       if (movedNode) {
@@ -369,185 +417,247 @@ export default function ConceptMapCanvas({
     }
   };
 
+  // Wheel Panning & Zooming
+  const handleWheelCanvas = (e: React.WheelEvent) => {
+    e.preventDefault();
+    if (e.ctrlKey || e.metaKey) {
+      // Zoom
+      const zoomDelta = -e.deltaY * 0.0015;
+      setZoomLevel((prev) => Math.min(Math.max(prev + zoomDelta, 0.4), 2.2));
+    } else {
+      // Pan
+      setPanOffset((prev) => ({
+        x: prev.x - e.deltaX,
+        y: prev.y - e.deltaY,
+      }));
+    }
+  };
+
+  // Reset / Center Mind Map View
+  const handleResetView = () => {
+    if (nodes.length === 0) {
+      setPanOffset({ x: 0, y: 0 });
+      setZoomLevel(1);
+      return;
+    }
+
+    const minX = Math.min(...nodes.map((n) => n.positionX));
+    const maxX = Math.max(...nodes.map((n) => n.positionX + getNodeDiameter(n.text)));
+    const minY = Math.min(...nodes.map((n) => n.positionY));
+    const maxY = Math.max(...nodes.map((n) => n.positionY + getNodeDiameter(n.text)));
+
+    const canvasWidth = canvasStageRef.current?.clientWidth || 800;
+    const canvasHeight = canvasStageRef.current?.clientHeight || 600;
+
+    const midX = (minX + maxX) / 2;
+    const midY = (minY + maxY) / 2;
+
+    setPanOffset({
+      x: Math.round(canvasWidth / 2 - midX),
+      y: Math.round(canvasHeight / 2 - midY),
+    });
+    setZoomLevel(1);
+  };
+
   return (
     <main
+      ref={canvasStageRef}
       className={`${styles.canvasArea} ${className || ''}`}
-      style={style}
+      style={{
+        ...style,
+        backgroundPosition: `${panOffset.x}px ${panOffset.y}px, center center`,
+      }}
+      onMouseDown={handleMouseDownCanvas}
       onMouseMove={handleMouseMoveCanvas}
       onMouseUp={handleMouseUpCanvas}
+      onMouseLeave={handleMouseUpCanvas}
+      onWheel={handleWheelCanvas}
     >
       <div className={styles.canvasHeader}>
         <h1 className={styles.stageTitle}>{stageTitle}</h1>
+        <span className={styles.panHint}>Drag background or use ✋ to pan • Scroll to move</span>
       </div>
 
-      <div
-        className={styles.canvasStage}
-        style={{ transform: `scale(${zoomLevel})`, transformOrigin: 'top left' }}
-      >
-        {/* Interactive Concept Nodes */}
-        {nodes.map((node) => {
-          const isSelected = selectedNodeId === node.id;
-          const isLinkSource = linkSourceNodeId === node.id;
-          const isEditing = editingNodeId === node.id;
-          const diameter = getNodeDiameter(node.text);
+      <div className={`${styles.canvasStage} ${isPanning ? styles.canvasStagePanning : ''}`}>
+        <div
+          className={styles.canvasContentLayer}
+          style={{
+            transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoomLevel})`,
+            transformOrigin: '0 0',
+          }}
+        >
+          {/* SVG Connecting Links Layer */}
+          <svg className={styles.svgOverlay}>
+            <rect width="100%" height="100%" fill="none" pointerEvents="none" />
+            {links.map((link) => {
+              const fromNode = nodes.find((n) => n.id === link.fromNodeId);
+              const toNode = nodes.find((n) => n.id === link.toNodeId);
+              if (!fromNode || !toNode) return null;
 
-          return (
-            <div
-              key={node.id}
-              className={`${styles.conceptNodeCircle} ${isSelected ? styles.selectedNode : ''} ${
-                activeTool === 'link' && isLinkSource ? styles.linkSourceNode : ''
-              }`}
-              style={{
-                left: `${node.positionX}px`,
-                top: `${node.positionY}px`,
-                width: `${diameter}px`,
-                height: `${diameter}px`,
-              }}
-              title={node.text}
-              onMouseDown={(e) => handleMouseDownNode(e, node.id)}
-              onDoubleClick={(e) => {
-                e.stopPropagation();
-                setEditingNodeId(node.id);
-                setEditNodeText(node.text);
-              }}
-              onClick={() => handleNodeClick(node.id)}
-            >
-              {isEditing ? (
-                <div className={styles.inlineEditWrapper} onClick={(e) => e.stopPropagation()}>
-                  <input
-                    type="text"
-                    value={editNodeText}
-                    onChange={(e) => setEditNodeText(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') handleUpdateNodeText(node.id);
-                      if (e.key === 'Escape') setEditingNodeId(null);
-                    }}
-                    className={styles.inlineEditInput}
-                    autoFocus
+              const isHovered = hoveredLinkId === link.id;
+              const fromDiameter = getNodeDiameter(fromNode.text);
+              const toDiameter = getNodeDiameter(toNode.text);
+              const x1 = fromNode.positionX + fromDiameter / 2;
+              const y1 = fromNode.positionY + fromDiameter / 2;
+              const x2 = toNode.positionX + toDiameter / 2;
+              const y2 = toNode.positionY + toDiameter / 2;
+
+              return (
+                <g
+                  key={link.id}
+                  onMouseEnter={() => setHoveredLinkId(link.id)}
+                  onMouseLeave={() => setHoveredLinkId(null)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteLink(link.id);
+                  }}
+                  style={{ cursor: 'pointer', pointerEvents: 'all' }}
+                >
+                  {/* Wide invisible hit line for easy mouse targeting */}
+                  <line
+                    x1={x1}
+                    y1={y1}
+                    x2={x2}
+                    y2={y2}
+                    stroke="rgba(0,0,0,0)"
+                    strokeWidth="16"
+                    pointerEvents="stroke"
                   />
-                  <div className={styles.inlineEditBtns}>
-                    <button
-                      onClick={() => handleUpdateNodeText(node.id)}
-                      className={styles.nodeSaveBtn}
-                      title="Save"
-                    >
-                      ✓
-                    </button>
-                    <button
-                      onClick={() => setEditingNodeId(null)}
-                      className={styles.nodeCancelBtn}
-                      title="Cancel"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <span className={styles.nodeLabel} title={node.text}>
-                    {node.text}
-                  </span>
+                  {/* Visible styled glow line */}
+                  <line
+                    x1={x1}
+                    y1={y1}
+                    x2={x2}
+                    y2={y2}
+                    stroke={isHovered ? '#FF4FD8' : '#37F3FF'}
+                    strokeWidth={isHovered ? 4 : 3}
+                    className={styles.svgLineGlow}
+                    pointerEvents="stroke"
+                  />
+                </g>
+              );
+            })}
+          </svg>
 
-                  {/* Node Action Controls (Edit / Delete) */}
-                  {isSelected && (
-                    <div className={styles.nodeControls} onClick={(e) => e.stopPropagation()}>
-                      <button
-                        onClick={() => {
-                          setEditingNodeId(node.id);
-                          setEditNodeText(node.text);
-                        }}
-                        className={styles.nodeActionBtn}
-                        title="Edit label"
-                      >
-                        ✏️
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteNode(node.id);
-                        }}
-                        className={styles.nodeDeleteBtn}
-                        title="Delete node"
-                      >
-                        🗑️
-                      </button>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          );
-        })}
-
-        {/* SVG Connecting Links Layer */}
-        <svg className={styles.svgOverlay}>
-          <rect width="100%" height="100%" fill="none" pointerEvents="none" />
-          {links.map((link) => {
-            const fromNode = nodes.find((n) => n.id === link.fromNodeId);
-            const toNode = nodes.find((n) => n.id === link.toNodeId);
-            if (!fromNode || !toNode) return null;
-
-            const isHovered = hoveredLinkId === link.id;
-            const fromDiameter = getNodeDiameter(fromNode.text);
-            const toDiameter = getNodeDiameter(toNode.text);
-            const x1 = fromNode.positionX + fromDiameter / 2;
-            const y1 = fromNode.positionY + fromDiameter / 2;
-            const x2 = toNode.positionX + toDiameter / 2;
-            const y2 = toNode.positionY + toDiameter / 2;
+          {/* Interactive Concept Nodes */}
+          {nodes.map((node) => {
+            const isSelected = selectedNodeId === node.id;
+            const isLinkSource = linkSourceNodeId === node.id;
+            const isEditing = editingNodeId === node.id;
+            const diameter = getNodeDiameter(node.text);
 
             return (
-              <g
-                key={link.id}
-                onMouseEnter={() => setHoveredLinkId(link.id)}
-                onMouseLeave={() => setHoveredLinkId(null)}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDeleteLink(link.id);
+              <div
+                key={node.id}
+                className={`${styles.conceptNodeCircle} ${isSelected ? styles.selectedNode : ''} ${
+                  activeTool === 'link' && isLinkSource ? styles.linkSourceNode : ''
+                }`}
+                style={{
+                  left: `${node.positionX}px`,
+                  top: `${node.positionY}px`,
+                  width: `${diameter}px`,
+                  height: `${diameter}px`,
                 }}
-                style={{ cursor: 'pointer', pointerEvents: 'all' }}
+                title={node.text}
+                onMouseDown={(e) => handleMouseDownNode(e, node.id)}
+                onDoubleClick={(e) => {
+                  e.stopPropagation();
+                  setEditingNodeId(node.id);
+                  setEditNodeText(node.text);
+                }}
+                onClick={() => handleNodeClick(node.id)}
               >
-                {/* Wide invisible hit line for easy mouse targeting */}
-                <line
-                  x1={x1}
-                  y1={y1}
-                  x2={x2}
-                  y2={y2}
-                  stroke="rgba(0,0,0,0)"
-                  strokeWidth="16"
-                  pointerEvents="stroke"
-                />
-                {/* Visible styled glow line */}
-                <line
-                  x1={x1}
-                  y1={y1}
-                  x2={x2}
-                  y2={y2}
-                  stroke={isHovered ? '#FF4FD8' : '#37F3FF'}
-                  strokeWidth={isHovered ? 4 : 3}
-                  className={styles.svgLineGlow}
-                  pointerEvents="stroke"
-                />
-              </g>
+                {isEditing ? (
+                  <div className={styles.inlineEditWrapper} onClick={(e) => e.stopPropagation()}>
+                    <input
+                      type="text"
+                      value={editNodeText}
+                      onChange={(e) => setEditNodeText(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleUpdateNodeText(node.id);
+                        if (e.key === 'Escape') setEditingNodeId(null);
+                      }}
+                      className={styles.inlineEditInput}
+                      autoFocus
+                    />
+                    <div className={styles.inlineEditBtns}>
+                      <button
+                        onClick={() => handleUpdateNodeText(node.id)}
+                        className={styles.nodeSaveBtn}
+                        title="Save"
+                      >
+                        ✓
+                      </button>
+                      <button
+                        onClick={() => setEditingNodeId(null)}
+                        className={styles.nodeCancelBtn}
+                        title="Cancel"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <span className={styles.nodeLabel} title={node.text}>
+                      {node.text}
+                    </span>
+
+                    {/* Node Action Controls (Edit / Delete) */}
+                    {isSelected && (
+                      <div className={styles.nodeControls} onClick={(e) => e.stopPropagation()}>
+                        <button
+                          onClick={() => {
+                            setEditingNodeId(node.id);
+                            setEditNodeText(node.text);
+                          }}
+                          className={styles.nodeActionBtn}
+                          title="Edit label"
+                        >
+                          ✏️
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteNode(node.id);
+                          }}
+                          className={styles.nodeDeleteBtn}
+                          title="Delete node"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
             );
           })}
-        </svg>
+        </div>
       </div>
 
       {/* Control Toolbar */}
       <div className={styles.canvasToolbar}>
         <button
-          onClick={() => setZoomLevel((z) => Math.min(z + 0.15, 1.8))}
+          onClick={() => setZoomLevel((z) => Math.min(z + 0.15, 2.2))}
           className={styles.toolbarBtn}
-          title="Zoom In"
+          title="Zoom In (Ctrl + Scroll Up)"
         >
           🔍+
         </button>
         <button
-          onClick={() => setZoomLevel((z) => Math.max(z - 0.15, 0.5))}
+          onClick={() => setZoomLevel((z) => Math.max(z - 0.15, 0.4))}
           className={styles.toolbarBtn}
-          title="Zoom Out"
+          title="Zoom Out (Ctrl + Scroll Down)"
         >
           🔍-
+        </button>
+        <button
+          onClick={handleResetView}
+          className={styles.toolbarBtn}
+          title="Reset View / Center Mind Map"
+        >
+          🎯
         </button>
         <button
           onClick={() => {
@@ -555,7 +665,7 @@ export default function ConceptMapCanvas({
             setLinkSourceNodeId(null);
           }}
           className={`${styles.toolbarBtn} ${activeTool === 'pan' ? styles.activeToolBtn : ''}`}
-          title="Pan Tool"
+          title="Pan Tool (Click and drag canvas to move around)"
         >
           ✋
         </button>
@@ -572,7 +682,7 @@ export default function ConceptMapCanvas({
             setLinkSourceNodeId(null);
           }}
           className={`${styles.toolbarBtn} ${activeTool === 'link' ? styles.activeToolBtn : ''}`}
-          title="Create Link (Click 2 nodes)"
+          title="Create Link (Click 2 nodes to connect)"
         >
           🖋️
         </button>

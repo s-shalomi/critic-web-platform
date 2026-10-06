@@ -42,6 +42,7 @@ export default function ConceptualiseStagePage() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [hoveredNoteId, setHoveredNoteId] = useState<string | null>(null);
   const [pinnedNoteId, setPinnedNoteId] = useState<string | null>(null);
+  const [isSourcePanelCollapsed, setIsSourcePanelCollapsed] = useState<boolean>(false);
 
   useEffect(() => {
     const notesKey = getStudentStorageKey('critic_notes', moduleId);
@@ -213,53 +214,72 @@ export default function ConceptualiseStagePage() {
       {/* Main Workspace Split */}
       <div className={styles.workspace}>
         {/* Left Horizontal Carousel Sources Reference Panel */}
-        <aside className={styles.leftSourcePanel}>
+        <aside
+          className={`${styles.leftSourcePanel} ${
+            isSourcePanelCollapsed ? styles.leftSourcePanelCollapsed : ''
+          }`}
+        >
           <div className={styles.sourcePanelHeader}>
-            <span className={styles.panelTitle}>EVIDENCE SOURCES (SCROLL HORIZONTALLY →)</span>
+            <span className={styles.panelTitle}>
+              {isSourcePanelCollapsed ? 'SOURCES' : 'EVIDENCE SOURCES (SCROLL HORIZONTALLY →)'}
+            </span>
+            <button
+              onClick={() => setIsSourcePanelCollapsed(!isSourcePanelCollapsed)}
+              className={styles.collapseToggleBtn}
+              title={
+                isSourcePanelCollapsed
+                  ? 'Expand Evidence Sources Panel'
+                  : 'Collapse Panel for Full-Width Mind Map'
+              }
+            >
+              {isSourcePanelCollapsed ? '▶ Show' : '◀ Collapse'}
+            </button>
           </div>
 
-          <div className={styles.horizontalSourcesCarousel}>
-            {sources.map((src) => (
-              <div key={src.id} className={styles.carouselSourceCard}>
-                <div className={styles.sourceCardBadge}>{src.title}</div>
-                {src.content.authorName && (
-                  <div className={styles.authorHeader}>
-                    <div className={styles.authorAvatar} />
-                    <span className={styles.authorName}>{src.content.authorName}</span>
-                  </div>
-                )}
-                <div className={styles.sourceText}>
-                  {renderHighlightedText(src.id, src.content.text)}
-
-                  {src.content.comments && (
-                    <div
-                      style={{
-                        marginTop: '16px',
-                        borderTop: '1px solid var(--color-border-slate-50)',
-                        paddingTop: '10px',
-                      }}
-                    >
-                      <h5
-                        style={{
-                          fontFamily: 'var(--font-orbitron)',
-                          fontSize: '0.8rem',
-                          marginBottom: '6px',
-                        }}
-                      >
-                        Comments
-                      </h5>
-                      {src.content.comments.map((c, i) => (
-                        <div key={i} style={{ fontSize: '0.85rem', marginBottom: '6px' }}>
-                          <strong className="cyan-neon-text">{c.author}:</strong>{' '}
-                          {renderHighlightedText(src.id, c.text)}
-                        </div>
-                      ))}
+          {!isSourcePanelCollapsed && (
+            <div className={styles.horizontalSourcesCarousel}>
+              {sources.map((src) => (
+                <div key={src.id} className={styles.carouselSourceCard}>
+                  <div className={styles.sourceCardBadge}>{src.title}</div>
+                  {src.content.authorName && (
+                    <div className={styles.authorHeader}>
+                      <div className={styles.authorAvatar} />
+                      <span className={styles.authorName}>{src.content.authorName}</span>
                     </div>
                   )}
+                  <div className={styles.sourceText}>
+                    {renderHighlightedText(src.id, src.content.text)}
+
+                    {src.content.comments && (
+                      <div
+                        style={{
+                          marginTop: '16px',
+                          borderTop: '1px solid var(--color-border-slate-50)',
+                          paddingTop: '10px',
+                        }}
+                      >
+                        <h5
+                          style={{
+                            fontFamily: 'var(--font-orbitron)',
+                            fontSize: '0.8rem',
+                            marginBottom: '6px',
+                          }}
+                        >
+                          Comments
+                        </h5>
+                        {src.content.comments.map((c, i) => (
+                          <div key={i} style={{ fontSize: '0.85rem', marginBottom: '6px' }}>
+                            <strong className="cyan-neon-text">{c.author}:</strong>{' '}
+                            {renderHighlightedText(src.id, c.text)}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </aside>
 
         {/* Right Concept Map Canvas using shared reusable component */}

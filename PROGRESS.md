@@ -552,7 +552,30 @@
   - `npm test` (30/30 tests passing across 8 test suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
   - `npm run build` (100% successful Next.js App Router build with 0 compilation errors across 11 routes).
-- **Immediate Next Step**: Seek approval from user.
+- **Immediate Next Step**: Completed and approved. Proceed to Canvas Panning & Expansive Workspace Layout.
+
+---
+
+### [2026-10-07] - Canvas & Layout: Infinite-Feel Panning, Zoom Coordinates, Center View & Expansive Workspace
+
+- **Role**: Full Stack Developer
+- **Code Built & Updated**:
+  - **Full Canvas Panning (`panOffset` & `isPanning`)**: Implemented mouse-drag canvas panning in [`src/shared/components/ConceptMapCanvas/ConceptMapCanvas.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/ConceptMapCanvas/ConceptMapCanvas.tsx) and [`ConceptMapCanvas.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/ConceptMapCanvas/ConceptMapCanvas.module.css):
+    - Clicking & dragging the canvas background or using the Pan tool (`✋`) smoothly translates the entire canvas.
+    - Added mouse wheel / trackpad 2D scroll panning and `Ctrl + Scroll` smooth zooming (`0.4x` - `2.2x`).
+  - **Zoom- & Pan-Aware Node Dragging**: Enhanced node dragging math (`(e.clientX - panOffset.x) / zoomLevel - dragOffset`) to guarantee 1:1 precision at any zoom level and pan offset without jitter.
+  - **Lockstep SVG Overlay & Node Transform**: Wrapped SVG link overlay and nodes in a shared `.canvasContentLayer` transforming synchronously via `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoomLevel})` with `transform-origin: 0 0`.
+  - **Tactile Cyberpunk Grid Background**: Styled `.canvasArea` with a dynamic 40px dot-grid background whose position synchronizes with `panOffset.x` and `panOffset.y`.
+  - **Center View / Reset Map (`🎯`)**: Added dedicated toolbar action calculating the bounding box of all concept nodes and centering the camera viewport on them.
+  - **Expansive Mind Map Workspace & Collapsible Evidence Panel**:
+    - In [`src/app/module/[moduleId]/conceptualise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/conceptualise/page.tsx) and [`conceptualise.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/conceptualise/conceptualise.module.css), made the left evidence source panel collapsible (`[◀ Collapse / ▶ Show]`) and slimmed its default width to `360px`, allowing the mind map canvas to occupy up to 100% full screen width.
+    - Set workspace to fill `height: calc(100vh - 128px)` with zero overflow.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (30/30 tests passing across 8 test suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+  - `npm run build` (100% successful Next.js App Router build with 0 compilation errors across 11 routes).
+- **Immediate Next Step**: Seek user approval for the panning and expansive mind map experience.
 
 
 

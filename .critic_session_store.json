@@ -92,21 +92,21 @@
     [
       "CLASS_B_2026",
       {
-        "id": "code_1791301995045",
+        "id": "code_1791302678524",
         "code": "CLASS_B_2026",
         "teacherId": "teacher-123",
-        "createdAt": "2026-10-06T15:53:15.045Z",
-        "expiresAt": "2026-11-05T15:53:15.045Z"
+        "createdAt": "2026-10-06T16:04:38.524Z",
+        "expiresAt": "2026-11-05T16:04:38.524Z"
       }
     ],
     [
       "EXP_CHEM_2026",
       {
-        "id": "code_1791301995361",
+        "id": "code_1791302678801",
         "code": "EXP_CHEM_2026",
         "teacherId": "teacher-demo",
-        "createdAt": "2026-10-06T15:53:15.361Z",
-        "expiresAt": "2026-11-05T15:53:15.361Z"
+        "createdAt": "2026-10-06T16:04:38.801Z",
+        "expiresAt": "2026-11-05T16:04:38.801Z"
       }
     ]
   ],
@@ -119,7 +119,7 @@
         "topicTitle": "Climate Change",
         "currentStage": "conceptualise",
         "status": "in_progress",
-        "lastActive": "2026-10-06T15:45:32.835Z"
+        "lastActive": "2026-10-06T16:03:16.436Z"
       }
     ],
     [
@@ -130,7 +130,7 @@
         "topicTitle": "Climate Change",
         "currentStage": "synthesise",
         "status": "in_progress",
-        "lastActive": "2026-10-06T15:53:15.054Z"
+        "lastActive": "2026-10-06T16:04:38.530Z"
       }
     ]
   ],
@@ -157,6 +157,16 @@
           "convertedToNode": true,
           "createdAt": "2026-10-06T15:33:03.687Z",
           "updatedAt": "2026-10-06T15:33:08.319Z"
+        },
+        {
+          "id": "note_1791302340019_fril1",
+          "moduleId": "mod_climate-change_student_53545544454e",
+          "sourceId": "source-2",
+          "highlightedText": "temperatures hit record lows in winter, how can global warming be real",
+          "noteText": "puts attention on a single cold event, which can make global warming seem inconsistent with observed experience",
+          "convertedToNode": true,
+          "createdAt": "2026-10-06T15:59:00.019Z",
+          "updatedAt": "2026-10-06T15:59:04.659Z"
         }
       ]
     ]

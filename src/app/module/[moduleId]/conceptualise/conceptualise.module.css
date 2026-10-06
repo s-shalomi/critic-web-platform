@@ -31,21 +31,57 @@
   display: flex;
   position: relative;
   overflow: hidden;
+  height: calc(100vh - 128px);
+  min-height: 520px;
 }
 
 /* Left Horizontal Carousel Panel */
 .leftSourcePanel {
-  width: 440px;
-  padding: 20px;
-  background: rgba(15, 23, 46, 0.65);
+  width: 360px;
+  min-width: 340px;
+  max-width: 400px;
+  padding: 18px 20px;
+  background: rgba(15, 23, 46, 0.75);
   border-right: 1px solid rgba(55, 243, 255, 0.2);
   display: flex;
   flex-direction: column;
   z-index: 10;
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), min-width 0.25s ease, padding 0.25s ease;
+}
+
+.leftSourcePanelCollapsed {
+  width: 58px;
+  min-width: 58px;
+  max-width: 58px;
+  padding: 16px 8px;
+  align-items: center;
 }
 
 .sourcePanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   margin-bottom: 12px;
+}
+
+.collapseToggleBtn {
+  background: rgba(55, 243, 255, 0.1);
+  border: 1px solid rgba(55, 243, 255, 0.35);
+  color: var(--color-accent-cyan);
+  font-family: var(--font-orbitron);
+  font-size: 0.7rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.collapseToggleBtn:hover {
+  background: rgba(55, 243, 255, 0.25);
+  border-color: var(--color-accent-cyan);
+  box-shadow: 0 0 8px rgba(55, 243, 255, 0.4);
 }
 
 .panelTitle {
