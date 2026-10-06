@@ -445,6 +445,22 @@
 - **Tests Passing**:
   - `npm test` (28/28 tests passing across 8 test suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
-- **Immediate Next Step**: Seek approval for revised Fix 1, then proceed to Fix 2 ("llm response is cut-off sometimes (often)").
+- **Immediate Next Step**: Completed and approved. Proceed to Fix 2.
+
+---
+
+### [2026-10-07] - Fix 2: Resolution of LLM Response Truncation / Cut-Offs
+
+- **Role**: Full Stack Developer
+- **Code Built & Updated**:
+  - **Ample Token Headroom**: Increased `maxOutputTokens` and `max_tokens` from 300 to **2048 tokens** in `generateSocraticResponse` and from 120 to **1024 tokens** in `generateAvatarHint` across both Gemini (`@google/genai`) and Groq (`groq-sdk`).
+  - **Syntactic & Thought Completeness Guardrails**: Added explicit prompt instructions ("Always complete your thoughts and sentences fully. Never stop mid-sentence or mid-thought") in `buildSocraticSystemPrompt` and `generateAvatarHint`.
+  - **Spacious, Scrollable Avatar Speech Bubbles**: Updated `.speechBubble` in [`src/app/module/[moduleId]/familiarise/familiarise.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/familiarise/familiarise.module.css) and [`conceptualise.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/conceptualise/conceptualise.module.css) to 340px width, responsive max-width (`calc(100vw - 48px)`), `max-height: 380px`, `word-break: break-word`, and customized thin scrollbars to prevent any visual clipping.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (28/28 tests passing across 8 test suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+- **Immediate Next Step**: Seek approval for Fix 2, then proceed to Fix 3 ("llm for conceptualise stage should be based on concept nodes").
+
 
 

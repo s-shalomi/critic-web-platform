@@ -397,7 +397,10 @@
   position: absolute;
   bottom: 80px;
   left: 0;
-  width: 280px;
+  width: 340px;
+  max-width: calc(100vw - 48px);
+  max-height: 380px;
+  overflow-y: auto;
   background: #0F172E;
   border: 1px solid var(--color-accent-cyan);
   box-shadow: 0 0 20px rgba(55, 243, 255, 0.3);
@@ -405,8 +408,11 @@
   border-radius: 12px;
   font-family: var(--font-space-mono);
   font-size: 0.85rem;
-  line-height: 1.4;
+  line-height: 1.5;
   color: var(--color-text-light);
+  word-break: break-word;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-accent-cyan-50) rgba(7, 11, 26, 0.4);
 }
 
 .speechHeader {
