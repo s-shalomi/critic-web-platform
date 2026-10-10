@@ -630,12 +630,21 @@
   - `npm test` (31/31 tests passing across 8 test suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
   - `npm run build` (100% successful Next.js App Router build with 0 compilation errors across 11 routes).
-- **Immediate Next Step**: Seek user approval for Groq-only implementation.
+- **Immediate Next Step**: Created architectural justifications documentation [`justifications.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/justifications.md).
 
+---
 
+### [2026-10-11] - Architectural Documentation: Creation of `justifications.md`
 
-
-
-
-
-
+- **Role**: Full Stack Developer
+- **Code Built & Updated**:
+  - **Comprehensive Architectural Justifications**: Created [`justifications.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/justifications.md) documenting:
+    1. Historical context and previous AI implementations (Phase 1 dual-provider Gemini/LLaMA fallback; Phase 2 Gemini 3.7/3.8 + speculative hedged Groq).
+    2. What changed (complete removal of Gemini, exclusive adoption of Groq `openai/gpt-oss-120b`, custom SSL agent for institutional proxy TLS inspection, calibrated token limits).
+    3. Technical and pedagogical justifications (sub-second 640ms-870ms latency satisfying conversational Socratic flow, resolution of campus proxy `UNABLE_TO_VERIFY_LEAF_SIGNATURE` certificates, elimination of multi-tier cascade delays, architectural simplicity).
+    4. Comprehensive summary comparison matrix across latency, reliability, token budgets, and failure handling.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (31/31 tests passing across 8 test suites).
+  - `npm run build` (100% clean production build).
+- **Immediate Next Step**: Seek user approval for the documentation.
