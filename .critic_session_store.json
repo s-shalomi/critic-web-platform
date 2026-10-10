@@ -66,8 +66,38 @@
             "authorName": "name",
             "text": "some description\n"
           }
+        },
+        {
+          "id": "source_1791647003132_q9o5a",
+          "topicId": "climate-change",
+          "orderIndex": 5,
+          "title": "Teacher Supplementary Report",
+          "content": {
+            "type": "article",
+            "authorName": "Dr. Jane Smith",
+            "text": "Supplementary findings on Arctic sea ice extent trends."
+          }
+        },
+        {
+          "id": "source_1791647003136_orpia",
+          "topicId": "climate-change",
+          "orderIndex": 6,
+          "title": "Updated Title",
+          "content": {
+            "type": "article",
+            "authorName": "Teacher Added",
+            "text": "Updated Text Content"
+          }
         }
       ]
+    ],
+    [
+      "vaccine-safety",
+      []
+    ],
+    [
+      "mental-wellbeing",
+      []
     ]
   ],
   "accessCodes": [
@@ -92,21 +122,31 @@
     [
       "CLASS_B_2026",
       {
-        "id": "code_1791302678524",
+        "id": "code_1791647003169",
         "code": "CLASS_B_2026",
         "teacherId": "teacher-123",
-        "createdAt": "2026-10-06T16:04:38.524Z",
-        "expiresAt": "2026-11-05T16:04:38.524Z"
+        "createdAt": "2026-10-10T15:43:23.169Z",
+        "expiresAt": "2026-11-09T15:43:23.169Z"
       }
     ],
     [
       "EXP_CHEM_2026",
       {
-        "id": "code_1791302678801",
+        "id": "code_1791647003367",
         "code": "EXP_CHEM_2026",
         "teacherId": "teacher-demo",
-        "createdAt": "2026-10-06T16:04:38.801Z",
-        "expiresAt": "2026-11-05T16:04:38.801Z"
+        "createdAt": "2026-10-10T15:43:23.367Z",
+        "expiresAt": "2026-11-09T15:43:23.367Z"
+      }
+    ],
+    [
+      "ANESTA",
+      {
+        "id": "code_1791381429892",
+        "code": "ANESTA",
+        "teacherId": "teacher-demo",
+        "createdAt": "2026-10-07T13:57:09.892Z",
+        "expiresAt": "2026-11-06T13:57:09.892Z"
       }
     ]
   ],
@@ -130,7 +170,29 @@
         "topicTitle": "Climate Change",
         "currentStage": "synthesise",
         "status": "in_progress",
-        "lastActive": "2026-10-06T16:04:38.530Z"
+        "lastActive": "2026-10-10T15:43:23.175Z"
+      }
+    ],
+    [
+      "ANESTA",
+      {
+        "studentId": "student_414e45535441",
+        "accessCode": "ANESTA",
+        "topicTitle": "Climate Change",
+        "currentStage": "review",
+        "status": "completed",
+        "lastActive": "2026-10-07T14:00:40.550Z"
+      }
+    ],
+    [
+      "CLIMATE2026",
+      {
+        "studentId": "student_434c494d4154",
+        "accessCode": "CLIMATE2026",
+        "topicTitle": "Climate Change",
+        "currentStage": "review",
+        "status": "completed",
+        "lastActive": "2026-10-08T04:20:05.809Z"
       }
     ]
   ],
@@ -167,6 +229,100 @@
           "convertedToNode": true,
           "createdAt": "2026-10-06T15:59:00.019Z",
           "updatedAt": "2026-10-06T15:59:04.659Z"
+        }
+      ]
+    ],
+    [
+      "mod_climate-change_student_414e45535441",
+      [
+        {
+          "id": "note_1791381510131_5m94g",
+          "moduleId": "mod_climate-change_student_414e45535441",
+          "sourceId": "source-1",
+          "highlightedText": "Wouldn't be bad to have a little of that good old fashioned Global Warming right now",
+          "noteText": "sarcasm",
+          "convertedToNode": true,
+          "createdAt": "2026-10-07T13:58:30.131Z",
+          "updatedAt": "2026-10-07T13:58:34.805Z"
+        }
+      ]
+    ],
+    [
+      "mod_climate-change_student_434c494d4154",
+      [
+        {
+          "id": "note_1791433086654_pw9h5",
+          "moduleId": "mod_climate-change_student_434c494d4154",
+          "sourceId": "source-1",
+          "highlightedText": "Wouldn't be bad to have a little of that good old fashioned Global Warming right no",
+          "noteText": "sarfgh",
+          "convertedToNode": true,
+          "createdAt": "2026-10-08T04:18:06.654Z",
+          "updatedAt": "2026-10-08T04:18:10.768Z"
+        }
+      ]
+    ],
+    [
+      "test_mod_123",
+      [
+        {
+          "id": "note_1791646914100_4wqc9",
+          "moduleId": "test_mod_123",
+          "sourceId": "source-1",
+          "highlightedText": "Global Warming right now!",
+          "noteText": "The author confuses weather anomalies with climate trends.",
+          "convertedToNode": false,
+          "createdAt": "2026-10-10T15:41:54.100Z",
+          "updatedAt": "2026-10-10T15:41:54.100Z"
+        }
+      ]
+    ],
+    [
+      "test_mod_edit",
+      [
+        {
+          "id": "note_1791646914107_dbwhw",
+          "moduleId": "test_mod_edit",
+          "sourceId": "source-1",
+          "highlightedText": "tremendous amounts of snow",
+          "noteText": "Updated note explaining local vs regional weather",
+          "convertedToNode": false,
+          "createdAt": "2026-10-10T15:41:54.107Z",
+          "updatedAt": "2026-10-10T15:41:54.109Z"
+        }
+      ]
+    ],
+    [
+      "test_mod_del",
+      []
+    ],
+    [
+      "test_mod_456",
+      [
+        {
+          "id": "note_1791646914116_9kcli",
+          "moduleId": "test_mod_456",
+          "sourceId": "source-1",
+          "highlightedText": "Record cold snow",
+          "noteText": "Weather anomaly",
+          "convertedToNode": true,
+          "createdAt": "2026-10-10T15:41:54.116Z",
+          "updatedAt": "2026-10-10T15:41:54.118Z"
+        }
+      ]
+    ],
+    [
+      "mod_resilient_test",
+      [
+        {
+          "id": "note_client_1791646914122",
+          "moduleId": "mod_resilient_test",
+          "sourceId": "src-1",
+          "highlightedText": "Evidence snippet",
+          "noteText": "Resiliently saved note text",
+          "convertedToNode": false,
+          "createdAt": "2026-10-10T15:41:54.122Z",
+          "updatedAt": "2026-10-10T15:41:54.122Z"
         }
       ]
     ]
@@ -219,11 +375,55 @@
           "updatedAt": "2026-10-06T16:08:33.070Z"
         }
       ]
+    ],
+    [
+      "mod_climate-change_student_414e45535441",
+      []
+    ],
+    [
+      "mod_climate-change_student_434c494d4154",
+      [
+        {
+          "id": "node_1791433090771_7g0nz",
+          "moduleId": "mod_climate-change_student_434c494d4154",
+          "text": "sarfgh",
+          "positionX": 402.1193870848799,
+          "positionY": 332.1729644128008,
+          "sourceNoteId": "note_1791433086654_pw9h5",
+          "linkCount": 0,
+          "createdAt": "2026-10-08T04:18:10.771Z",
+          "updatedAt": "2026-10-08T04:18:10.771Z"
+        }
+      ]
+    ],
+    [
+      "test_mod_456",
+      [
+        {
+          "id": "node_1791646914119_kfq5v",
+          "moduleId": "test_mod_456",
+          "text": "Weather anomaly",
+          "positionX": 382.85781702572547,
+          "positionY": 169.11144026527396,
+          "sourceNoteId": "note_1791646914116_9kcli",
+          "linkCount": 0,
+          "createdAt": "2026-10-10T15:41:54.119Z",
+          "updatedAt": "2026-10-10T15:41:54.119Z"
+        }
+      ]
     ]
   ],
   "conceptLinks": [
     [
       "mod_climate-change_student_53545544454e",
+      []
+    ],
+    [
+      "mod_climate-change_student_414e45535441",
+      []
+    ],
+    [
+      "mod_climate-change_student_434c494d4154",
       []
     ]
   ],

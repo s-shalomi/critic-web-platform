@@ -2,6 +2,7 @@ import {
   buildSocraticSystemPrompt,
   compressChatHistory,
   generateSocraticResponse,
+  generateAvatarHint,
   ChatTurn,
   ModuleSnapshot,
 } from '../src/domains/ai/aiService';
@@ -65,5 +66,26 @@ describe('Socratic AI Engine Tests', () => {
     expect(hint.text).toBeDefined();
     expect(hint.text.length).toBeGreaterThan(10);
     expect(['gemini', 'groq', 'fallback_rule', 'rate_limit_error']).toContain(hint.provider);
+  });
+
+  test('generateSocraticResponse and generateAvatarHint resolve strictly in under 3000ms', async () => {
+    const history: ChatTurn[] = [{ sender: 'student', text: 'Can renewable energy replace all fossil fuels?' }];
+    const snapshot: ModuleSnapshot = {
+      topicTitle: 'Climate Change',
+      currentStage: 'inquire',
+      notes: [],
+      conceptNodes: [],
+    };
+
+    const startTime = Date.now();
+    const [chatRes, hintRes] = await Promise.all([
+      generateSocraticResponse(history, snapshot),
+      generateAvatarHint({ stage: 'familiarise', topicTitle: 'Climate Change' }),
+    ]);
+    const duration = Date.now() - startTime;
+
+    expect(duration).toBeLessThan(3000);
+    expect(chatRes.text).toBeDefined();
+    expect(hintRes.text).toBeDefined();
   });
 });

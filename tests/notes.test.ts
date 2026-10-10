@@ -2,7 +2,7 @@ import { createNote, getNotesForModule, updateNote, deleteNote, convertNoteToNod
 
 describe('Notes Domain Tests', () => {
   test('Creates note and persists to module session', async () => {
-    const moduleId = 'test_mod_123';
+    const moduleId = `test_mod_${Date.now()}`;
     const note = await createNote({
       moduleId,
       sourceId: 'source-1',
