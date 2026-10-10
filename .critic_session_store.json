@@ -122,21 +122,21 @@
     [
       "CLASS_B_2026",
       {
-        "id": "code_1791647003169",
+        "id": "code_1791649003249",
         "code": "CLASS_B_2026",
         "teacherId": "teacher-123",
-        "createdAt": "2026-10-10T15:43:23.169Z",
-        "expiresAt": "2026-11-09T15:43:23.169Z"
+        "createdAt": "2026-10-10T16:16:43.249Z",
+        "expiresAt": "2026-11-09T16:16:43.249Z"
       }
     ],
     [
       "EXP_CHEM_2026",
       {
-        "id": "code_1791647003367",
+        "id": "code_1791649003751",
         "code": "EXP_CHEM_2026",
         "teacherId": "teacher-demo",
-        "createdAt": "2026-10-10T15:43:23.367Z",
-        "expiresAt": "2026-11-09T15:43:23.367Z"
+        "createdAt": "2026-10-10T16:16:43.751Z",
+        "expiresAt": "2026-11-09T16:16:43.751Z"
       }
     ],
     [
@@ -170,7 +170,7 @@
         "topicTitle": "Climate Change",
         "currentStage": "synthesise",
         "status": "in_progress",
-        "lastActive": "2026-10-10T15:43:23.175Z"
+        "lastActive": "2026-10-10T16:16:43.285Z"
       }
     ],
     [
@@ -190,9 +190,9 @@
         "studentId": "student_434c494d4154",
         "accessCode": "CLIMATE2026",
         "topicTitle": "Climate Change",
-        "currentStage": "review",
-        "status": "completed",
-        "lastActive": "2026-10-08T04:20:05.809Z"
+        "currentStage": "familiarise",
+        "status": "in_progress",
+        "lastActive": "2026-10-10T15:47:29.743Z"
       }
     ]
   ],
@@ -255,10 +255,10 @@
           "moduleId": "mod_climate-change_student_434c494d4154",
           "sourceId": "source-1",
           "highlightedText": "Wouldn't be bad to have a little of that good old fashioned Global Warming right no",
-          "noteText": "sarfgh",
+          "noteText": "sarcasm",
           "convertedToNode": true,
           "createdAt": "2026-10-08T04:18:06.654Z",
-          "updatedAt": "2026-10-08T04:18:10.768Z"
+          "updatedAt": "2026-10-10T15:47:41.588Z"
         }
       ]
     ],

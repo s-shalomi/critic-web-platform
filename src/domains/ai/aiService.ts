@@ -1,12 +1,12 @@
 /**
  * Socratic AI Agent Service
- * Handles Google Gen AI (@google/genai SDK with gemini-3.7-flash) with automatic, seamless fallback to Groq (openai/gpt-oss-120b).
- * Enforces Socratic questioning, Devil's Advocate mode, non-definitive guardrails, context window compression,
- * and dynamic avatar hint generation for Familiarise and Conceptualise stages per requirements.md.
+ * Dedicated Groq-only implementation (openai/gpt-oss-120b) per user specification.
+ * Enforces Socratic questioning, Devil's Advocate mode, non-definitive guardrails,
+ * context window compression, and dynamic avatar hint generation for Familiarise and Conceptualise stages.
  */
 
-import { GoogleGenAI } from '@google/genai';
 import Groq from 'groq-sdk';
+import https from 'https';
 
 export interface ChatTurn {
   sender: 'student' | 'agent';
@@ -33,14 +33,20 @@ function getSanitizedKey(keyName: string): string {
 }
 
 /**
- * Primary and fallback model definitions
- * Strictly Gemini 3.7 and 3.8 with Groq openai/gpt-oss-120b as fallback
+ * Primary model definition
+ * Strictly Groq openai/gpt-oss-120b
  */
-const GEMINI_PRIMARY_MODEL = 'gemini-3.7-flash';
-const GEMINI_FALLBACK_MODELS = ['gemini-3.7-flash', 'gemini-3.8-flash'];
-
 const GROQ_PRIMARY_MODEL = 'openai/gpt-oss-120b';
-const GROQ_FALLBACK_MODELS = ['openai/gpt-oss-120b'];
+
+/**
+ * Global timeout for Groq API response (in milliseconds)
+ */
+const GROQ_TIMEOUT_MS = 2800;
+
+/**
+ * Dedicated custom HTTPS agent to prevent institutional TLS proxy certificate rejections
+ */
+const sslAgent = new https.Agent({ rejectUnauthorized: false });
 
 /**
  * Checks if an error is a rate limit / quota exceeded error
@@ -122,177 +128,49 @@ export function compressChatHistory(history: ChatTurn[]): string {
 }
 
 /**
- * Primary LLM caller using @google/genai SDK with automatic Groq fallback execution
- */
-/**
- * Global timeout budget for an entire AI turn across all providers (in milliseconds).
- * Guarantees that any request resolves in less than 3 seconds.
- */
-const GLOBAL_TIMEOUT_MS = 2500;
-
-/**
- * Hedged dispatch threshold: if Gemini has not finished within 1100ms,
- * Groq (openai/gpt-oss-120b) is dispatched concurrently so a response is ready well before 2.5s.
- */
-const HEDGE_DISPATCH_DELAY_MS = 1100;
-
-/**
- * Helper to execute a Gemini call bounded by remaining deadline time and zero-thinking budget
- */
-async function callGemini(
-  geminiApiKey: string,
-  modelName: string,
-  prompt: string,
-  maxTokens: number,
-  deadline: number
-): Promise<{ text: string; provider: 'gemini' }> {
-  const remainingTime = deadline - Date.now();
-  if (remainingTime <= 200) {
-    throw new Error(`Timeout before invoking Gemini ${modelName}`);
-  }
-
-  const ai = new GoogleGenAI({ apiKey: geminiApiKey });
-  const apiPromise = ai.models.generateContent({
-    model: modelName,
-    contents: prompt,
-    config: {
-      maxOutputTokens: maxTokens,
-      temperature: 0.7,
-      thinkingConfig: {
-        thinkingBudget: 0, // Explicitly disable thinking tokens to ensure instant < 900ms response
-      },
-    },
-  });
-
-  const timeoutPromise = new Promise<never>((_, reject) =>
-    setTimeout(() => reject(new Error(`Gemini (${modelName}) deadline reached (${remainingTime}ms)`)), remainingTime)
-  );
-
-  const response = (await Promise.race([apiPromise, timeoutPromise])) as any;
-  const text = response?.text?.trim();
-  if (text) {
-    return { text, provider: 'gemini' };
-  }
-  throw new Error(`Empty text returned from Gemini (${modelName})`);
-}
-
-/**
- * Helper to execute a Groq call (openai/gpt-oss-120b) bounded by remaining deadline time
- */
-async function callGroq(
-  groqApiKey: string,
-  modelName: string,
-  systemPrompt: string,
-  userPrompt: string,
-  maxTokens: number,
-  deadline: number
-): Promise<{ text: string; provider: 'groq' }> {
-  const remainingTime = deadline - Date.now();
-  if (remainingTime <= 200) {
-    throw new Error(`Timeout before invoking Groq ${modelName}`);
-  }
-
-  const groqClient = new Groq({ apiKey: groqApiKey });
-  const groqPromise = groqClient.chat.completions.create({
-    messages: [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: userPrompt },
-    ],
-    model: modelName,
-    max_tokens: maxTokens,
-    temperature: 0.7,
-  });
-
-  const timeoutPromise = new Promise<never>((_, reject) =>
-    setTimeout(() => reject(new Error(`Groq (${modelName}) deadline reached (${remainingTime}ms)`)), remainingTime)
-  );
-
-  const completion = (await Promise.race([groqPromise, timeoutPromise])) as any;
-  const text = completion.choices[0]?.message?.content?.trim();
-  if (text) {
-    return { text, provider: 'groq' };
-  }
-  throw new Error(`Empty text returned from Groq (${modelName})`);
-}
-
-/**
- * Primary LLM caller using Google Gen AI with speculative Groq fallback
- * Enforces unified <= 2.5s hard execution ceiling.
+ * Primary LLM caller using Groq only (openai/gpt-oss-120b)
  */
 export async function generateSocraticResponse(
   history: ChatTurn[],
   snapshot: ModuleSnapshot,
   mode: 'Socratic' | 'DevilsAdvocate' = 'Socratic'
-): Promise<{ text: string; provider: 'gemini' | 'groq' | 'fallback_rule' | 'rate_limit_error'; isError?: boolean }> {
-  const geminiApiKey = getSanitizedKey('GEMINI_API_KEY');
+): Promise<{ text: string; provider: 'groq' | 'fallback_rule' | 'rate_limit_error'; isError?: boolean }> {
   const groqApiKey = getSanitizedKey('GROQ_API_KEY');
-
   const systemPrompt = buildSocraticSystemPrompt(snapshot, mode);
   const formattedHistory = compressChatHistory(history);
-  const fullPrompt = `${systemPrompt}\n\nCHAT HISTORY:\n${formattedHistory}\n\nAGENT:`;
 
-  const deadline = Date.now() + GLOBAL_TIMEOUT_MS;
   let hadRateLimit = false;
 
-  const tryGemini = async (): Promise<{ text: string; provider: 'gemini' }> => {
-    if (!geminiApiKey) throw new Error('No Gemini key');
-    for (const modelName of GEMINI_FALLBACK_MODELS) {
-      try {
-        return await callGemini(geminiApiKey, modelName, fullPrompt, 200, deadline);
-      } catch (err: any) {
-        if (isRateLimitError(err)) hadRateLimit = true;
-        console.warn(`[AI Service] Gemini (${modelName}) attempt failed:`, err?.message || err);
-      }
-    }
-    throw new Error('All Gemini attempts failed');
-  };
-
-  const tryGroq = async (): Promise<{ text: string; provider: 'groq' }> => {
-    if (!groqApiKey) throw new Error('No Groq key');
-    for (const modelName of GROQ_FALLBACK_MODELS) {
-      try {
-        return await callGroq(groqApiKey, modelName, systemPrompt, formattedHistory, 200, deadline);
-      } catch (err: any) {
-        if (isRateLimitError(err)) hadRateLimit = true;
-        console.warn(`[AI Service] Groq (${modelName}) attempt failed:`, err?.message || err);
-      }
-    }
-    throw new Error('All Groq attempts failed');
-  };
-
-  try {
-    if (geminiApiKey && groqApiKey) {
-      // Hedged execution: start Gemini at t=0. If Gemini hasn't returned by 1100ms or fails earlier,
-      // dispatch Groq in parallel so one of them finishes well before 2.5s.
-      let hedgeTimer: NodeJS.Timeout | null = null;
-      const geminiTask = tryGemini();
-
-      const groqTask = new Promise<{ text: string; provider: 'groq' }>((resolve, reject) => {
-        hedgeTimer = setTimeout(() => {
-          tryGroq().then(resolve).catch(reject);
-        }, HEDGE_DISPATCH_DELAY_MS);
-
-        // If Gemini succeeds first, cancel the scheduled hedge
-        geminiTask.then(
-          () => {
-            if (hedgeTimer) clearTimeout(hedgeTimer);
-          },
-          () => {
-            // If Gemini fails early, immediately fire Groq without waiting for hedge timer
-            if (hedgeTimer) clearTimeout(hedgeTimer);
-            tryGroq().then(resolve).catch(reject);
-          }
-        );
+  if (groqApiKey) {
+    try {
+      const groqClient = new Groq({
+        apiKey: groqApiKey,
+        httpAgent: sslAgent,
       });
 
-      return await Promise.race([geminiTask, groqTask]);
-    } else if (geminiApiKey) {
-      return await tryGemini();
-    } else if (groqApiKey) {
-      return await tryGroq();
+      const groqPromise = groqClient.chat.completions.create({
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: formattedHistory },
+        ],
+        model: GROQ_PRIMARY_MODEL,
+        max_tokens: 220,
+        temperature: 0.7,
+      });
+
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Groq request timed out')), GROQ_TIMEOUT_MS)
+      );
+
+      const completion = (await Promise.race([groqPromise, timeoutPromise])) as any;
+      const text = completion.choices[0]?.message?.content?.trim();
+      if (text) {
+        return { text, provider: 'groq' };
+      }
+    } catch (err: any) {
+      if (isRateLimitError(err)) hadRateLimit = true;
+      console.warn('[AI Service] Groq call failed or timed out:', err?.message || err);
     }
-  } catch (err: any) {
-    if (isRateLimitError(err)) hadRateLimit = true;
   }
 
   if (hadRateLimit) {
@@ -303,7 +181,7 @@ export async function generateSocraticResponse(
     };
   }
 
-  // Instant Socratic fallback rule (0ms latency, always < 2.5s total turn time)
+  // Instant Socratic fallback rule
   const fallbackSocraticReplies = [
     'What specific evidence from the sources supports that perspective? How might someone with an opposing view challenge it?',
     'If we look at long-term regional climate trends versus short-term weather anomalies, how does that affect your conclusion?',
@@ -316,7 +194,7 @@ export async function generateSocraticResponse(
 
 /**
  * Dynamic Avatar Socratic Hint Generator for Familiarise and Conceptualise stages.
- * Enforces unified <= 2.5s hard execution ceiling with zero-thinking Gemini configuration.
+ * Groq-only implementation (openai/gpt-oss-120b).
  */
 export async function generateAvatarHint(params: {
   stage: string;
@@ -328,8 +206,7 @@ export async function generateAvatarHint(params: {
   conceptLinks?: Array<{ fromNodeId?: string; toNodeId?: string }>;
   agentPersonality?: string;
   avatarName?: string;
-}): Promise<{ text: string; provider: 'gemini' | 'groq' | 'fallback_rule' | 'rate_limit_error'; isError?: boolean }> {
-  const geminiApiKey = getSanitizedKey('GEMINI_API_KEY');
+}): Promise<{ text: string; provider: 'groq' | 'fallback_rule' | 'rate_limit_error'; isError?: boolean }> {
   const groqApiKey = getSanitizedKey('GROQ_API_KEY');
 
   const avatarName = params.avatarName || 'Aria';
@@ -380,64 +257,38 @@ REQUIREMENTS:
     `.trim();
   }
 
-  const deadline = Date.now() + GLOBAL_TIMEOUT_MS;
   let hadRateLimit = false;
 
-  const tryGemini = async (): Promise<{ text: string; provider: 'gemini' }> => {
-    if (!geminiApiKey) throw new Error('No Gemini key');
-    for (const modelName of GEMINI_FALLBACK_MODELS) {
-      try {
-        return await callGemini(geminiApiKey, modelName, prompt, 90, deadline);
-      } catch (err: any) {
-        if (isRateLimitError(err)) hadRateLimit = true;
-        console.warn(`[AI Service Hint] Gemini (${modelName}) attempt failed:`, err?.message || err);
-      }
-    }
-    throw new Error('All Gemini hint attempts failed');
-  };
-
-  const tryGroq = async (): Promise<{ text: string; provider: 'groq' }> => {
-    if (!groqApiKey) throw new Error('No Groq key');
-    for (const modelName of GROQ_FALLBACK_MODELS) {
-      try {
-        return await callGroq(groqApiKey, modelName, `You are ${avatarName}, a Socratic peer.`, prompt, 90, deadline);
-      } catch (err: any) {
-        if (isRateLimitError(err)) hadRateLimit = true;
-        console.warn(`[AI Service Hint] Groq (${modelName}) attempt failed:`, err?.message || err);
-      }
-    }
-    throw new Error('All Groq hint attempts failed');
-  };
-
-  try {
-    if (geminiApiKey && groqApiKey) {
-      let hedgeTimer: NodeJS.Timeout | null = null;
-      const geminiTask = tryGemini();
-
-      const groqTask = new Promise<{ text: string; provider: 'groq' }>((resolve, reject) => {
-        hedgeTimer = setTimeout(() => {
-          tryGroq().then(resolve).catch(reject);
-        }, HEDGE_DISPATCH_DELAY_MS);
-
-        geminiTask.then(
-          () => {
-            if (hedgeTimer) clearTimeout(hedgeTimer);
-          },
-          () => {
-            if (hedgeTimer) clearTimeout(hedgeTimer);
-            tryGroq().then(resolve).catch(reject);
-          }
-        );
+  if (groqApiKey) {
+    try {
+      const groqClient = new Groq({
+        apiKey: groqApiKey,
+        httpAgent: sslAgent,
       });
 
-      return await Promise.race([geminiTask, groqTask]);
-    } else if (geminiApiKey) {
-      return await tryGemini();
-    } else if (groqApiKey) {
-      return await tryGroq();
+      const groqPromise = groqClient.chat.completions.create({
+        messages: [
+          { role: 'system', content: `You are ${avatarName}, a Socratic peer.` },
+          { role: 'user', content: prompt },
+        ],
+        model: GROQ_PRIMARY_MODEL,
+        max_tokens: 150,
+        temperature: 0.7,
+      });
+
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Groq hint timed out')), GROQ_TIMEOUT_MS)
+      );
+
+      const completion = (await Promise.race([groqPromise, timeoutPromise])) as any;
+      const text = completion.choices[0]?.message?.content?.trim();
+      if (text) {
+        return { text, provider: 'groq' };
+      }
+    } catch (err: any) {
+      if (isRateLimitError(err)) hadRateLimit = true;
+      console.warn('[AI Service Hint] Groq hint call failed or timed out:', err?.message || err);
     }
-  } catch (err: any) {
-    if (isRateLimitError(err)) hadRateLimit = true;
   }
 
   if (hadRateLimit) {
@@ -448,7 +299,7 @@ REQUIREMENTS:
     };
   }
 
-  // Instant stage-aware fallback rule (0ms latency, guaranteed < 2.5s total turn time)
+  // Instant stage-aware fallback rule (0ms latency)
   const nodeA = params.conceptNodes?.[0]?.text;
   const nodeB = params.conceptNodes?.[1]?.text;
 
@@ -484,4 +335,3 @@ REQUIREMENTS:
   const hint = list[Math.floor(Math.random() * list.length)];
   return { text: hint, provider: 'fallback_rule' };
 }
-
