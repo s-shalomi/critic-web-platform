@@ -671,6 +671,8 @@
   - **Dedicated Student Login Route & Modal ([`src/app/login/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/login/page.tsx) & [`src/app/login/login.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/login/login.module.css))**:
     - Implemented student login screen matching [`screens_v2/login.png`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/screens_v2/login.png) with robot avatar badge, active cyan indicator dot, access code input with paste support, quick-try code pills (`'BIO'`, `'CLIMATE-2026'`, `'CLIMATE2026'`), and cyan submit button.
     - Zero functionality altered: student authentication, JWT token issuance, and dashboard redirection fully preserved.
+  - **Top Navigation Login Button Visibility Enhancement**:
+    - Increased prominence of `.loginPillBtn` with a 2px glowing cyan border, ambient cyan glow shadow (`0 0 18px rgba(55, 243, 255, 0.35)`), bold typography (`1.05rem`, font-weight 700), and a luminous high-contrast hover state filling into solid cyan `#37F3FF` with dark text.
 - **Dependencies Introduced**: None.
 - **Tests Passing**:
   - `npm test` (31/31 tests passing across 8 test suites).

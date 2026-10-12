@@ -35,24 +35,25 @@
 }
 
 .loginPillBtn {
-  background: var(--color-bg-primary);
-  border: 1.5px solid var(--color-accent-cyan);
-  color: var(--color-text-light);
+  background: rgba(55, 243, 255, 0.1);
+  border: 2px solid var(--color-accent-cyan);
+  color: #ffffff;
   font-family: var(--font-display);
-  font-size: 0.98rem;
-  font-weight: 600;
-  padding: 8px 30px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 10px 36px;
   border-radius: 9999px;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 0 12px rgba(55, 243, 255, 0.18);
+  box-shadow: 0 0 18px rgba(55, 243, 255, 0.35), inset 0 0 12px rgba(55, 243, 255, 0.12);
 }
 
 .loginPillBtn:hover {
-  background: rgba(55, 243, 255, 0.16);
-  box-shadow: 0 0 22px rgba(55, 243, 255, 0.45);
-  transform: translateY(-1.5px);
-  color: #ffffff;
+  background: var(--color-accent-cyan);
+  color: #070B1A;
+  box-shadow: 0 0 30px rgba(55, 243, 255, 0.75), 0 0 10px #37F3FF;
+  transform: translateY(-2px);
 }
 
 .loginPillBtn:active {
