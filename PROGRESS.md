@@ -722,11 +722,14 @@
     - Embedded dynamic robot avatar preview circle (`<RobotAvatar variant={selectedAppearance} size={22} />`) displaying the student's active companion directly inside the button.
     - Removed extraneous glowing cyan status dot per user feedback, leaving a clean, balanced pill layout.
     - Upgraded hover interaction with smooth elevation, purple-cyan border glow, and glassmorphic backdrop filter.
-  - **Non-Linear Iterative Pathway & Unified Informational Cards ([`src/app/dashboard/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/page.tsx) & [`src/app/dashboard/dashboard.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/dashboard.module.css))**:
-    - **Unified Color Scheme**: Removed arbitrary rainbow/random colors across stages; standardized all 4 stage milestones and cards on the unified brand cyan (`#37F3FF`) and deep slate palette.
-    - **Non-Linear Bidirectional Pathway**: Replaced rigid one-way forward arrows with bidirectional track connectors (`◄──────►`), visually reinforcing that critical thinking is an iterative, flexible cycle where students move between stages freely.
-    - **Explicit Informational Indicators**: Added `Informational Overview` badge, descriptive subtitle ("An iterative cycle — move between stages freely... Select a module above to begin"), and `Info only` card tags to make it 100% clear that the cards are educational references rather than clickable action buttons.
-    - **Hover Neutralized**: Maintained static, calm behavior on card hover (`cursor: default`) with zero distracting motion.
+  - **Thinking Journey Cards Redesign Matching User Reference Image ([`src/app/dashboard/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/page.tsx) & [`src/app/dashboard/dashboard.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/dashboard.module.css))**:
+    - **Reference Card Styling**: Implemented card structure exactly matching user uploaded reference image:
+      - Card 1: `Annotate` — "Find assumptions and biases. Highlight rhetorical techniques, source motivations, and unproven claims." | Footer: `Familiarise` (Cyan) + `Step 1`.
+      - Card 2: `Mind Map` — "Identify and organise key concepts. Build visual node webs linking claims, evidence, and logical leaps." | Footer: `Conceptualise` (Purple) + `Step 2`.
+      - Card 3: `Challenge` — "Challenge the material and yourself. Converse with the AI agent to stress-test your perspective and discover blind spots." | Footer: `Inquire + Evaluate` (Indigo) + `Step 3`.
+      - Card 4: `Conclude` — "Reflect and make a reasoned conclusion. Synthesise your annotations and map into a finalized position." | Footer: `Synthesise` (Emerald) + `Step 4`.
+    - **Tag Cleanup**: Removed the `'Informational Overview'` badge and `'Info only'` tags per user instruction, restoring a clean heading and card layout.
+    - **Non-Linear Pathway**: Preserved bidirectional connectors (`◄──────►`) and matching top milestone glow nodes across the 4 stages.
   - **Decluttered Dashboard Layout & Balanced Whitespace**:
     - Refined hero section spacing (`margin-bottom: 44px`, font size `3.3rem`), topic selection grid padding (`26px 22px`), and reduced topic-to-journey distance to ~38-40px.
     - Muted unreleased module text to prevent visual noise.

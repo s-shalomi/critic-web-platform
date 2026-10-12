@@ -17,22 +17,38 @@ const JOURNEY_STAGES = [
   {
     num: '01',
     title: 'Annotate',
-    desc: 'Find assumptions and biases',
+    desc: 'Find assumptions and biases. Highlight rhetorical techniques, source motivations, and unproven claims.',
+    stageName: 'Familiarise',
+    stepLabel: 'Step 1',
+    color: '#38BDF8',
+    glow: 'rgba(56, 189, 248, 0.25)',
   },
   {
     num: '02',
     title: 'Mind Map',
-    desc: 'Identify and organise key concepts',
+    desc: 'Identify and organise key concepts. Build visual node webs linking claims, evidence, and logical leaps.',
+    stageName: 'Conceptualise',
+    stepLabel: 'Step 2',
+    color: '#C084FC',
+    glow: 'rgba(192, 132, 252, 0.25)',
   },
   {
     num: '03',
     title: 'Challenge',
-    desc: 'Challenge the material and yourself. Find evidence and assess credibility',
+    desc: 'Challenge the material and yourself. Converse with the AI agent to stress-test your perspective and discover blind spots.',
+    stageName: 'Inquire + Evaluate',
+    stepLabel: 'Step 3',
+    color: '#818CF8',
+    glow: 'rgba(129, 140, 248, 0.25)',
   },
   {
     num: '04',
     title: 'Conclude',
-    desc: 'Reflect and make a conclusion',
+    desc: 'Reflect and make a reasoned conclusion. Synthesise your annotations and map into a finalized position.',
+    stageName: 'Synthesise',
+    stepLabel: 'Step 4',
+    color: '#34D399',
+    glow: 'rgba(52, 211, 153, 0.25)',
   },
 ];
 
@@ -250,15 +266,7 @@ export default function DashboardPage() {
 
         {/* "Your thinking journey" Container per screens_v2/dashboard.png */}
         <section className={`${styles.section} ${styles.journeySection}`}>
-          <div className={styles.journeyHeaderRow}>
-            <div className={styles.journeyHeadingWithBadge}>
-              <h2 className={styles.sectionHeading}>Your thinking journey</h2>
-              <span className={styles.informationalBadge}>Informational Overview</span>
-            </div>
-            <p className={styles.journeySubtitle}>
-              An iterative cycle — move between stages freely as your thinking evolves. Select a module above to begin.
-            </p>
-          </div>
+          <h2 className={styles.sectionHeading}>Your thinking journey</h2>
 
           <div className={styles.journeyContainer}>
             <div className={styles.journeyGrid}>
@@ -266,7 +274,14 @@ export default function DashboardPage() {
                 <div key={stage.num} className={styles.stageColumn}>
                   {/* Non-linear bidirectional connector & milestone node */}
                   <div className={styles.stagePathHeader}>
-                    <div className={styles.stageNode}>
+                    <div
+                      className={styles.stageNode}
+                      style={{
+                        borderColor: stage.color,
+                        color: stage.color,
+                        boxShadow: `0 0 14px ${stage.glow}`,
+                      }}
+                    >
                       <span>{stage.num}</span>
                     </div>
 
@@ -305,14 +320,19 @@ export default function DashboardPage() {
                     )}
                   </div>
 
-                  {/* Informational Stage Card */}
+                  {/* Stage Card matching user uploaded reference */}
                   <div className={styles.journeyCard}>
-                    <div className={styles.cardHeaderRow}>
-                      <span className={styles.stageMicroBadge}>STAGE {stage.num}</span>
-                      <span className={styles.cardInfoTag}>Info only</span>
+                    <div className={styles.cardContent}>
+                      <h3 className={styles.cardTitle}>{stage.title}</h3>
+                      <p className={styles.cardDescription}>{stage.desc}</p>
                     </div>
-                    <h3 className={styles.cardTitle}>{stage.title}</h3>
-                    <p className={styles.cardDescription}>{stage.desc}</p>
+
+                    <div className={styles.cardFooter}>
+                      <span className={styles.cardStageName} style={{ color: stage.color }}>
+                        {stage.stageName}
+                      </span>
+                      <span className={styles.cardStepLabel}>{stage.stepLabel}</span>
+                    </div>
                   </div>
                 </div>
               ))}

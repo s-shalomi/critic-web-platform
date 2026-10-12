@@ -247,41 +247,6 @@
   margin-bottom: 40px;
 }
 
-.journeyHeaderRow {
-  margin-bottom: 20px;
-}
-
-.journeyHeadingWithBadge {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-bottom: 6px;
-}
-
-.informationalBadge {
-  display: inline-flex;
-  align-items: center;
-  background: rgba(55, 243, 255, 0.08);
-  border: 1px solid rgba(55, 243, 255, 0.28);
-  color: var(--color-accent-cyan);
-  font-family: var(--font-display);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.6px;
-  padding: 3px 10px;
-  border-radius: 9999px;
-  text-transform: uppercase;
-}
-
-.journeySubtitle {
-  font-family: var(--font-body);
-  font-size: 0.95rem;
-  color: var(--color-text-soft);
-  line-height: 1.5;
-  margin: 0;
-}
-
 .journeyContainer {
   background: #0B1226;
   border: 1px solid rgba(68, 81, 104, 0.4);
@@ -320,9 +285,7 @@
   font-size: 0.95rem;
   font-weight: 700;
   background: #0E172E;
-  border: 1.5px solid rgba(55, 243, 255, 0.5);
-  color: var(--color-accent-cyan);
-  box-shadow: 0 0 12px rgba(55, 243, 255, 0.16);
+  border: 1.5px solid;
   flex-shrink: 0;
   position: relative;
   z-index: 2;
@@ -344,8 +307,8 @@
   width: 100%;
   height: 2px;
   border-radius: 2px;
-  background: linear-gradient(90deg, rgba(55, 243, 255, 0.4), rgba(55, 243, 255, 0.65), rgba(55, 243, 255, 0.4));
-  box-shadow: 0 0 8px rgba(55, 243, 255, 0.15);
+  background: linear-gradient(90deg, rgba(68, 81, 104, 0.4), rgba(56, 189, 248, 0.5), rgba(68, 81, 104, 0.4));
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.15);
 }
 
 .pathwayArrowLeft,
@@ -370,68 +333,64 @@
 }
 
 .journeyCard {
-  background: linear-gradient(180deg, rgba(55, 243, 255, 0.04) 0%, #0D162C 50%);
-  border: 1px solid rgba(68, 81, 104, 0.38);
-  border-top: 2.5px solid rgba(55, 243, 255, 0.55);
-  border-radius: 14px;
-  padding: 22px 20px 20px;
+  background: #081022;
+  border: 1px solid rgba(68, 81, 104, 0.35);
+  border-radius: 18px;
+  padding: 26px 22px 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
+  min-height: 230px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.32);
+  cursor: default;
+  user-select: none;
+}
+
+.cardContent {
   display: flex;
   flex-direction: column;
   flex: 1;
-  min-height: 140px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.03);
-  cursor: default;
-  user-select: none;
-  position: relative;
-  overflow: hidden;
-}
-
-/* Informational cards are not clickable */
-
-.cardHeaderRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8px;
-}
-
-.stageMicroBadge {
-  font-family: var(--font-display);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: var(--color-accent-cyan);
-  opacity: 0.9;
-}
-
-.cardInfoTag {
-  font-family: var(--font-display);
-  font-size: 0.68rem;
-  font-weight: 600;
-  color: var(--color-muted-slate);
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-  background: rgba(68, 81, 104, 0.22);
-  padding: 2px 7px;
-  border-radius: 4px;
 }
 
 .cardTitle {
   font-family: var(--font-display);
-  font-size: 1.25rem;
+  font-size: 1.4rem;
   font-weight: 700;
   color: #ffffff;
-  margin-bottom: 8px;
+  margin: 0 0 14px 0;
   letter-spacing: -0.2px;
 }
 
 .cardDescription {
   font-family: var(--font-body);
-  font-size: 0.93rem;
+  font-size: 0.94rem;
   line-height: 1.55;
-  color: #9AB3D5;
+  color: #8FA6C9;
   margin: 0;
+}
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 32px;
+  padding-top: 4px;
+}
+
+.cardStageName {
+  font-family: var(--font-display);
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+}
+
+.cardStepLabel {
+  font-family: var(--font-display);
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #5A7092;
+  letter-spacing: 0.3px;
 }
 
 /* Loading Overlay & Indicators */
