@@ -724,12 +724,15 @@
     - Upgraded hover interaction with smooth elevation, purple-cyan border glow, and glassmorphic backdrop filter.
   - **Thinking Journey Cards Redesign Matching User Reference Image ([`src/app/dashboard/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/page.tsx) & [`src/app/dashboard/dashboard.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/dashboard.module.css))**:
     - **Reference Card Styling**: Implemented card structure exactly matching user uploaded reference image:
-      - Card 1: `Annotate` — "Find assumptions and biases. Highlight rhetorical techniques, source motivations, and unproven claims." | Footer: `Familiarise` (Cyan) + `Step 1`.
-      - Card 2: `Mind Map` — "Identify and organise key concepts. Build visual node webs linking claims, evidence, and logical leaps." | Footer: `Conceptualise` (Purple) + `Step 2`.
-      - Card 3: `Challenge` — "Challenge the material and yourself. Converse with the AI agent to stress-test your perspective and discover blind spots." | Footer: `Inquire + Evaluate` (Indigo) + `Step 3`.
-      - Card 4: `Conclude` — "Reflect and make a reasoned conclusion. Synthesise your annotations and map into a finalized position." | Footer: `Synthesise` (Emerald) + `Step 4`.
-    - **Tag Cleanup**: Removed the `'Informational Overview'` badge and `'Info only'` tags per user instruction, restoring a clean heading and card layout.
+      - Card 1: `Annotate` — "Find assumptions and biases. Highlight rhetorical techniques, source motivations, and unproven claims." | Footer: `Familiarise` (`#38BDF8` Cyan) + `Step 1`.
+      - Card 2: `Mind Map` — "Identify and organise key concepts. Build visual node webs linking claims, evidence, and logical leaps." | Footer: `Conceptualise` (`#C084FC` Purple) + `Step 2`.
+      - Card 3: `Challenge` — "Challenge the material and yourself. Converse with the AI agent to stress-test your perspective and discover blind spots." | Footer: `Inquire + Evaluate` (`#818CF8` Indigo) + `Step 3`.
+      - Card 4: `Conclude` — "Reflect and make a reasoned conclusion. Synthesise your annotations and map into a finalized position." | Footer: `Synthesise` (`#37F3FF` Cyan Blue) + `Step 4`.
+    - **Palette Restriction**: Restricted card accents strictly to blues and purples per user request (zero green and zero orange).
+    - **Iterative Process Subtitle**: Retained `"An iterative process — move between stages freely as your thinking evolves. Select a module above to begin."` under the heading while ensuring all `'info only'` and `'Informational Overview'` tags remain removed.
     - **Non-Linear Pathway**: Preserved bidirectional connectors (`◄──────►`) and matching top milestone glow nodes across the 4 stages.
+  - **Clickable Topic Module Card ([`src/app/dashboard/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/page.tsx) & [`src/app/dashboard/dashboard.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/dashboard.module.css))**:
+    - Converted the entire active Climate Change topic card into a clickable surface (`cursor: pointer`, `role="button"`, `tabIndex={0}`, keyboard Enter/Space support, and hover state with chevron icon) rather than requiring users to click only the tiny "Enter Module" text.
   - **Decluttered Dashboard Layout & Balanced Whitespace**:
     - Refined hero section spacing (`margin-bottom: 44px`, font size `3.3rem`), topic selection grid padding (`26px 22px`), and reduced topic-to-journey distance to ~38-40px.
     - Muted unreleased module text to prevent visual noise.

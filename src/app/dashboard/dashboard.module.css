@@ -163,11 +163,17 @@
   background: #0E172E;
   border: 1.5px solid var(--color-accent-purple);
   box-shadow: 0 0 20px rgba(168, 85, 247, 0.22);
+  cursor: pointer;
 }
 
 .topicCardAvailable:hover {
   transform: translateY(-3px);
   box-shadow: 0 0 28px rgba(168, 85, 247, 0.45);
+}
+
+.topicCardAvailable:hover .enterModuleLink {
+  color: #E9D5FF;
+  transform: translateX(3px);
 }
 
 /* Coming Soon Topic Card */
@@ -245,6 +251,14 @@
 .journeySection {
   margin-top: 0;
   margin-bottom: 40px;
+}
+
+.journeySubtitle {
+  font-family: var(--font-body);
+  font-size: 0.98rem;
+  color: var(--color-text-soft);
+  line-height: 1.5;
+  margin: -10px 0 22px 0;
 }
 
 .journeyContainer {

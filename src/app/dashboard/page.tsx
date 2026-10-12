@@ -47,8 +47,8 @@ const JOURNEY_STAGES = [
     desc: 'Reflect and make a reasoned conclusion. Synthesise your annotations and map into a finalized position.',
     stageName: 'Synthesise',
     stepLabel: 'Step 4',
-    color: '#34D399',
-    glow: 'rgba(52, 211, 153, 0.25)',
+    color: '#37F3FF',
+    glow: 'rgba(55, 243, 255, 0.25)',
   },
 ];
 
@@ -203,10 +203,10 @@ export default function DashboardPage() {
                   topic.id === 'climate-change'
                     ? 'Climate Change'
                     : topic.id === 'vaccine-safety'
-                    ? 'Vaccine Safety'
-                    : topic.id === 'mental-wellbeing'
-                    ? 'Mental Well-being'
-                    : topic.title;
+                      ? 'Vaccine Safety'
+                      : topic.id === 'mental-wellbeing'
+                        ? 'Mental Well-being'
+                        : topic.title;
 
                 const displayDesc =
                   topic.id === 'climate-change'
@@ -216,6 +216,20 @@ export default function DashboardPage() {
                 return (
                   <div
                     key={topic.id}
+                    onClick={isAvailable ? () => handleEnterModule(topic.id) : undefined}
+                    role={isAvailable ? 'button' : undefined}
+                    tabIndex={isAvailable ? 0 : undefined}
+                    onKeyDown={
+                      isAvailable
+                        ? (e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              handleEnterModule(topic.id);
+                            }
+                          }
+                        : undefined
+                    }
+                    aria-label={isAvailable ? `Enter ${displayTitle} module` : undefined}
                     className={`${styles.topicCard} ${
                       isAvailable ? styles.topicCardAvailable : styles.topicCardDisabled
                     }`}
@@ -239,20 +253,30 @@ export default function DashboardPage() {
 
                     <div className={styles.cardFooter}>
                       {isAvailable ? (
-                        <button
-                          onClick={() => handleEnterModule(topic.id)}
-                          disabled={!!enteringTopicId}
-                          className={styles.enterModuleLink}
-                        >
+                        <div className={styles.enterModuleLink}>
                           {isEntering ? (
                             <>
                               <span className={styles.spinnerSmall} />
                               <span>Entering Module...</span>
                             </>
                           ) : (
-                            'Enter Module'
+                            <>
+                              <span>Enter Module</span>
+                              <svg
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <polyline points="9 18 15 12 9 6" />
+                              </svg>
+                            </>
                           )}
-                        </button>
+                        </div>
                       ) : (
                         <span className={styles.comingSoonText}>Coming Soon</span>
                       )}
@@ -267,6 +291,9 @@ export default function DashboardPage() {
         {/* "Your thinking journey" Container per screens_v2/dashboard.png */}
         <section className={`${styles.section} ${styles.journeySection}`}>
           <h2 className={styles.sectionHeading}>Your thinking journey</h2>
+          <p className={styles.journeySubtitle}>
+            An iterative process. Move between stages freely as your thinking evolves. Select a module above to begin.
+          </p>
 
           <div className={styles.journeyContainer}>
             <div className={styles.journeyGrid}>
@@ -371,18 +398,16 @@ export default function DashboardPage() {
                   <button
                     type="button"
                     onClick={() => setCustomiseTab('appearance')}
-                    className={`${styles.optionPill} ${
-                      customiseTab === 'appearance' ? styles.optionPillActive : ''
-                    }`}
+                    className={`${styles.optionPill} ${customiseTab === 'appearance' ? styles.optionPillActive : ''
+                      }`}
                   >
                     Appearance
                   </button>
                   <button
                     type="button"
                     onClick={() => setCustomiseTab('tone')}
-                    className={`${styles.optionPill} ${
-                      customiseTab === 'tone' ? styles.optionPillActive : ''
-                    }`}
+                    className={`${styles.optionPill} ${customiseTab === 'tone' ? styles.optionPillActive : ''
+                      }`}
                   >
                     Tone
                   </button>
@@ -455,9 +480,8 @@ export default function DashboardPage() {
                       <div
                         key={tone.name}
                         onClick={() => handleSavePreferences(selectedAppearance, tone.name)}
-                        className={`${styles.toneCard} ${
-                          selectedTone === tone.name ? styles.toneCardActive : ''
-                        }`}
+                        className={`${styles.toneCard} ${selectedTone === tone.name ? styles.toneCardActive : ''
+                          }`}
                       >
                         <div className={styles.toneName}>{tone.name}</div>
                         <p className={styles.toneDesc}>{tone.desc}</p>
