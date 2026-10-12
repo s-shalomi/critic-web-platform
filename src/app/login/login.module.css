@@ -1,0 +1,336 @@
+.container {
+  min-height: 100vh;
+  position: relative;
+  background-color: var(--color-bg-deep);
+  color: var(--color-text-light);
+  font-family: var(--font-body);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Background Dimmed Landing Page Backdrop */
+.backgroundCanvas {
+  position: absolute;
+  inset: 0;
+  opacity: 0.18;
+  filter: blur(4px);
+  pointer-events: none;
+  padding: 24px 64px;
+  display: flex;
+  flex-direction: column;
+}
+
+.bgHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 60px;
+}
+
+.bgLogo {
+  font-family: var(--font-display);
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: var(--color-text-light);
+}
+
+.bgLoginBtn {
+  background: var(--color-bg-primary);
+  border: 1.5px solid var(--color-accent-cyan);
+  color: var(--color-text-light);
+  font-family: var(--font-display);
+  font-size: 0.98rem;
+  font-weight: 600;
+  padding: 8px 30px;
+  border-radius: 9999px;
+}
+
+.bgHero {
+  max-width: 960px;
+}
+
+.bgEyebrow {
+  color: var(--color-accent-cyan);
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+.bgTitle {
+  font-family: var(--font-display);
+  font-size: 3.8rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+
+.bgSubtitle {
+  font-size: 1.25rem;
+  line-height: 1.65;
+  color: var(--color-text-soft);
+}
+
+/* Modal Overlay Backdrop */
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(7, 11, 26, 0.78);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+}
+
+/* Student Login Card per screens_v2/login.png */
+.studentModalCard {
+  background: #0E172E;
+  border: 1px solid rgba(55, 243, 255, 0.28);
+  border-radius: 20px;
+  padding: 42px 36px;
+  max-width: 480px;
+  width: 100%;
+  position: relative;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7), 0 0 45px rgba(55, 243, 255, 0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.modalCloseBtn {
+  position: absolute;
+  top: 20px;
+  right: 22px;
+  background: transparent;
+  border: none;
+  color: var(--color-text-soft);
+  font-size: 1.4rem;
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 4px;
+  text-decoration: none;
+  line-height: 1;
+}
+
+.modalCloseBtn:hover {
+  color: #ffffff;
+}
+
+.robotBadgeWrapper {
+  position: relative;
+  width: 68px;
+  height: 68px;
+  border-radius: 16px;
+  background: #0A1226;
+  border: 1.5px solid rgba(55, 243, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 22px;
+  box-shadow: 0 0 24px rgba(55, 243, 255, 0.25);
+}
+
+.robotActivePip {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--color-accent-cyan);
+  border: 2px solid #0E172E;
+  box-shadow: 0 0 10px var(--color-accent-cyan);
+}
+
+.studentModalTitle {
+  font-family: var(--font-display);
+  font-size: 2.15rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 8px;
+}
+
+.studentModalSubtitle {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--color-text-soft);
+  margin-bottom: 28px;
+}
+
+.studentForm {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.inputMetaRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.inputMetaLabel {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--color-accent-cyan);
+}
+
+.inputMetaHint {
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  color: var(--color-muted-slate);
+}
+
+.accessInputWrapper {
+  width: 100%;
+  background: #070C1A;
+  border: 1.5px solid rgba(55, 243, 255, 0.4);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  padding: 6px 8px 6px 16px;
+  transition: all 0.2s;
+  box-shadow: 0 0 16px rgba(55, 243, 255, 0.08);
+  margin-bottom: 18px;
+}
+
+.accessInputWrapper:focus-within {
+  border-color: var(--color-accent-cyan);
+  box-shadow: 0 0 20px rgba(55, 243, 255, 0.25);
+}
+
+.accessCodeInput {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--color-accent-cyan);
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  outline: none;
+  letter-spacing: 1px;
+}
+
+.accessCodeInput::placeholder {
+  color: rgba(143, 166, 201, 0.5);
+  font-weight: 400;
+}
+
+.pasteBtn {
+  background: #172445;
+  border: 1px solid rgba(143, 166, 201, 0.3);
+  color: var(--color-text-light);
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pasteBtn:hover {
+  background: rgba(55, 243, 255, 0.15);
+  border-color: var(--color-accent-cyan);
+  color: #ffffff;
+}
+
+.quickTryRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.quickTryLabel {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--color-muted-slate);
+}
+
+.quickPillCyan {
+  background: rgba(55, 243, 255, 0.12);
+  border: 1px solid rgba(55, 243, 255, 0.3);
+  color: var(--color-accent-cyan);
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.quickPillCyan:hover {
+  background: rgba(55, 243, 255, 0.25);
+}
+
+.quickPillPurple {
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  color: var(--color-accent-purple);
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.quickPillPurple:hover {
+  background: rgba(168, 85, 247, 0.25);
+}
+
+.loginSubmitBtn {
+  width: 100%;
+  background: var(--color-accent-cyan);
+  color: #070B1A;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 20px rgba(55, 243, 255, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.loginSubmitBtn:hover:not(:disabled) {
+  background: #62f7ff;
+  box-shadow: 0 0 30px rgba(55, 243, 255, 0.6);
+  transform: translateY(-1.5px);
+}
+
+.loginSubmitBtn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.errorMessage {
+  margin-top: 14px;
+  color: #ff6b6b;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  background: rgba(255, 107, 107, 0.1);
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  padding: 8px 14px;
+  border-radius: 8px;
+  width: 100%;
+}

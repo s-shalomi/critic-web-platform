@@ -1,27 +1,37 @@
 @import url('https://fonts.googleapis.com/css2?family=Audiowide&family=Exo+2:ital,wght@0,300..900;1,300..900&family=Inclusive+Sans:ital@0;1&family=Orbitron:wght@400..900&family=Rajdhani:wght@400;600;700&family=Space+Grotesk:wght@400;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
 
 :root {
+  /* Section 9 Brand Colors */
   --color-bg-primary: #0F172E;
   --color-bg-deep: #070B1A;
-  --color-accent-pink: #FF4FD8;
+  --color-bg-card: #101B37;
   --color-accent-cyan: #37F3FF;
   --color-accent-cyan-20: rgba(55, 243, 255, 0.20);
   --color-accent-cyan-50: rgba(55, 243, 255, 0.50);
-  --color-muted-blue: #53A0C4;
+  --color-accent-purple: #A855F7;
+  --color-accent-purple-20: rgba(168, 85, 247, 0.20);
+  --color-muted-slate: #8FA6C9;
   --color-text-light: #EAF6FF;
   --color-text-light-60: rgba(234, 246, 255, 0.60);
   --color-text-soft: #D9DFF7;
   --color-border-slate: #445168;
   --color-border-slate-50: rgba(68, 81, 104, 0.50);
+  --color-border-cyan: rgba(55, 243, 255, 0.40);
+  --color-border-purple: rgba(168, 85, 247, 0.40);
   --color-slate-blue-45: rgba(143, 166, 201, 0.45);
+  --color-muted-blue: #53A0C4;
+  --color-accent-pink: #FF4FD8;
 
-  --font-orbitron: 'Orbitron', sans-serif;
+  /* Section 9 Fonts */
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'Exo 2', sans-serif;
   --font-space-grotesk: 'Space Grotesk', sans-serif;
-  --font-audiowide: 'Audiowide', cursive;
   --font-exo2: 'Exo 2', sans-serif;
-  --font-inclusive-sans: 'Inclusive Sans', sans-serif;
-  --font-rajdhani: 'Rajdhani', sans-serif;
-  --font-space-mono: 'Space Mono', monospace;
+  --font-orbitron: 'Space Grotesk', sans-serif;
+  --font-audiowide: 'Space Grotesk', cursive;
+  --font-inclusive-sans: 'Exo 2', sans-serif;
+  --font-rajdhani: 'Space Grotesk', sans-serif;
+  --font-space-mono: 'Space Grotesk', monospace;
 }
 
 * {

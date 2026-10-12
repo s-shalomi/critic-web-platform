@@ -647,4 +647,34 @@
 - **Tests Passing**:
   - `npm test` (31/31 tests passing across 8 test suites).
   - `npm run build` (100% clean production build).
-- **Immediate Next Step**: Seek user approval for the documentation.
+- **Immediate Next Step**: Proceed with UI updates per Section 9 of `requirements.md`.
+
+---
+
+### [2026-10-12] - UI Iteration 2: Design Configuration & Landing Page Redesign
+
+- **Role**: Full Stack Developer
+- **Code Built & Updated**:
+  - **Shared Design Tokens & Typography ([`src/shared/config/theme.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/config/theme.ts) & [`src/app/globals.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/globals.css))**:
+    - Centralized brand colors per Section 9: `#37F3FF` (Cyan), `#0F172E` (Deep Slate), `#070B1A` (Deepest Backdrop), `#EAF6FF` (Soft Light Blue), `#D9DFF7` (Muted Lavender), `#A855F7` (Purple), `#8FA6C9` (Muted Slate Blue).
+    - Enforced `Space Grotesk` (display headings) and `Exo 2` (body typography) globally.
+    - Preserved legacy token aliases to guarantee zero regression across other module stages.
+  - **Reusable Illustrated Robot Avatar ([`src/shared/components/RobotAvatar/RobotAvatar.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/RobotAvatar/RobotAvatar.tsx))**:
+    - Implemented high-fidelity SVG illustration of Aria the robot avatar with glowing cyan visor eyes and rounded helmet matching reference designs in `screens_v2/`.
+  - **Landing Page Redesign ([`src/app/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/page.tsx) & [`src/app/page.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/page.module.css))**:
+    - Rebuilt layout matching [`screens_v2/landing1.png`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/screens_v2/landing1.png) and [`screens_v2/landing2.png`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/screens_v2/landing2.png):
+      - Top sticky navigation bar with "Critic" logo and rounded "Login" button linking directly to `/login`.
+      - Left-aligned hero: "Critical Thinking, Improved", bold "Think better with Critic." heading, and descriptive subtitle.
+      - Interactive app mockup window (`critic.app/climate_change`) featuring macOS colored window dots, split conversation panel ("Challenge Everything"), and concept mind map preview with connected nodes.
+      - "Four stages backed by research" section showcasing the 4 pedagogical stages (`01 Read + Annotate`, `02 Mind Map`, `03 Challenge`, `04 Conclude`) with distinct colored badges, iconography, and focus bullets.
+      - Bottom CTA container ("Ready to get started?") with access code trigger and teacher-only educator portal access link.
+  - **Dedicated Student Login Route & Modal ([`src/app/login/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/login/page.tsx) & [`src/app/login/login.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/login/login.module.css))**:
+    - Implemented student login screen matching [`screens_v2/login.png`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/screens_v2/login.png) with robot avatar badge, active cyan indicator dot, access code input with paste support, quick-try code pills (`'BIO'`, `'CLIMATE-2026'`, `'CLIMATE2026'`), and cyan submit button.
+    - Zero functionality altered: student authentication, JWT token issuance, and dashboard redirection fully preserved.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (31/31 tests passing across 8 test suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+  - `npm run build` (100% clean Next.js production build across 12 routes).
+- **Immediate Next Step**: Await user instructions for the next screen to update.
+
