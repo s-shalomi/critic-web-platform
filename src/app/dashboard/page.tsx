@@ -19,32 +19,36 @@ const JOURNEY_STAGES = [
     title: 'Annotate',
     desc: 'Find assumptions and biases',
     color: '#37F3FF',
-    lineColor: 'linear-gradient(90deg, rgba(55, 243, 255, 0.6), rgba(168, 85, 247, 0.5))',
-    arrowColor: '#A855F7',
+    glow: 'rgba(55, 243, 255, 0.28)',
+    subtleBg: 'rgba(55, 243, 255, 0.05)',
+    nextColor: '#A855F7',
   },
   {
     num: '02',
     title: 'Mind Map',
     desc: 'Identify and organise key concepts',
     color: '#A855F7',
-    lineColor: 'linear-gradient(90deg, rgba(168, 85, 247, 0.6), rgba(245, 158, 11, 0.5))',
-    arrowColor: '#F59E0B',
+    glow: 'rgba(168, 85, 247, 0.28)',
+    subtleBg: 'rgba(168, 85, 247, 0.05)',
+    nextColor: '#F59E0B',
   },
   {
     num: '03',
     title: 'Challenge',
     desc: 'Challenge the material and yourself. Find evidence and assess credibility',
     color: '#F59E0B',
-    lineColor: 'linear-gradient(90deg, rgba(245, 158, 11, 0.6), rgba(16, 185, 129, 0.5))',
-    arrowColor: '#10B981',
+    glow: 'rgba(245, 158, 11, 0.28)',
+    subtleBg: 'rgba(245, 158, 11, 0.05)',
+    nextColor: '#10B981',
   },
   {
     num: '04',
     title: 'Conclude',
     desc: 'Reflect and make a conclusion',
     color: '#10B981',
-    lineColor: null,
-    arrowColor: null,
+    glow: 'rgba(16, 185, 129, 0.28)',
+    subtleBg: 'rgba(16, 185, 129, 0.05)',
+    nextColor: null,
   },
 ];
 
@@ -164,8 +168,13 @@ export default function DashboardPage() {
         <button
           onClick={() => setIsCustomiseModalOpen(true)}
           className={styles.customiseAgentBtn}
+          aria-label="Customise your agent"
         >
-          Customise your agent
+          <span className={styles.customiseAvatarBadge}>
+            <RobotAvatar variant={selectedAppearance} size={22} />
+          </span>
+          <span className={styles.customiseBtnText}>Customise your agent</span>
+          <span className={styles.customiseStatusDot} aria-hidden="true" />
         </button>
       </header>
 
@@ -263,34 +272,60 @@ export default function DashboardPage() {
             <div className={styles.journeyGrid}>
               {JOURNEY_STAGES.map((stage, idx) => (
                 <div key={stage.num} className={styles.stageColumn}>
+                  {/* Pathway Milestone & Connector */}
                   <div className={styles.stagePathHeader}>
-                    <span className={styles.stageNum} style={{ color: stage.color }}>
-                      {stage.num}
-                    </span>
+                    <div
+                      className={styles.stageNode}
+                      style={{
+                        borderColor: stage.color,
+                        color: stage.color,
+                        boxShadow: `0 0 14px ${stage.glow}`,
+                      }}
+                    >
+                      <span>{stage.num}</span>
+                    </div>
+
                     {idx < JOURNEY_STAGES.length - 1 && (
-                      <div className={styles.pathwayConnector} aria-hidden="true">
-                        <span
+                      <div className={styles.pathwayTrack} aria-hidden="true">
+                        <div
                           className={styles.pathwayLine}
-                          style={{ background: stage.lineColor || undefined }}
+                          style={{
+                            background: `linear-gradient(90deg, ${stage.color}, ${stage.nextColor})`,
+                            boxShadow: `0 0 8px ${stage.glow}`,
+                          }}
                         />
-                        <svg
-                          className={styles.pathwayArrow}
-                          style={{ color: stage.arrowColor || undefined }}
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
+                        <div
+                          className={styles.pathwayArrowMarker}
+                          style={{ color: stage.nextColor || undefined }}
                         >
-                          <polyline points="9 18 15 12 9 6" />
-                        </svg>
+                          <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="3"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <polyline points="9 18 15 12 9 6" />
+                          </svg>
+                        </div>
                       </div>
                     )}
                   </div>
-                  <div className={styles.journeyCard}>
+
+                  {/* Enhanced Stage Card */}
+                  <div
+                    className={styles.journeyCard}
+                    style={{
+                      borderTopColor: stage.color,
+                      background: `linear-gradient(180deg, ${stage.subtleBg} 0%, #0D162C 50%)`,
+                    }}
+                  >
+                    <span className={styles.stageMicroBadge} style={{ color: stage.color }}>
+                      STAGE {stage.num}
+                    </span>
                     <h3 className={styles.cardTitle}>{stage.title}</h3>
                     <p className={styles.cardDescription}>{stage.desc}</p>
                   </div>

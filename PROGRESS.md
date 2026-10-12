@@ -718,12 +718,18 @@
   - **Unified Brand CriticLogo Component ([`src/shared/components/CriticLogo/CriticLogo.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/CriticLogo/CriticLogo.tsx) & [`CriticLogo.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/CriticLogo/CriticLogo.module.css))**:
     - Extracted a reusable, consistent `CriticLogo` component featuring unified cyan gradient typography (`Space Grotesk`, 700), subtle cyan ambient glow drop-shadow, and navigation routing.
     - Integrated `CriticLogo` across the Landing page, Student Login page, and Dashboard header.
-  - **Dashboard Thinking Journey Pathway & Interaction Refinement ([`src/app/dashboard/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/page.tsx) & [`src/app/dashboard/dashboard.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/dashboard.module.css))**:
-    - **Visual Learning Pathway**: Implemented connecting pathway track across stages with smooth gradient connectors (`linear-gradient`) and directional arrows (`→`) bridging stages `01` to `02`, `02` to `03`, and `03` to `04`.
-    - **Simplistic Cards**: Formatted the 4 thinking journey cards (`Annotate`, `Mind Map`, `Challenge`, `Conclude`) with minimal cognitive load per user instruction, presenting clean typography and concise 1-line descriptions.
-    - **Hover Interaction Neutralized**: Removed all hover effects on thinking journey cards (`cursor: default`, static positioning, zero glow shift) ensuring cards remain stable and non-interactive.
-    - **Whitespace Balancing**: Reduced excess margin between topic selection modules and thinking journey container to a balanced ~36-40px.
-    - **Muted "Coming Soon" State**: Set `.comingSoonText` to `var(--color-muted-slate)` so unreleased topics remain subdued and keep focus on the active "Climate Change" module.
+  - **Enhanced "Customise Your Agent" Button UI/UX ([`src/app/dashboard/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/page.tsx) & [`src/app/dashboard/dashboard.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/dashboard.module.css))**:
+    - Embedded dynamic robot avatar preview circle (`<RobotAvatar variant={selectedAppearance} size={22} />`) displaying the student's active companion directly inside the button.
+    - Added glowing cyan status dot signifying the AI agent is active and online.
+    - Upgraded hover interaction with smooth elevation, purple-cyan border glow, and glassmorphic backdrop filter.
+  - **Elevated Stepper Pathway & Enhanced Cards ([`src/app/dashboard/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/page.tsx) & [`src/app/dashboard/dashboard.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/dashboard.module.css))**:
+    - **Milestone Nodes**: Upgraded stage numbers into circular glowing milestone badges (`36px × 36px`, colored borders and glow: `01` Cyan, `02` Purple, `03` Amber, `04` Emerald).
+    - **Continuous Illuminated Pathway Track**: Built a seamless horizontal gradient line connecting stage nodes across column gaps with directional chevrons (`›`).
+    - **Enhanced Stage Cards**: Added top color accent border (`border-top: 2.5px solid [stage.color]`), subtle top-down ambient gradient tint, uppercase `STAGE 0X` micro-badge, high-contrast title, and clear line-height description.
+    - **Hover Neutralized**: Maintained static, calm behavior on card hover (`cursor: default`) with zero distracting motion.
+  - **Decluttered Dashboard Layout & Balanced Whitespace**:
+    - Refined hero section spacing (`margin-bottom: 44px`, font size `3.3rem`), topic selection grid padding (`26px 22px`), and reduced topic-to-journey distance to ~38-40px.
+    - Muted unreleased module text to prevent visual noise.
 - **Dependencies Introduced**: None.
 - **Tests Passing**:
   - `npm test` (31/31 tests passing across 8 test suites).
