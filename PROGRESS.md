@@ -707,6 +707,28 @@
   - `npm test` (31/31 tests passing across 8 test suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
   - `npm run build` (100% clean Next.js production build across 12 routes).
-- **Immediate Next Step**: Await user instructions for the next screen to update.
+- **Immediate Next Step**: Proceed with UI updates per Section 9 of `requirements.md`.
+
+---
+
+### [2026-10-13] - UI Iteration 2: Logo Consistency, Thinking Journey Pathway & Dashboard Refinements
+
+- **Role**: Full Stack Developer
+- **Code Built & Updated**:
+  - **Unified Brand CriticLogo Component ([`src/shared/components/CriticLogo/CriticLogo.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/CriticLogo/CriticLogo.tsx) & [`CriticLogo.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/CriticLogo/CriticLogo.module.css))**:
+    - Extracted a reusable, consistent `CriticLogo` component featuring unified cyan gradient typography (`Space Grotesk`, 700), subtle cyan ambient glow drop-shadow, and navigation routing.
+    - Integrated `CriticLogo` across the Landing page, Student Login page, and Dashboard header.
+  - **Dashboard Thinking Journey Pathway & Interaction Refinement ([`src/app/dashboard/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/page.tsx) & [`src/app/dashboard/dashboard.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/dashboard.module.css))**:
+    - **Visual Learning Pathway**: Implemented connecting pathway track across stages with smooth gradient connectors (`linear-gradient`) and directional arrows (`→`) bridging stages `01` to `02`, `02` to `03`, and `03` to `04`.
+    - **Simplistic Cards**: Formatted the 4 thinking journey cards (`Annotate`, `Mind Map`, `Challenge`, `Conclude`) with minimal cognitive load per user instruction, presenting clean typography and concise 1-line descriptions.
+    - **Hover Interaction Neutralized**: Removed all hover effects on thinking journey cards (`cursor: default`, static positioning, zero glow shift) ensuring cards remain stable and non-interactive.
+    - **Whitespace Balancing**: Reduced excess margin between topic selection modules and thinking journey container to a balanced ~36-40px.
+    - **Muted "Coming Soon" State**: Set `.comingSoonText` to `var(--color-muted-slate)` so unreleased topics remain subdued and keep focus on the active "Climate Change" module.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (31/31 tests passing across 8 test suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+- **Immediate Next Step**: Prompt user to specify next screen to update per Section 9.
+
 
 

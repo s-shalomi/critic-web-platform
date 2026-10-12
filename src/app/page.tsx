@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
 import { RobotAvatar } from '@/shared/components/RobotAvatar/RobotAvatar';
+import { CriticLogo } from '@/shared/components/CriticLogo/CriticLogo';
 
 export default function LandingPage() {
   const router = useRouter();
@@ -87,7 +88,7 @@ export default function LandingPage() {
     <div className={styles.container}>
       {/* Top Navigation Bar */}
       <header className={styles.header}>
-        <div className={styles.logo}>Critic</div>
+        <CriticLogo href="/" />
         <button
           onClick={() => router.push('/login')}
           className={styles.loginPillBtn}

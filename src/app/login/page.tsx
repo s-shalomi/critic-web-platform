@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import styles from './login.module.css';
 import { RobotAvatar } from '@/shared/components/RobotAvatar/RobotAvatar';
+import { CriticLogo } from '@/shared/components/CriticLogo/CriticLogo';
 
 export default function StudentLoginPage() {
   const router = useRouter();
@@ -56,7 +57,7 @@ export default function StudentLoginPage() {
       {/* Background Dimmed Landing Mockup per screens_v2/login.png */}
       <div className={styles.backgroundCanvas}>
         <header className={styles.bgHeader}>
-          <span className={styles.bgLogo}>Critic</span>
+          <CriticLogo href="/" />
           <button className={styles.bgLoginBtn} disabled>Login</button>
         </header>
         <div className={styles.bgHero}>

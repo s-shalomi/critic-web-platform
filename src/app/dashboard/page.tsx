@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './dashboard.module.css';
 import { RobotAvatar, RobotVariant } from '@/shared/components/RobotAvatar/RobotAvatar';
+import { CriticLogo } from '@/shared/components/CriticLogo/CriticLogo';
 
 interface Topic {
   id: string;
@@ -11,6 +12,41 @@ interface Topic {
   status: 'Available' | 'Coming Soon';
   description: string;
 }
+
+const JOURNEY_STAGES = [
+  {
+    num: '01',
+    title: 'Annotate',
+    desc: 'Find assumptions and biases',
+    color: '#37F3FF',
+    lineColor: 'linear-gradient(90deg, rgba(55, 243, 255, 0.6), rgba(168, 85, 247, 0.5))',
+    arrowColor: '#A855F7',
+  },
+  {
+    num: '02',
+    title: 'Mind Map',
+    desc: 'Identify and organise key concepts',
+    color: '#A855F7',
+    lineColor: 'linear-gradient(90deg, rgba(168, 85, 247, 0.6), rgba(245, 158, 11, 0.5))',
+    arrowColor: '#F59E0B',
+  },
+  {
+    num: '03',
+    title: 'Challenge',
+    desc: 'Challenge the material and yourself. Find evidence and assess credibility',
+    color: '#F59E0B',
+    lineColor: 'linear-gradient(90deg, rgba(245, 158, 11, 0.6), rgba(16, 185, 129, 0.5))',
+    arrowColor: '#10B981',
+  },
+  {
+    num: '04',
+    title: 'Conclude',
+    desc: 'Reflect and make a conclusion',
+    color: '#10B981',
+    lineColor: null,
+    arrowColor: null,
+  },
+];
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -124,9 +160,7 @@ export default function DashboardPage() {
 
       {/* Top Header per screens_v2/dashboard.png */}
       <header className={styles.header}>
-        <div className={styles.logoBadge} onClick={() => router.push('/')}>
-          <span className={styles.logoCyanText}>Critic</span>
-        </div>
+        <CriticLogo href="/dashboard" />
         <button
           onClick={() => setIsCustomiseModalOpen(true)}
           className={styles.customiseAgentBtn}
@@ -223,47 +257,45 @@ export default function DashboardPage() {
         </section>
 
         {/* "Your thinking journey" Container per screens_v2/dashboard.png */}
-        <section className={styles.section}>
+        <section className={`${styles.section} ${styles.journeySection}`}>
           <h2 className={styles.sectionHeading}>Your thinking journey</h2>
           <div className={styles.journeyContainer}>
             <div className={styles.journeyGrid}>
-              {/* Step 01 */}
-              <div className={styles.journeyStepWrapper}>
-                <span className={styles.stageNumber}>01</span>
-                <div className={styles.journeyStepCard}>
-                  <h3 className={styles.stageTitle}>Annotate</h3>
-                  <p className={styles.stageDesc}>Find assumptions and biases</p>
+              {JOURNEY_STAGES.map((stage, idx) => (
+                <div key={stage.num} className={styles.stageColumn}>
+                  <div className={styles.stagePathHeader}>
+                    <span className={styles.stageNum} style={{ color: stage.color }}>
+                      {stage.num}
+                    </span>
+                    {idx < JOURNEY_STAGES.length - 1 && (
+                      <div className={styles.pathwayConnector} aria-hidden="true">
+                        <span
+                          className={styles.pathwayLine}
+                          style={{ background: stage.lineColor || undefined }}
+                        />
+                        <svg
+                          className={styles.pathwayArrow}
+                          style={{ color: stage.arrowColor || undefined }}
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <polyline points="9 18 15 12 9 6" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                  <div className={styles.journeyCard}>
+                    <h3 className={styles.cardTitle}>{stage.title}</h3>
+                    <p className={styles.cardDescription}>{stage.desc}</p>
+                  </div>
                 </div>
-              </div>
-
-              {/* Step 02 */}
-              <div className={styles.journeyStepWrapper}>
-                <span className={styles.stageNumber}>02</span>
-                <div className={styles.journeyStepCard}>
-                  <h3 className={styles.stageTitle}>Mind Map</h3>
-                  <p className={styles.stageDesc}>Identify and organise key concepts</p>
-                </div>
-              </div>
-
-              {/* Step 03 */}
-              <div className={styles.journeyStepWrapper}>
-                <span className={styles.stageNumber}>03</span>
-                <div className={styles.journeyStepCard}>
-                  <h3 className={styles.stageTitle}>Challenge</h3>
-                  <p className={styles.stageDesc}>
-                    Challenge the material and yourself. Find evidence and assess credibility
-                  </p>
-                </div>
-              </div>
-
-              {/* Step 04 */}
-              <div className={styles.journeyStepWrapper}>
-                <span className={styles.stageNumber}>04</span>
-                <div className={styles.journeyStepCard}>
-                  <h3 className={styles.stageTitle}>Conclude</h3>
-                  <p className={styles.stageDesc}>Reflect and make a conclusion</p>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </section>
