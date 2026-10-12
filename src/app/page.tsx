@@ -360,7 +360,7 @@ export default function LandingPage() {
             <form onSubmit={handleStudentLogin} className={styles.studentForm}>
               <div className={styles.inputMetaRow}>
                 <span className={styles.inputMetaLabel}>ACCESS CODE</span>
-                <span className={styles.inputMetaHint}>Any length • Case-insensitive</span>
+                <span className={styles.inputMetaHint}>Case-insensitive</span>
               </div>
 
               <div className={styles.accessInputWrapper}>

@@ -678,5 +678,35 @@
   - `npm test` (31/31 tests passing across 8 test suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
   - `npm run build` (100% clean Next.js production build across 12 routes).
+- **Immediate Next Step**: Proceed with UI updates per Section 9 of `requirements.md`.
+
+---
+
+### [2026-10-12] - UI Iteration 2: Student Login Hint Cleanup & Dashboard Redesign
+
+- **Role**: Full Stack Developer
+- **Code Built & Updated**:
+  - **Student Login Hint Text Cleanup ([`src/app/login/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/login/page.tsx) & [`src/app/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/page.tsx))**:
+    - Removed `'Any length • '` from the input metadata hint, leaving clean `'Case-insensitive'` text per user instruction.
+  - **Multi-Avatar Robot Variants ([`src/shared/components/RobotAvatar/RobotAvatar.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/RobotAvatar/RobotAvatar.tsx))**:
+    - Extended `RobotAvatar` to support `variant="aria" | "yellow" | "blue"` matching the avatar lineup in `screens_v2/customise.png`.
+  - **Dashboard Redesign ([`src/app/dashboard/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/page.tsx) & [`src/app/dashboard/dashboard.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/dashboard.module.css))**:
+    - Rebuilt layout matching [`screens_v2/dashboard.png`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/screens_v2/dashboard.png):
+      - Top header: Glowing "Critic" brand logo and rounded "Customise your agent" pill button.
+      - Hero section: Bold "Think harder about what you read." heading (`Space Grotesk`, `3.6rem`) and descriptive subtitle (`Exo 2`, `1.35rem`) with generous bottom whitespace (`56px`).
+      - "Choose a topic" grid:
+        - Active "Climate Change" card with purple border accent (`#A855F7`), "Examine sources relating to the climate", and purple "Enter Module" link with spinner loading state.
+        - "Vaccine Safety" and "Mental Well-being" cards with "Module will be available soon." and bright cyan "Coming Soon" indicators.
+      - "Your thinking journey" container:
+        - Unified dark slate enclosure card housing 4 clean step cards (`01 Annotate`, `02 Mind Map`, `03 Challenge`, `04 Conclude`) with clear typography and descriptions.
+      - Full-screen module initialization loading overlay retained with glowing cyan box and spinner.
+  - **Integrated Agent Customisation Modal ([`screens_v2/customise.png`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/screens_v2/customise.png))**:
+    - Wired "Customise your agent" button to open the customisation modal supporting Appearance and Tone tabs, avatar selection across yellow, Aria, and blue robots, dot pagination, tone options, and persistence via `PUT /api/students/:studentId/agent-preferences`.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (31/31 tests passing across 8 test suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+  - `npm run build` (100% clean Next.js production build across 12 routes).
 - **Immediate Next Step**: Await user instructions for the next screen to update.
+
 
