@@ -720,12 +720,12 @@
     - Integrated `CriticLogo` across the Landing page, Student Login page, and Dashboard header.
   - **Enhanced "Customise Your Agent" Button UI/UX ([`src/app/dashboard/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/page.tsx) & [`src/app/dashboard/dashboard.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/dashboard.module.css))**:
     - Embedded dynamic robot avatar preview circle (`<RobotAvatar variant={selectedAppearance} size={22} />`) displaying the student's active companion directly inside the button.
-    - Added glowing cyan status dot signifying the AI agent is active and online.
+    - Removed extraneous glowing cyan status dot per user feedback, leaving a clean, balanced pill layout.
     - Upgraded hover interaction with smooth elevation, purple-cyan border glow, and glassmorphic backdrop filter.
-  - **Elevated Stepper Pathway & Enhanced Cards ([`src/app/dashboard/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/page.tsx) & [`src/app/dashboard/dashboard.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/dashboard.module.css))**:
-    - **Milestone Nodes**: Upgraded stage numbers into circular glowing milestone badges (`36px × 36px`, colored borders and glow: `01` Cyan, `02` Purple, `03` Amber, `04` Emerald).
-    - **Continuous Illuminated Pathway Track**: Built a seamless horizontal gradient line connecting stage nodes across column gaps with directional chevrons (`›`).
-    - **Enhanced Stage Cards**: Added top color accent border (`border-top: 2.5px solid [stage.color]`), subtle top-down ambient gradient tint, uppercase `STAGE 0X` micro-badge, high-contrast title, and clear line-height description.
+  - **Non-Linear Iterative Pathway & Unified Informational Cards ([`src/app/dashboard/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/page.tsx) & [`src/app/dashboard/dashboard.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/dashboard.module.css))**:
+    - **Unified Color Scheme**: Removed arbitrary rainbow/random colors across stages; standardized all 4 stage milestones and cards on the unified brand cyan (`#37F3FF`) and deep slate palette.
+    - **Non-Linear Bidirectional Pathway**: Replaced rigid one-way forward arrows with bidirectional track connectors (`◄──────►`), visually reinforcing that critical thinking is an iterative, flexible cycle where students move between stages freely.
+    - **Explicit Informational Indicators**: Added `Informational Overview` badge, descriptive subtitle ("An iterative cycle — move between stages freely... Select a module above to begin"), and `Info only` card tags to make it 100% clear that the cards are educational references rather than clickable action buttons.
     - **Hover Neutralized**: Maintained static, calm behavior on card hover (`cursor: default`) with zero distracting motion.
   - **Decluttered Dashboard Layout & Balanced Whitespace**:
     - Refined hero section spacing (`margin-bottom: 44px`, font size `3.3rem`), topic selection grid padding (`26px 22px`), and reduced topic-to-journey distance to ~38-40px.

@@ -18,37 +18,21 @@ const JOURNEY_STAGES = [
     num: '01',
     title: 'Annotate',
     desc: 'Find assumptions and biases',
-    color: '#37F3FF',
-    glow: 'rgba(55, 243, 255, 0.28)',
-    subtleBg: 'rgba(55, 243, 255, 0.05)',
-    nextColor: '#A855F7',
   },
   {
     num: '02',
     title: 'Mind Map',
     desc: 'Identify and organise key concepts',
-    color: '#A855F7',
-    glow: 'rgba(168, 85, 247, 0.28)',
-    subtleBg: 'rgba(168, 85, 247, 0.05)',
-    nextColor: '#F59E0B',
   },
   {
     num: '03',
     title: 'Challenge',
     desc: 'Challenge the material and yourself. Find evidence and assess credibility',
-    color: '#F59E0B',
-    glow: 'rgba(245, 158, 11, 0.28)',
-    subtleBg: 'rgba(245, 158, 11, 0.05)',
-    nextColor: '#10B981',
   },
   {
     num: '04',
     title: 'Conclude',
     desc: 'Reflect and make a conclusion',
-    color: '#10B981',
-    glow: 'rgba(16, 185, 129, 0.28)',
-    subtleBg: 'rgba(16, 185, 129, 0.05)',
-    nextColor: null,
   },
 ];
 
@@ -174,7 +158,6 @@ export default function DashboardPage() {
             <RobotAvatar variant={selectedAppearance} size={22} />
           </span>
           <span className={styles.customiseBtnText}>Customise your agent</span>
-          <span className={styles.customiseStatusDot} aria-hidden="true" />
         </button>
       </header>
 
@@ -267,44 +250,51 @@ export default function DashboardPage() {
 
         {/* "Your thinking journey" Container per screens_v2/dashboard.png */}
         <section className={`${styles.section} ${styles.journeySection}`}>
-          <h2 className={styles.sectionHeading}>Your thinking journey</h2>
+          <div className={styles.journeyHeaderRow}>
+            <div className={styles.journeyHeadingWithBadge}>
+              <h2 className={styles.sectionHeading}>Your thinking journey</h2>
+              <span className={styles.informationalBadge}>Informational Overview</span>
+            </div>
+            <p className={styles.journeySubtitle}>
+              An iterative cycle — move between stages freely as your thinking evolves. Select a module above to begin.
+            </p>
+          </div>
+
           <div className={styles.journeyContainer}>
             <div className={styles.journeyGrid}>
               {JOURNEY_STAGES.map((stage, idx) => (
                 <div key={stage.num} className={styles.stageColumn}>
-                  {/* Pathway Milestone & Connector */}
+                  {/* Non-linear bidirectional connector & milestone node */}
                   <div className={styles.stagePathHeader}>
-                    <div
-                      className={styles.stageNode}
-                      style={{
-                        borderColor: stage.color,
-                        color: stage.color,
-                        boxShadow: `0 0 14px ${stage.glow}`,
-                      }}
-                    >
+                    <div className={styles.stageNode}>
                       <span>{stage.num}</span>
                     </div>
 
                     {idx < JOURNEY_STAGES.length - 1 && (
                       <div className={styles.pathwayTrack} aria-hidden="true">
-                        <div
-                          className={styles.pathwayLine}
-                          style={{
-                            background: `linear-gradient(90deg, ${stage.color}, ${stage.nextColor})`,
-                            boxShadow: `0 0 8px ${stage.glow}`,
-                          }}
-                        />
-                        <div
-                          className={styles.pathwayArrowMarker}
-                          style={{ color: stage.nextColor || undefined }}
-                        >
+                        <div className={styles.pathwayArrowLeft}>
                           <svg
-                            width="14"
-                            height="14"
+                            width="9"
+                            height="9"
                             viewBox="0 0 24 24"
                             fill="none"
                             stroke="currentColor"
-                            strokeWidth="3"
+                            strokeWidth="3.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <polyline points="15 18 9 12 15 6" />
+                          </svg>
+                        </div>
+                        <div className={styles.pathwayLine} />
+                        <div className={styles.pathwayArrowRight}>
+                          <svg
+                            width="9"
+                            height="9"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="3.5"
                             strokeLinecap="round"
                             strokeLinejoin="round"
                           >
@@ -315,17 +305,12 @@ export default function DashboardPage() {
                     )}
                   </div>
 
-                  {/* Enhanced Stage Card */}
-                  <div
-                    className={styles.journeyCard}
-                    style={{
-                      borderTopColor: stage.color,
-                      background: `linear-gradient(180deg, ${stage.subtleBg} 0%, #0D162C 50%)`,
-                    }}
-                  >
-                    <span className={styles.stageMicroBadge} style={{ color: stage.color }}>
-                      STAGE {stage.num}
-                    </span>
+                  {/* Informational Stage Card */}
+                  <div className={styles.journeyCard}>
+                    <div className={styles.cardHeaderRow}>
+                      <span className={styles.stageMicroBadge}>STAGE {stage.num}</span>
+                      <span className={styles.cardInfoTag}>Info only</span>
+                    </div>
                     <h3 className={styles.cardTitle}>{stage.title}</h3>
                     <p className={styles.cardDescription}>{stage.desc}</p>
                   </div>
