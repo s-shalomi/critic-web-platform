@@ -245,6 +245,7 @@ export function buildSocraticSystemPrompt(
 Stage: Familiarise. Your goal is to help students interact with the source and get familiarised with it so that they can identify claims, biases and assumptions in it.
 
 Ask one concise Socratic Question related to the source currently in view and the student's existing notes. If the student has not taken any notes, ask a question that encourages them to start. If the student has notes, ask a question that encourages them to think more deeply about the source.
+Stage rule: Do NOT ask the student about establishing links, connecting nodes, or building a concept map (establishing links belongs strictly to the Conceptualise stage). Focus exclusively on evaluating this source, identifying claims, rhetoric, unstated assumptions, or taking annotations.
 
 ${sourcesText ? `Source in view: ${sourcesText}` : ''}
 Student's work so far: {text: [${notesList}]}${hintNudge}
@@ -450,6 +451,7 @@ Student's work so far: {text: [${notesList}]}, {concepts: [${nodesList}], links:
 Stage: Familiarise. Your goal is to help students interact with the source and get familiarised with it so that they can identify claims, biases and assumptions in it.
 
 Ask one concise Socratic Question related to the source currently in view and the student's existing notes. If the student has not taken any notes, ask a question that encourages them to start. If the student has notes, ask a question that encourages them to think more deeply about the source.
+Stage rule: Do NOT ask the student about establishing links, drawing links, connecting nodes, or building a concept map (establishing links belongs strictly to the Conceptualise stage). Focus exclusively on evaluating this source, identifying claims, rhetoric, unstated assumptions, or taking annotations.
 
 Source in view: ${sourceInfo}
 Student's work so far: {text: [${notesList}]}${hintNudge}
@@ -482,11 +484,18 @@ Student's work so far: {text: [${notesList}]}${hintNudge}
       const completion = (await Promise.race([groqPromise, timeoutPromise])) as any;
       const choice = completion.choices?.[0];
       const text = choice?.message?.content?.trim();
-      if (text && choice.finish_reason !== 'length' && isCompleteText(text)) {
+
+      const hasInvalidLinkPrompt =
+        stage === 'familiarise' &&
+        /establish(ing)? (a |the )?link|draw(ing)? (a )?link|connect(ing)? (the |your )?nodes?|concept map/i.test(
+          text || ''
+        );
+
+      if (text && choice.finish_reason !== 'length' && isCompleteText(text) && !hasInvalidLinkPrompt) {
         return { text, provider: 'groq' };
       }
-      if (text && (!isCompleteText(text) || choice?.finish_reason === 'length')) {
-        console.warn('[AI Service Hint] Hint truncated or incomplete, falling back to rule.');
+      if (text && (hasInvalidLinkPrompt || !isCompleteText(text) || choice?.finish_reason === 'length')) {
+        console.warn('[AI Service Hint] Hint invalid or truncated, falling back to rule.');
       }
     } catch (err: any) {
       if (isRateLimitError(err)) hadRateLimit = true;

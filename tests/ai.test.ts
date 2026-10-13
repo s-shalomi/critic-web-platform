@@ -225,4 +225,20 @@ describe('Socratic AI Engine Tests', () => {
     expect(wordCount).toBeLessThan(50);
     expect(hint.text.split(/[.?!]+/).filter(Boolean).length).toBeLessThanOrEqual(4);
   });
+
+  test('generateAvatarHint in familiarise stage does not ask about establishing links', async () => {
+    const hint = await generateAvatarHint({
+      stage: 'familiarise',
+      topicTitle: 'Climate Change',
+      sourceTitle: 'Social Media Post',
+      sourceText: 'Be careful and try staying in your house...',
+      notes: [
+        { highlightedText: 'extreme snow', noteText: 'Author confuses weather with climate' },
+      ],
+      agentPersonality: 'Friendly',
+    });
+
+    expect(hint.text).toBeDefined();
+    expect(hint.text.toLowerCase()).not.toMatch(/establish(ing)? (a |the )?link|concept map/);
+  });
 });

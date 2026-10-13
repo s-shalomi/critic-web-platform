@@ -47,14 +47,16 @@ export async function POST(
       ? body.conceptLinks
       : conceptsData.links;
 
+    const isFamiliarise = stage === 'familiarise';
+
     const hintResult = await generateAvatarHint({
       stage,
       topicTitle: topicCtx.topicTitle,
       sourceTitle,
       sourceText,
       notes: resolvedNotes,
-      conceptNodes,
-      conceptLinks: rawLinks,
+      conceptNodes: isFamiliarise ? [] : conceptNodes,
+      conceptLinks: isFamiliarise ? [] : rawLinks,
       agentPersonality,
       avatarName,
       hintCount,

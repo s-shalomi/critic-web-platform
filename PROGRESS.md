@@ -1047,3 +1047,24 @@
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
   - Live API testing verified 100% complete sentences with `finish_reason: "stop"` and 20–37 word counts.
 - **Immediate Next Step**: Commit fix to `feature/iteration-2`.
+
+---
+
+### [2026-10-13] - Refinement: Prevent Agent from Asking to Establish Links in Familiarise Stage
+
+- **Role**: Full Stack Developer
+- **User Instruction**: *"familiarise stage agent should not ask about establishing links"*
+- **Code Built & Updated**:
+  - **Familiarise Payload Scoping ([`src/app/module/[moduleId]/familiarise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/familiarise/page.tsx) & [`src/app/api/modules/[moduleId]/agent/hint/route.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/api/modules/%5BmoduleId%5D/agent/hint/route.ts))**:
+    - Omitted `conceptNodes` and `conceptLinks` from the hint request payload in Familiarise stage, strictly aligning with Section 4 where Familiarise student context consists only of `{text: annotations}`.
+    - Guaranteed in the hint API route that `conceptNodes` and `conceptLinks` are always passed as empty arrays for `stage === 'familiarise'`.
+  - **Stage-Specific Constraint & Validation ([`src/domains/ai/aiService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/ai/aiService.ts))**:
+    - Added explicit stage rule in both `buildSocraticSystemPrompt` and `generateAvatarHint` for Familiarise: *"Do NOT ask the student about establishing links, drawing links, connecting nodes, or building a concept map (establishing links belongs strictly to the Conceptualise stage). Focus exclusively on evaluating this source, identifying claims, rhetoric, unstated assumptions, or taking notes."*
+    - Added output validation ensuring any AI hint in Familiarise mentioning establishing links or concept maps is rejected and safely replaced with a source-focused Socratic fallback question.
+  - **Test Suite Updates ([`tests/ai.test.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/tests/ai.test.ts))**:
+    - Added unit test asserting `generateAvatarHint` in the Familiarise stage never generates questions asking to establish links or reference concept maps.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (38/38 tests passing across 8 test suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+- **Immediate Next Step**: Commit refinement to `feature/iteration-2`.
