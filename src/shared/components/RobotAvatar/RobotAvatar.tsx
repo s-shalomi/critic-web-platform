@@ -127,6 +127,76 @@ export function getStoredAgentPreferences(): ResolvedAgentPreferences {
   };
 }
 
+export function getStageOpener(
+  stage: 'familiarise' | 'conceptualise' | 'inquire' | 'synthesise',
+  toneName?: string
+): string {
+  const normalized = (toneName || 'Friendly').trim().toLowerCase();
+
+  if (stage === 'inquire') {
+    if (normalized === 'mentor') {
+      return 'Take a calm look at your evidence map. Which central claim stands out to you, and what underlying assumption makes that source persuasive?';
+    }
+    if (normalized === 'witty challenger' || normalized === 'witty_challenger') {
+      return "Alright, your map is on the table—now let's stress-test it. Which claim are you betting on, and why should anyone trust that source?";
+    }
+    if (normalized === 'curious explorer' || normalized === 'curious_explorer') {
+      return "I'm really curious to hear how you're piecing this together! Which claim caught your attention most, and what evidence drew you to it?";
+    }
+    if (normalized === "devil's advocate" || normalized === 'devils_advocate') {
+      return "Let's put your assumptions on trial. Which source do you trust most right now, and what blind spot might its author be hiding?";
+    }
+    return "You've mapped out your evidence! What is the central claim you are considering, and which source do you find most convincing so far?";
+  }
+
+  if (stage === 'synthesise') {
+    if (normalized === 'mentor') {
+      return 'Stepping back to view your full map and inquiry, how would you weigh the competing evidence into a reasoned conclusion?';
+    }
+    if (normalized === 'witty challenger' || normalized === 'witty_challenger') {
+      return 'Time for the final verdict—looking at your map and our debate, what conclusion actually survives scrutiny?';
+    }
+    if (normalized === 'curious explorer' || normalized === 'curious_explorer') {
+      return "I'd love to see how your perspective has evolved! Looking across your entire map, what final conclusion are you reaching?";
+    }
+    if (normalized === "devil's advocate" || normalized === 'devils_advocate') {
+      return 'Before you lock in your final position—looking across your entire map, what is your conclusion and how does it hold up against the strongest counterargument?';
+    }
+    return 'Looking back at your entire map, what is your final take on these sources?';
+  }
+
+  if (stage === 'conceptualise') {
+    if (normalized === 'mentor') {
+      return 'Notice how your concept nodes sit relative to one another—what deeper cause-and-effect relationship connects them?';
+    }
+    if (normalized === 'witty challenger' || normalized === 'witty_challenger') {
+      return 'Those nodes look neat in isolation, but how do they actually connect without a logical leap?';
+    }
+    if (normalized === 'curious explorer' || normalized === 'curious_explorer') {
+      return "I'm curious about the links you're building! How do these concepts influence or challenge each other?";
+    }
+    if (normalized === "devil's advocate" || normalized === 'devils_advocate') {
+      return 'Where is the weakest link on your canvas right now, and what counter-evidence could break it?';
+    }
+    return 'How do the concepts on your canvas connect—or contradict—each other?';
+  }
+
+  // familiarise
+  if (normalized === 'mentor') {
+    return 'As you read this source, consider what unstated assumption the author relies on to make their point.';
+  }
+  if (normalized === 'witty challenger' || normalized === 'witty_challenger') {
+    return "Read between the lines here—is the author giving you solid proof, or just a clever rhetorical spin?";
+  }
+  if (normalized === 'curious explorer' || normalized === 'curious_explorer') {
+    return 'What stands out to you in this source, and what evidence does the author offer to back it up?';
+  }
+  if (normalized === "devil's advocate" || normalized === 'devils_advocate') {
+    return 'What perspective or counter-evidence is this author conveniently leaving out?';
+  }
+  return 'What key claim or assumption stands out to you in this source so far?';
+}
+
 interface RobotAvatarProps {
   size?: number;
   variant?: RobotVariant;

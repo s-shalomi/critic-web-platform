@@ -220,3 +220,30 @@ export async function deleteSourceFromTopic(sourceId: string): Promise<boolean> 
   return false;
 }
 
+export async function resolveTopicContextForModule(moduleId: string): Promise<{
+  topicId: string;
+  topicTitle: string;
+  sources: Array<{ title: string; authorName?: string; excerpt: string }>;
+}> {
+  const topics = await getAllTopics();
+  const normalizedMod = (moduleId || '').toLowerCase().replace(/_/g, '-');
+  const matchedTopic =
+    topics.find((t) => normalizedMod.includes(t.id.toLowerCase())) || topics[0];
+
+  const topicId = matchedTopic ? matchedTopic.id : 'climate-change';
+  const rawTitle = matchedTopic ? matchedTopic.title : 'Climate Change';
+  const topicTitle = rawTitle
+    .split(' ')
+    .map((w) => (w.length > 0 ? w[0].toUpperCase() + w.slice(1) : w))
+    .join(' ');
+
+  const rawSources = await getSourcesForTopic(topicId);
+  const sources = rawSources.map((s) => ({
+    title: s.title,
+    authorName: s.content.authorName || s.author,
+    excerpt: s.content.text,
+  }));
+
+  return { topicId, topicTitle, sources };
+}
+

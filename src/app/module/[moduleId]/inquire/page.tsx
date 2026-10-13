@@ -14,6 +14,7 @@ import ConceptMapCanvas from '@/shared/components/ConceptMapCanvas/ConceptMapCan
 import {
   RobotAvatar,
   getStoredAgentPreferences,
+  getStageOpener,
   DEFAULT_AGENT_PREFERENCES,
   ResolvedAgentPreferences,
 } from '@/shared/components/RobotAvatar/RobotAvatar';
@@ -47,7 +48,8 @@ export default function InquireEvaluateStagePage() {
   useEffect(() => {
     const chatKey = getStudentStorageKey('critic_chat', moduleId);
     const notesKey = getStudentStorageKey('critic_notes', moduleId);
-    setAgentPrefs(getStoredAgentPreferences());
+    const currentPrefs = getStoredAgentPreferences();
+    setAgentPrefs(currentPrefs);
 
     // Show mandatory AI disclosure automatically once when the student first enters the module
     if (!hasSeenModuleDisclosure(moduleId)) {
@@ -57,7 +59,16 @@ export default function InquireEvaluateStagePage() {
 
     reportStudentProgress('inquire');
 
-    const handleFocus = () => setAgentPrefs(getStoredAgentPreferences());
+    const handleFocus = () => {
+      const updated = getStoredAgentPreferences();
+      setAgentPrefs(updated);
+      setMessages((prev) => {
+        if (prev.length === 1 && prev[0].id === 'msg-1') {
+          return [{ ...prev[0], text: getStageOpener('inquire', updated.toneName) }];
+        }
+        return prev;
+      });
+    };
     window.addEventListener('focus', handleFocus);
 
     // 0. Load notes count for AI nudge
@@ -74,7 +85,7 @@ export default function InquireEvaluateStagePage() {
       .then((res) => res.json())
       .then((data) => {
         if (data.notes) {
-          setNotesCount(data.notes.length);
+          setNotesCount((prev) => Math.max(prev, data.notes.length));
         }
       });
 
@@ -82,7 +93,11 @@ export default function InquireEvaluateStagePage() {
     const localChat = localStorage.getItem(chatKey);
     if (localChat) {
       try {
-        setMessages(JSON.parse(localChat));
+        const parsed = JSON.parse(localChat);
+        if (Array.isArray(parsed) && parsed.length === 1 && parsed[0].id === 'msg-1') {
+          parsed[0].text = getStageOpener('inquire', currentPrefs.toneName);
+        }
+        setMessages(parsed);
       } catch (e) {
         console.error(e);
       }
@@ -90,7 +105,14 @@ export default function InquireEvaluateStagePage() {
       fetch(`/api/modules/${moduleId}/inquire`)
         .then((res) => res.json())
         .then((data) => {
-          if (data.messages) setMessages(data.messages);
+          if (data.messages && Array.isArray(data.messages)) {
+            const initialized = data.messages.map((m: ChatMessage) =>
+              m.id === 'msg-1'
+                ? { ...m, text: getStageOpener('inquire', currentPrefs.toneName) }
+                : m
+            );
+            setMessages(initialized);
+          }
         });
     }
 
@@ -125,6 +147,21 @@ export default function InquireEvaluateStagePage() {
     setLoading(true);
 
     try {
+      // Gather client-side notes, conceptNodes, and conceptLinks for full context snapshot
+      const notesKey = getStudentStorageKey('critic_notes', moduleId);
+      const nodesKey = getStudentStorageKey('critic_nodes_canvas', moduleId);
+      const linksKey = getStudentStorageKey('critic_links_canvas', moduleId);
+      let localNotes: any[] = [];
+      let localNodes: any[] = [];
+      let localLinks: any[] = [];
+      try {
+        localNotes = JSON.parse(localStorage.getItem(notesKey) || '[]');
+        localNodes = JSON.parse(localStorage.getItem(nodesKey) || '[]');
+        localLinks = JSON.parse(localStorage.getItem(linksKey) || '[]');
+      } catch (e) {
+        /* ignore parse error */
+      }
+
       const highConfidenceRegex =
         /\b(definitely|obviously|clearly|always|never|proves|fake|hoax|certainly|guaranteed|undeniable|true|false)\b/i;
       const isHighConfidence = highConfidenceRegex.test(userText);
@@ -144,6 +181,9 @@ export default function InquireEvaluateStagePage() {
           history: messages,
           userMessage: userText,
           mode: effectiveMode,
+          notes: Array.isArray(localNotes) ? localNotes : [],
+          conceptNodes: Array.isArray(localNodes) ? localNodes : [],
+          conceptLinks: Array.isArray(localLinks) ? localLinks : [],
           agentPersonality: `${agentPrefs.toneName} (${agentPrefs.toneDesc})`,
           avatarName: agentPrefs.avatarName,
         }),

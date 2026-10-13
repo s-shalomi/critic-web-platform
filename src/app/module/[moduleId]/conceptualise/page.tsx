@@ -14,6 +14,7 @@ import ConceptMapCanvas from '@/shared/components/ConceptMapCanvas/ConceptMapCan
 import {
   RobotAvatar,
   getStoredAgentPreferences,
+  getStageOpener,
   DEFAULT_AGENT_PREFERENCES,
   ResolvedAgentPreferences,
 } from '@/shared/components/RobotAvatar/RobotAvatar';
@@ -155,12 +156,14 @@ export default function ConceptualiseStagePage() {
       // Retrieve live concept nodes and links from client canvas storage
       const nodesKey = getStudentStorageKey('critic_nodes_canvas', moduleId);
       const linksKey = getStudentStorageKey('critic_links_canvas', moduleId);
-      let localNodes: Array<{ text: string }> = [];
+      let localNodes: Array<{ id?: string; text: string }> = [];
       let localLinks: any[] = [];
       try {
         const parsedNodes = JSON.parse(localStorage.getItem(nodesKey) || '[]');
         if (Array.isArray(parsedNodes))
-          localNodes = parsedNodes.map((n: any) => ({ text: n.text || '' })).filter((n) => n.text);
+          localNodes = parsedNodes
+            .map((n: any) => ({ id: n.id, text: n.text || '' }))
+            .filter((n) => n.text);
         const parsedLinks = JSON.parse(localStorage.getItem(linksKey) || '[]');
         if (Array.isArray(parsedLinks)) localLinks = parsedLinks;
       } catch (e) {
@@ -175,6 +178,10 @@ export default function ConceptualiseStagePage() {
           stage: 'conceptualise',
           sourceTitle: activeSource?.title,
           sourceText: activeSource?.content?.text,
+          notes: notes.map((n) => ({
+            highlightedText: n.highlightedText,
+            noteText: n.noteText,
+          })),
           conceptNodes: localNodes,
           conceptLinks: localLinks,
           agentPersonality: `${agentPrefs.toneName} (${agentPrefs.toneDesc})`,
@@ -190,7 +197,7 @@ export default function ConceptualiseStagePage() {
         );
       }
     } catch (err) {
-      setAgentSpeech('How does this concept connect to the evidence you highlighted earlier?');
+      setAgentSpeech(getStageOpener('conceptualise', agentPrefs.toneName));
     } finally {
       setAgentLoading(false);
     }

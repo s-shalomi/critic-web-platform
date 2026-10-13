@@ -13,6 +13,7 @@ import { reportStudentProgress } from '@/shared/utils/reportProgress';
 import {
   RobotAvatar,
   getStoredAgentPreferences,
+  getStageOpener,
   DEFAULT_AGENT_PREFERENCES,
   ResolvedAgentPreferences,
 } from '@/shared/components/RobotAvatar/RobotAvatar';
@@ -312,6 +313,23 @@ export default function FamiliariseStagePage() {
       const current = parseInt(localStorage.getItem(hintKey) || '0', 10);
       localStorage.setItem(hintKey, String(current + 1));
 
+      const nodesKey = getStudentStorageKey('critic_nodes_canvas', moduleId);
+      const linksKey = getStudentStorageKey('critic_links_canvas', moduleId);
+      let localNodes: Array<{ id?: string; text: string }> = [];
+      let localLinks: any[] = [];
+      try {
+        const parsedNodes = JSON.parse(localStorage.getItem(nodesKey) || '[]');
+        if (Array.isArray(parsedNodes)) {
+          localNodes = parsedNodes
+            .map((n: any) => ({ id: n.id, text: n.text || '' }))
+            .filter((n) => n.text);
+        }
+        const parsedLinks = JSON.parse(localStorage.getItem(linksKey) || '[]');
+        if (Array.isArray(parsedLinks)) localLinks = parsedLinks;
+      } catch (e) {
+        /* ignore parse error */
+      }
+
       const res = await fetch(`/api/modules/${moduleId}/agent/hint`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -319,6 +337,12 @@ export default function FamiliariseStagePage() {
           stage: 'familiarise',
           sourceTitle: currentSource?.title,
           sourceText: currentSource?.content?.text,
+          notes: notes.map((n) => ({
+            highlightedText: n.highlightedText,
+            noteText: n.noteText,
+          })),
+          conceptNodes: localNodes,
+          conceptLinks: localLinks,
           agentPersonality: `${agentPrefs.toneName} (${agentPrefs.toneDesc})`,
           avatarName: agentPrefs.avatarName,
         }),
@@ -332,7 +356,7 @@ export default function FamiliariseStagePage() {
         );
       }
     } catch (err) {
-      setAgentSpeech('What underlying assumptions might the author be making in this claim?');
+      setAgentSpeech(getStageOpener('familiarise', agentPrefs.toneName));
     } finally {
       setAgentLoading(false);
     }

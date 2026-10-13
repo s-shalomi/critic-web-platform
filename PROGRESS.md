@@ -897,3 +897,21 @@
   - `npm test` (32/32 tests passing across 8 test suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
 - **Immediate Next Step**: Proceed to Stage 3 (Full Cross-Stage Context Snapshot, Tone-Consistent Openers & Dynamic Topic Resolution).
+
+---
+
+### [2026-10-13] - AI Agent Alignment Stage 3: Full Cross-Stage Context Snapshot, Tone-Consistent Openers & Dynamic Topic Resolution
+
+- **Role**: Full Stack Developer
+- **Code Built & Updated**:
+  - **Dynamic Topic & Sources Resolution ([`src/domains/topics/topicService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/topics/topicService.ts))**:
+    - Added `resolveTopicContextForModule(moduleId)` to dynamically resolve `topicId`, `topicTitle`, and `sources` (`{ title, authorName, excerpt }`) from the topic and source stores rather than hardcoding `'Climate Change'`.
+  - **Full Cross-Stage Context Aggregation Across API Routes**:
+    - Updated [`src/app/api/modules/[moduleId]/agent/hint/route.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/api/modules/%5BmoduleId%5D/agent/hint/route.ts), [`src/app/api/modules/[moduleId]/inquire/messages/route.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/api/modules/%5BmoduleId%5D/inquire/messages/route.ts), and [`src/app/api/modules/[moduleId]/synthesis/route.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/api/modules/%5BmoduleId%5D/synthesis/route.ts) to merge client-supplied `notes`, `conceptNodes`, `conceptLinks` (resolved to `{ fromText, toText }`), and `chatHistory` with server stores.
+  - **Tone-Consistent Stage Openers ([`src/shared/components/RobotAvatar/RobotAvatar.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/RobotAvatar/RobotAvatar.tsx))**:
+    - Added `getStageOpener(stage, toneName)` so the initial agent greeting/prompt in `familiarise`, `conceptualise`, `inquire`, and `synthesise` reflects the user's selected tone from the very first message.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (32/32 tests passing across 8 test suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+- **Immediate Next Step**: Proceed to Stage 4 & Stage 5 (Devil's Advocate Triggering, Scaffolding Mode, Non-Blocking Nudges & Friendly Retry UX).

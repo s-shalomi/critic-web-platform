@@ -14,6 +14,7 @@ import ConceptMapCanvas from '@/shared/components/ConceptMapCanvas/ConceptMapCan
 import {
   RobotAvatar,
   getStoredAgentPreferences,
+  getStageOpener,
   DEFAULT_AGENT_PREFERENCES,
   ResolvedAgentPreferences,
 } from '@/shared/components/RobotAvatar/RobotAvatar';
@@ -95,11 +96,32 @@ export default function SynthesiseStagePage() {
     setAiFeedback(null);
 
     try {
+      const notesKey = getStudentStorageKey('critic_notes', moduleId);
+      const nodesKey = getStudentStorageKey('critic_nodes_canvas', moduleId);
+      const linksKey = getStudentStorageKey('critic_links_canvas', moduleId);
+      const chatKey = getStudentStorageKey('critic_chat', moduleId);
+      let localNotes: any[] = [];
+      let localNodes: any[] = [];
+      let localLinks: any[] = [];
+      let localChat: any[] = [];
+      try {
+        localNotes = JSON.parse(localStorage.getItem(notesKey) || '[]');
+        localNodes = JSON.parse(localStorage.getItem(nodesKey) || '[]');
+        localLinks = JSON.parse(localStorage.getItem(linksKey) || '[]');
+        localChat = JSON.parse(localStorage.getItem(chatKey) || '[]');
+      } catch (e) {
+        /* ignore parse error */
+      }
+
       const res = await fetch(`/api/modules/${moduleId}/synthesis`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           synthesisText,
+          notes: Array.isArray(localNotes) ? localNotes : [],
+          conceptNodes: Array.isArray(localNodes) ? localNodes : [],
+          conceptLinks: Array.isArray(localLinks) ? localLinks : [],
+          chatHistory: Array.isArray(localChat) ? localChat : [],
           agentPersonality: `${agentPrefs.toneName} (${agentPrefs.toneDesc})`,
           avatarName: agentPrefs.avatarName,
         }),
@@ -178,7 +200,7 @@ export default function SynthesiseStagePage() {
                 </div>
                 <div className={styles.agentBubble}>
                   <p className={styles.messageText}>
-                    Looking back at your entire map, what is your final take on these sources?
+                    {getStageOpener('synthesise', agentPrefs.toneName)}
                   </p>
                 </div>
               </div>

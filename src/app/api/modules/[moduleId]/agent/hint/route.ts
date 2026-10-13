@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { generateAvatarHint } from '@/domains/ai/aiService';
 import { getNotesForModule } from '@/domains/notes/noteService';
 import { getConceptualiseData } from '@/domains/concepts/conceptService';
+import { resolveTopicContextForModule } from '@/domains/topics/topicService';
 
 export async function POST(
   request: Request,
@@ -15,30 +16,44 @@ export async function POST(
     const agentPersonality = body.agentPersonality;
     const avatarName = body.avatarName;
 
-    // Retrieve active module notes and concept nodes (combining client payload with server store)
-    const notesData = await getNotesForModule(params.moduleId);
-    const conceptsData = await getConceptualiseData(params.moduleId);
+    // Retrieve active module notes, concept nodes, and dynamic topic context
+    const [notesData, conceptsData, topicCtx] = await Promise.all([
+      getNotesForModule(params.moduleId),
+      getConceptualiseData(params.moduleId),
+      resolveTopicContextForModule(params.moduleId),
+    ]);
+
+    // Prefer client's real-time notes if provided, otherwise fall back to server store
+    const resolvedNotes = Array.isArray(body.notes) && body.notes.length > 0
+      ? body.notes.map((n: any) => ({
+          highlightedText: String(n.highlightedText || ''),
+          noteText: String(n.noteText || ''),
+        }))
+      : notesData.map((n) => ({
+          highlightedText: n.highlightedText,
+          noteText: n.noteText,
+        }));
 
     // Prefer client's real-time canvas concept nodes if provided
-    const conceptNodes = Array.isArray(body.conceptNodes) && body.conceptNodes.length > 0
-      ? body.conceptNodes
-      : conceptsData.nodes.map((n) => ({ text: n.text }));
+    const rawNodes: Array<{ id?: string; text: string }> =
+      Array.isArray(body.conceptNodes) && body.conceptNodes.length > 0
+        ? body.conceptNodes
+        : conceptsData.nodes.map((n) => ({ id: n.id, text: n.text }));
 
-    const conceptLinks = Array.isArray(body.conceptLinks)
+    const conceptNodes = rawNodes.map((n) => ({ text: String(n.text || '') }));
+
+    const rawLinks = Array.isArray(body.conceptLinks) && body.conceptLinks.length > 0
       ? body.conceptLinks
       : conceptsData.links;
 
     const hintResult = await generateAvatarHint({
       stage,
-      topicTitle: 'Climate Change',
+      topicTitle: topicCtx.topicTitle,
       sourceTitle,
       sourceText,
-      notes: notesData.map((n) => ({
-        highlightedText: n.highlightedText,
-        noteText: n.noteText,
-      })),
+      notes: resolvedNotes,
       conceptNodes,
-      conceptLinks,
+      conceptLinks: rawLinks,
       agentPersonality,
       avatarName,
     });
@@ -48,7 +63,7 @@ export async function POST(
       hint: hintResult.text,
       provider: hintResult.provider,
       agentName: avatarName || 'Aria',
-      personality: agentPersonality || 'Socratic Peer',
+      personality: agentPersonality || 'Friendly',
     });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to generate agent hint' }, { status: 500 });
