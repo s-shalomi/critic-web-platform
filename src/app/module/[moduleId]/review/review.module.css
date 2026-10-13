@@ -100,21 +100,46 @@
 
 .metricsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 18px;
   margin-bottom: 44px;
 }
 
+@media (max-width: 860px) {
+  .metricsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .metricsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .metricCard {
   background: #172038;
-  border: 1.5px solid rgba(139, 92, 246, 0.32);
-  padding: 22px 16px;
+  border: 1.5px solid rgba(55, 243, 255, 0.28);
+  padding: 24px 18px;
   border-radius: 18px;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
   box-shadow: 0 10px 26px rgba(0, 0, 0, 0.26);
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.metricCard:hover {
+  transform: translateY(-2px);
+  border-color: rgba(55, 243, 255, 0.55);
+  box-shadow: 0 12px 30px rgba(55, 243, 255, 0.12);
+}
+
+.metricIcon {
+  font-size: 1.8rem;
+  margin-bottom: 8px;
+  line-height: 1;
 }
 
 .metricVal {
@@ -123,14 +148,6 @@
   font-weight: 700;
   color: #eaf6ff;
   margin-bottom: 6px;
-}
-
-.metricValPurple {
-  color: #c084fc;
-}
-
-.metricValCyan {
-  color: #37f3ff;
 }
 
 .metricLabel {
@@ -150,71 +167,6 @@
   color: #eaf6ff;
   margin-bottom: 20px;
   text-align: center;
-}
-
-/* Badges Grid & Sequential Unlock Animation */
-.badgesGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 18px;
-}
-
-.badgeCard {
-  background: #172038;
-  border-radius: 18px;
-  padding: 22px 18px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  border: 1.5px solid rgba(143, 166, 201, 0.18);
-  transition: all 0.38s ease-out;
-}
-
-.badgeLocked {
-  opacity: 0.28;
-  filter: grayscale(1);
-  transform: scale(0.96);
-}
-
-.badgeUnlocked {
-  opacity: 1;
-  filter: grayscale(0);
-  transform: scale(1);
-  border-color: #8b5cf6;
-  box-shadow: 0 0 22px rgba(139, 92, 246, 0.28);
-  animation: unlockGlow 0.42s ease-out;
-}
-
-@keyframes unlockGlow {
-  0% {
-    transform: scale(0.88);
-    box-shadow: 0 0 36px rgba(55, 243, 255, 0.55);
-  }
-  100% {
-    transform: scale(1);
-    box-shadow: 0 0 22px rgba(139, 92, 246, 0.28);
-  }
-}
-
-.badgeIcon {
-  font-size: 2.2rem;
-  margin-bottom: 10px;
-}
-
-.badgeTitle {
-  font-family: var(--font-space-grotesk), sans-serif;
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: #eaf6ff;
-  margin: 0 0 6px;
-}
-
-.badgeDesc {
-  font-family: var(--font-exo2), sans-serif;
-  font-size: 0.88rem;
-  color: #d9dff7;
-  margin: 0;
 }
 
 /* MBTI Shareable Profile Card */
@@ -299,4 +251,62 @@
   background: #37f3ff;
   color: #0f172e;
   box-shadow: 0 0 18px rgba(55, 243, 255, 0.4);
+}
+
+/* AI Generation Disclosure Disclaimer */
+.aiDisclosureNote {
+  max-width: 780px;
+  margin: 18px auto 0;
+  padding: 14px 20px;
+  border-radius: 14px;
+  background: rgba(23, 32, 56, 0.72);
+  border: 1px solid rgba(143, 166, 201, 0.24);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.disclosureIcon {
+  font-size: 1.15rem;
+  flex-shrink: 0;
+}
+
+.aiDisclosureText {
+  font-family: var(--font-exo2), sans-serif;
+  font-size: 0.88rem;
+  color: #8fa6c9;
+  margin: 0;
+  line-height: 1.45;
+}
+
+/* Primary Dashboard Return Action */
+.actionFooter {
+  max-width: 780px;
+  margin: 44px auto 0;
+  display: flex;
+  justify-content: center;
+}
+
+.returnDashboardBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 36px;
+  border-radius: 999px;
+  border: 1.5px solid #37f3ff;
+  background: linear-gradient(135deg, rgba(55, 243, 255, 0.18), rgba(168, 85, 247, 0.22));
+  color: #eaf6ff;
+  font-family: var(--font-space-grotesk), sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 0 24px rgba(55, 243, 255, 0.2);
+  transition: all 0.22s ease;
+}
+
+.returnDashboardBtn:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #37f3ff, #a855f7);
+  color: #0b1124;
+  box-shadow: 0 0 32px rgba(55, 243, 255, 0.45);
 }

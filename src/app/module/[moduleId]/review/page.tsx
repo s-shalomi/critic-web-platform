@@ -12,24 +12,13 @@ import {
   ResolvedAgentPreferences,
 } from '@/shared/components/RobotAvatar/RobotAvatar';
 
-interface Badge {
-  id: string;
-  title: string;
-  description: string;
-  icon: string;
-  unlocked: boolean;
-}
-
 interface ReviewData {
   conceptsIdentified: number;
   assumptionsChallenged: number;
   questionsAsked: number;
   misinformationEvaluations: number;
-  criticalThinkingScore: number;
-  synthesisScore: number;
   mbtiPersonalityTitle: string;
   mbtiPersonalitySummary: string;
-  badges: Badge[];
 }
 
 export default function ModuleReviewPage() {
@@ -38,7 +27,6 @@ export default function ModuleReviewPage() {
   const moduleId = (params?.moduleId as string) || 'mod_climate_change_demo';
 
   const [review, setReview] = useState<ReviewData | null>(null);
-  const [unlockedCount, setUnlockedCount] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [agentPrefs, setAgentPrefs] = useState<ResolvedAgentPreferences>(DEFAULT_AGENT_PREFERENCES);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -216,16 +204,6 @@ export default function ModuleReviewPage() {
     computeAndLoadStats();
   }, [moduleId]);
 
-  // Sequential Badge Unlock Animation effect
-  useEffect(() => {
-    if (!review || !review.badges) return;
-    if (unlockedCount < review.badges.length) {
-      const timer = setTimeout(() => {
-        setUnlockedCount((prev) => prev + 1);
-      }, 320);
-      return () => clearTimeout(timer);
-    }
-  }, [review, unlockedCount]);
 
   /**
    * Renders the MBTI Reasoning Profile card to an HTML5 Canvas and downloads as reasoning_profile_card.png
@@ -301,18 +279,16 @@ export default function ModuleReviewPage() {
 
     ctx.fillStyle = '#37F3FF';
     ctx.font = 'bold 14px "Space Grotesk", sans-serif';
-    ctx.fillText(`CONCEPTS: ${review.conceptsIdentified}`, 62, y + 40);
-    ctx.fillText(`ASSUMPTIONS: ${review.assumptionsChallenged}`, 222, y + 40);
-    ctx.fillText(`QUESTIONS: ${review.questionsAsked}`, 415, y + 40);
+    ctx.fillText(`CONCEPTS: ${review.conceptsIdentified}`, 58, y + 40);
+    ctx.fillText(`ASSUMPTIONS: ${review.assumptionsChallenged}`, 215, y + 40);
+    ctx.fillText(`QUESTIONS: ${review.questionsAsked}`, 410, y + 40);
+    ctx.fillText(`MISINFO: ${review.misinformationEvaluations}`, 595, y + 40);
 
-    ctx.fillStyle = '#C084FC';
-    ctx.fillText(`CRITICAL SCORE: ${review.criticalThinkingScore}/100`, 565, y + 40);
-
-    // Signature
+    // Signature & AI Disclosure
     ctx.fillStyle = 'rgba(217, 223, 247, 0.72)';
-    ctx.font = '13px "Space Grotesk", sans-serif';
+    ctx.font = '12px "Space Grotesk", sans-serif';
     ctx.fillText(
-      `EVALUATED BY ${agentPrefs.avatarName.toUpperCase()} (${agentPrefs.toneName.toUpperCase()} TONE)`,
+      `EVALUATED BY ${agentPrefs.avatarName.toUpperCase()} (${agentPrefs.toneName.toUpperCase()} TONE) • AI-GENERATED EDUCATIONAL REFLECTION`,
       42,
       416
     );
@@ -368,57 +344,27 @@ export default function ModuleReviewPage() {
           </div>
         ) : (
           <>
-            {/* 6 Core Gamified Metric Stat Cards */}
+            {/* Core Inquiry Metric Stat Cards */}
             <section className={styles.metricsGrid} aria-label="Module performance statistics">
               <div className={styles.metricCard}>
+                <div className={styles.metricIcon}>🧠</div>
                 <span className={styles.metricVal}>{review.conceptsIdentified}</span>
                 <span className={styles.metricLabel}>Concepts Identified</span>
               </div>
               <div className={styles.metricCard}>
+                <div className={styles.metricIcon}>🛡️</div>
                 <span className={styles.metricVal}>{review.assumptionsChallenged}</span>
                 <span className={styles.metricLabel}>Assumptions Challenged</span>
               </div>
               <div className={styles.metricCard}>
+                <div className={styles.metricIcon}>❓</div>
                 <span className={styles.metricVal}>{review.questionsAsked}</span>
                 <span className={styles.metricLabel}>Questions Asked</span>
               </div>
               <div className={styles.metricCard}>
+                <div className={styles.metricIcon}>🔍</div>
                 <span className={styles.metricVal}>{review.misinformationEvaluations}</span>
                 <span className={styles.metricLabel}>Misinfo Critiques</span>
-              </div>
-              <div className={styles.metricCard}>
-                <span className={`${styles.metricVal} ${styles.metricValPurple}`}>
-                  {review.criticalThinkingScore}/100
-                </span>
-                <span className={styles.metricLabel}>Critical Thinking Score</span>
-              </div>
-              <div className={styles.metricCard}>
-                <span className={`${styles.metricVal} ${styles.metricValCyan}`}>
-                  {review.synthesisScore}/100
-                </span>
-                <span className={styles.metricLabel}>Synthesis Score</span>
-              </div>
-            </section>
-
-            {/* Sequential Badge Unlock Animation Section */}
-            <section className={styles.section}>
-              <h2 className={styles.sectionTitle}>Unlocked Reasoning Badges</h2>
-              <div className={styles.badgesGrid}>
-                {review.badges.map((badge, idx) => {
-                  const isUnlocked = idx < unlockedCount && badge.unlocked;
-                  return (
-                    <div
-                      key={badge.id}
-                      className={`${styles.badgeCard} ${
-                        isUnlocked ? styles.badgeUnlocked : styles.badgeLocked
-                      }`}
-                    >
-                      <div className={styles.badgeIcon}>{badge.icon}</div>
-                      <h4 className={styles.badgeTitle}>{badge.title}</h4>
-                      <p className={styles.badgeDesc}>{badge.description}</p>
-                    </div>
-                  );
-                })}
               </div>
             </section>
 
@@ -450,6 +396,38 @@ export default function ModuleReviewPage() {
                     Share Reasoning Card (Save PNG)
                   </button>
                 </div>
+              </div>
+
+              {/* AI Generation Disclosure Disclaimer */}
+              <div className={styles.aiDisclosureNote}>
+                <span className={styles.disclosureIcon}>ℹ️</span>
+                <p className={styles.aiDisclosureText}>
+                  This critical thinking personality profile is AI-generated. Please do not take it too seriously.
+                </p>
+              </div>
+
+              {/* Primary Dashboard Action Button */}
+              <div className={styles.actionFooter}>
+                <button
+                  type="button"
+                  onClick={() => router.push('/dashboard')}
+                  className={styles.returnDashboardBtn}
+                >
+                  <span>Return to Dashboard</span>
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <polyline points="12 5 19 12 12 5" />
+                  </svg>
+                </button>
               </div>
             </section>
           </>

@@ -487,7 +487,14 @@ Note that the UI is subject to change, so implement it with the flexibility to b
             <li><p>Exo 2</p></li>
           </ul>
         </td>
-        <td><p></p></td>
+        <td><p>Celebrates module completion and displays the student's inquiry journey summary:
+        <ul>
+          <li><b>Core Inquiry Metrics:</b> Displays 4 core inquiry statistics (Concepts Identified, Assumptions Challenged, Questions Asked, and Misinfo Critiques). Does not display gamified scores (Critical Thinking Score or Synthesis Score) or unlockable reasoning badges.</li>
+          <li><b>Critical Thinking Personality Card:</b> Generates a shareable MBTI-like reasoning personality profile based on the student's annotations, concept map, inquiry dialogue, and synthesis. Supports exporting as a downloadable PNG card.</li>
+          <li><b>AI Generation Disclosure:</b> Includes a clear disclosure directly under the personality card stating that the profile is AI-generated and not to take it too seriously.</li>
+          <li><b>Dashboard Navigation:</b> Features a primary action button allowing students to return to the dashboard.</li>
+        </ul>
+        </p></td>
       </tr>
     </tbody>
   </table>

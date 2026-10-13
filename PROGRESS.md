@@ -1206,3 +1206,39 @@
   - `npm test` (47/47 tests passing across 9 test suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
 - **Immediate Next Step**: Commit changes to `feature/iteration-2`.
+
+---
+
+### [2026-10-14] - Feature: Review Screen Redesign (Remove Badges & Scores, Add AI Disclosure & Dashboard Return)
+
+- **Role**: Full Stack Developer
+- **User Instructions**:
+  - *"redesign the review screen. remove the badges, critical thinking score and synthesis score. under the critical thinking personality card, add a small disclosure saying it is AI generated and to not take it too seriously"*
+- **Code Built & Updated**:
+  - **Review Page Layout & Presentation ([`src/app/module/[moduleId]/review/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/review/page.tsx))**:
+    - **Removed Badges**: Completely removed the Unlocked Reasoning Badges section, badge unlock animation timer, and `unlockedCount` state.
+    - **Removed Scores**: Removed `Critical Thinking Score` (e.g. `85/100`) and `Synthesis Score` (e.g. `90/100`) from the UI stats grid and removed the `CRITICAL SCORE` line from the exported canvas card.
+    - **4 Core Inquiry Metric Cards**: Redesigned the metrics grid to display the 4 core inquiry statistics with thematic icons:
+      - Concepts Identified (`🧠`)
+      - Assumptions Challenged (`🛡️`)
+      - Questions Asked (`❓`)
+      - Misinfo Critiques (`🔍`)
+    - **AI Generation Disclosure**: Added a clear disclosure disclaimer container directly underneath the Critical Thinking Personality Card:
+      - *"This critical thinking personality profile is AI-generated. Please do not take it too seriously."*
+    - **HTML5 Canvas Card Export Update**: Updated `handleDownloadCardImage` to replace the score with `MISINFO: ${review.misinformationEvaluations}` and include an explicit AI-generated educational reflection signature on the saved PNG.
+    - **Primary Action Button**: Added a centered "Return to Dashboard" action button at the bottom of the review view.
+  - **Styles & Responsive Layout ([`src/app/module/[moduleId]/review/review.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/review/review.module.css))**:
+    - Redesigned `.metricsGrid` to a balanced 4-column layout on desktop, responsive 2-column on tablets, and 1-column on mobile.
+    - Added subtle hover glow and icon styling for `.metricCard` and `.metricIcon`.
+    - Added styling for `.aiDisclosureNote`, `.disclosureIcon`, and `.aiDisclosureText`.
+    - Added styling for `.actionFooter` and `.returnDashboardBtn` with glowing cyan/purple gradient accents.
+    - Purged obsolete badge styling rules (`.badgesGrid`, `.badgeCard`, `.badgeLocked`, `.badgeUnlocked`, `@keyframes unlockGlow`).
+  - **Requirements ([`requirements.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/requirements.md))**:
+    - Updated Section 9 Review screen table row specifying 4 core inquiry metrics, absence of gamified scores/badges, AI-generated disclosure disclaimer, and dashboard navigation button.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (47/47 tests passing across 9 test suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+  - `npm run build` (Next.js production build succeeded across all 12 routes).
+- **Immediate Next Step**: Commit changes to `feature/iteration-2`.
+
