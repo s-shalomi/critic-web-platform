@@ -742,5 +742,28 @@
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
 - **Immediate Next Step**: Prompt user to specify next screen to update per Section 9.
 
+---
 
+### [2026-10-13] - UI Iteration 2: Agent Customisation Screen (`screens_v2/customise.png` & Section 9)
 
+- **Role**: Full Stack Developer
+- **Code Built & Updated**:
+  - **9-Avatar Infinite Circular Lineup ([`src/shared/components/RobotAvatar/RobotAvatar.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/RobotAvatar/RobotAvatar.tsx))**:
+    - Extended `RobotVariant` to 9 distinct robot companion avatars (`'violet'`, `'yellow'`, `'aria'`, `'blue'`, `'emerald'`, `'crimson'`, `'frost'`, `'stealth'`, `'gold'`) and exported `AVATAR_OPTIONS` (9 items matching the 9 pagination dots in `screens_v2/customise.png`, with `'aria'` at index 2 flanked by `'yellow'` on the left and `'blue'` on the right).
+    - Refined SVG illustrations for `'yellow'`, `'aria'`, and `'blue'` to match `screens_v2/customise.png`.
+  - **Infinite Circular Avatar Carousel & 5 Tone Personalities ([`src/app/dashboard/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/page.tsx) & [`src/app/dashboard/dashboard.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/dashboard.module.css))**:
+    - Implemented the infinite circular carousel per Section 9 ("Avatar Selection Behaviour"):
+      - Selected avatar always snaps smoothly to the center position (`scale(1.18)`), while neighboring unselected avatars flow continuously on either side (`offset = ±1, ±2`).
+      - Supports mouse wheel / trackpad scrolling, pointer drag / swipe gestures, clicking side avatars, left/right arrow keys, hover navigation buttons, and interactive 9-dot pagination.
+    - Implemented the 5 Agent Tone personality options per Section 9 ("Tone Selection Behaviour"):
+      - **Friendly**: *"Encouraging, warm, and highly engaging without being overly corporate. Uses natural Gen Z phrasing, light humor, and supportive language."*
+      - **Mentor**: *"Relatable, calm, and non-judgmental. They ask probing questions that encourage deeper thought and self-discovery."*
+      - **Witty Challenger**: *"Playful, sharp, and strategic. Uses wit, light roasts, and clever provocations to sharpen thinking."*
+      - **Curious Explorer**: *"Gentle and curious. They show interest in the user's ideas and offer encouragement."*
+      - **Devil's Advocate**: *"Challenges assumptions and beliefs, pushing the user to consider alternative perspectives."*
+    - Applied Section 9 color tokens (`#37F3FF`, `#0F172E`, `#EAF6FF`, `#D9DFF7`) and fonts (`Space Grotesk`, `Exo 2`) with dual bordered option/display panels matching `screens_v2/customise.png`.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (31/31 tests passing across 8 test suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+- **Immediate Next Step**: Await user feedback or next screen instruction.

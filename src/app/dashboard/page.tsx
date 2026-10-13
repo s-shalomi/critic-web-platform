@@ -1,9 +1,13 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './dashboard.module.css';
-import { RobotAvatar, RobotVariant } from '@/shared/components/RobotAvatar/RobotAvatar';
+import {
+  AVATAR_OPTIONS,
+  RobotAvatar,
+  RobotVariant,
+} from '@/shared/components/RobotAvatar/RobotAvatar';
 import { CriticLogo } from '@/shared/components/CriticLogo/CriticLogo';
 
 interface Topic {
@@ -12,6 +16,29 @@ interface Topic {
   status: 'Available' | 'Coming Soon';
   description: string;
 }
+
+const TONE_OPTIONS = [
+  {
+    name: 'Friendly',
+    desc: 'Encouraging, warm, and highly engaging without being overly corporate. Uses natural Gen Z phrasing, light humor, and supportive language.',
+  },
+  {
+    name: 'Mentor',
+    desc: 'Relatable, calm, and non-judgmental. They ask probing questions that encourage deeper thought and self-discovery.',
+  },
+  {
+    name: 'Witty Challenger',
+    desc: 'Playful, sharp, and strategic. Uses wit, light roasts, and clever provocations to sharpen thinking.',
+  },
+  {
+    name: 'Curious Explorer',
+    desc: "Gentle and curious. They show interest in the user's ideas and offer encouragement.",
+  },
+  {
+    name: "Devil's Advocate",
+    desc: 'Challenges assumptions and beliefs, pushing the user to consider alternative perspectives.',
+  },
+];
 
 const JOURNEY_STAGES = [
   {
@@ -62,7 +89,17 @@ export default function DashboardPage() {
   const [isCustomiseModalOpen, setIsCustomiseModalOpen] = useState(false);
   const [customiseTab, setCustomiseTab] = useState<'appearance' | 'tone'>('appearance');
   const [selectedAppearance, setSelectedAppearance] = useState<RobotVariant>('aria');
-  const [selectedTone, setSelectedTone] = useState<string>('Socratic Peer');
+  const [selectedTone, setSelectedTone] = useState<string>('Friendly');
+
+  // Infinite Circular Carousel Interaction State
+  const lastWheelTimeRef = useRef<number>(0);
+  const dragStartXRef = useRef<number | null>(null);
+  const [dragOffsetX, setDragOffsetX] = useState<number>(0);
+
+  const activeAvatarIndex = Math.max(
+    0,
+    AVATAR_OPTIONS.findIndex((a) => a.id === selectedAppearance)
+  );
 
   useEffect(() => {
     fetch('/api/topics')
@@ -77,8 +114,12 @@ export default function DashboardPage() {
       const stored = localStorage.getItem('critic_agent_preferences');
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (parsed.appearance) setSelectedAppearance(parsed.appearance);
-        if (parsed.tone) setSelectedTone(parsed.tone);
+        if (parsed.appearance && AVATAR_OPTIONS.some((a) => a.id === parsed.appearance)) {
+          setSelectedAppearance(parsed.appearance);
+        }
+        if (parsed.tone && TONE_OPTIONS.some((t) => t.name === parsed.tone)) {
+          setSelectedTone(parsed.tone);
+        }
       }
     } catch {
       // Ignored
@@ -118,10 +159,13 @@ export default function DashboardPage() {
     setSelectedAppearance(appearance);
     setSelectedTone(tone);
 
+    const avatarMeta = AVATAR_OPTIONS.find((a) => a.id === appearance);
+    const avatarName = avatarMeta ? avatarMeta.name : 'Aria';
+
     try {
       localStorage.setItem(
         'critic_agent_preferences',
-        JSON.stringify({ appearance, tone })
+        JSON.stringify({ appearance, tone, avatarName })
       );
 
       let studentId = 'student_demo';
@@ -137,13 +181,71 @@ export default function DashboardPage() {
         body: JSON.stringify({
           agentPersonality: tone,
           agentAppearance: appearance,
-          avatarName: 'Aria',
+          avatarName,
         }),
       });
     } catch (e) {
       console.error('Could not sync preferences', e);
     }
   };
+
+  const shiftCarousel = (delta: number) => {
+    const total = AVATAR_OPTIONS.length;
+    const nextIndex = (((activeAvatarIndex + delta) % total) + total) % total;
+    handleSavePreferences(AVATAR_OPTIONS[nextIndex].id, selectedTone);
+  };
+
+  const handleCarouselWheel = (e: React.WheelEvent) => {
+    const now = Date.now();
+    if (now - lastWheelTimeRef.current < 200) return;
+    const primaryDelta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    if (Math.abs(primaryDelta) < 8) return;
+
+    lastWheelTimeRef.current = now;
+    if (primaryDelta > 0) {
+      shiftCarousel(1);
+    } else {
+      shiftCarousel(-1);
+    }
+  };
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    dragStartXRef.current = e.clientX;
+    setDragOffsetX(0);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (dragStartXRef.current === null) return;
+    setDragOffsetX(e.clientX - dragStartXRef.current);
+  };
+
+  const handlePointerUp = () => {
+    if (dragStartXRef.current === null) return;
+    if (dragOffsetX < -35) {
+      shiftCarousel(1);
+    } else if (dragOffsetX > 35) {
+      shiftCarousel(-1);
+    }
+    dragStartXRef.current = null;
+    setDragOffsetX(0);
+  };
+
+  useEffect(() => {
+    if (!isCustomiseModalOpen || customiseTab !== 'appearance') return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        shiftCarousel(1);
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        shiftCarousel(-1);
+      } else if (e.key === 'Escape') {
+        setIsCustomiseModalOpen(false);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isCustomiseModalOpen, customiseTab, activeAvatarIndex, selectedTone]);
 
   return (
     <div className={styles.container}>
@@ -368,7 +470,7 @@ export default function DashboardPage() {
         </section>
       </main>
 
-      {/* Customise Agent Modal per screens_v2/customise.png */}
+      {/* Customise Agent Modal per screens_v2/customise.png & Section 9 */}
       {isCustomiseModalOpen && (
         <div
           className={styles.modalBackdrop}
@@ -379,6 +481,7 @@ export default function DashboardPage() {
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
+            aria-labelledby="customise-agent-title"
           >
             <button
               onClick={() => setIsCustomiseModalOpen(false)}
@@ -388,105 +491,190 @@ export default function DashboardPage() {
               ✕
             </button>
 
-            <h2 className={styles.customiseModalTitle}>Customise your agent.</h2>
+            <h2 id="customise-agent-title" className={styles.customiseModalTitle}>
+              Customise your agent.
+            </h2>
 
             <div className={styles.customiseModalBody}>
-              {/* Left Options Menu */}
+              {/* Left Options Menu Box */}
               <div className={styles.optionsColumn}>
                 <div className={styles.optionsLabel}>Options</div>
                 <div className={styles.optionsList}>
                   <button
                     type="button"
                     onClick={() => setCustomiseTab('appearance')}
-                    className={`${styles.optionPill} ${customiseTab === 'appearance' ? styles.optionPillActive : ''
-                      }`}
+                    className={`${styles.optionPill} ${
+                      customiseTab === 'appearance' ? styles.optionPillActive : ''
+                    }`}
                   >
                     Appearance
                   </button>
                   <button
                     type="button"
                     onClick={() => setCustomiseTab('tone')}
-                    className={`${styles.optionPill} ${customiseTab === 'tone' ? styles.optionPillActive : ''
-                      }`}
+                    className={`${styles.optionPill} ${
+                      customiseTab === 'tone' ? styles.optionPillActive : ''
+                    }`}
                   >
                     Tone
                   </button>
                 </div>
               </div>
 
-              {/* Right Display Area */}
+              {/* Right Display Area Box */}
               <div className={styles.displayContainer}>
                 {customiseTab === 'appearance' ? (
                   <>
-                    <div className={styles.avatarsRow}>
-                      {/* Left: Yellow Robot */}
-                      <div
-                        className={styles.avatarSideItem}
-                        onClick={() => handleSavePreferences('yellow', selectedTone)}
-                        title="Select Yellow Robot"
+                    <div
+                      className={styles.carouselViewport}
+                      onWheel={handleCarouselWheel}
+                      onPointerDown={handlePointerDown}
+                      onPointerMove={handlePointerMove}
+                      onPointerUp={handlePointerUp}
+                      onPointerCancel={handlePointerUp}
+                      onPointerLeave={handlePointerUp}
+                      role="region"
+                      aria-label="Infinite circular avatar carousel"
+                    >
+                      <button
+                        type="button"
+                        className={`${styles.carouselNavBtn} ${styles.carouselNavPrev}`}
+                        onClick={() => shiftCarousel(-1)}
+                        aria-label="Previous avatar"
                       >
-                        <RobotAvatar size={64} variant="yellow" />
+                        ‹
+                      </button>
+
+                      <div className={styles.carouselTrack}>
+                        {AVATAR_OPTIONS.map((avatar, idx) => {
+                          const total = AVATAR_OPTIONS.length;
+                          let offset = idx - activeAvatarIndex;
+                          if (offset > Math.floor(total / 2)) offset -= total;
+                          if (offset < -Math.floor(total / 2)) offset += total;
+
+                          const isCenter = offset === 0;
+                          const absOffset = Math.abs(offset);
+
+                          let baseX = 0;
+                          let baseY = -4;
+                          let scale = 1.15;
+                          let opacity = 1;
+                          let zIndex = 10;
+
+                          if (absOffset === 1) {
+                            baseX = offset * 128;
+                            baseY = 14;
+                            scale = 0.64;
+                            opacity = 0.95;
+                            zIndex = 6;
+                          } else if (absOffset === 2) {
+                            baseX = offset * 116;
+                            baseY = 20;
+                            scale = 0.44;
+                            opacity = 0.25;
+                            zIndex = 3;
+                          } else if (absOffset >= 3) {
+                            baseX = offset < 0 ? -300 : 300;
+                            baseY = 24;
+                            scale = 0.28;
+                            opacity = 0;
+                            zIndex = 1;
+                          }
+
+                          const liveX =
+                            absOffset <= 2 ? baseX + dragOffsetX * 0.35 : baseX;
+                          const disableTransition =
+                            absOffset === 4 || dragStartXRef.current !== null;
+
+                          return (
+                            <button
+                              key={avatar.id}
+                              type="button"
+                              onClick={() =>
+                                handleSavePreferences(avatar.id, selectedTone)
+                              }
+                              className={`${styles.carouselItem} ${
+                                isCenter ? styles.carouselItemCenter : ''
+                              }`}
+                              style={{
+                                transform: `translate3d(${liveX}px, ${baseY}px, 0) scale(${scale})`,
+                                opacity,
+                                zIndex,
+                                pointerEvents: absOffset <= 2 ? 'auto' : 'none',
+                                transition: disableTransition ? 'none' : undefined,
+                              }}
+                              aria-label={`Select ${avatar.name} avatar`}
+                              aria-pressed={isCenter}
+                            >
+                              <RobotAvatar
+                                size={120}
+                                variant={avatar.id}
+                                glow={isCenter}
+                              />
+                            </button>
+                          );
+                        })}
                       </div>
 
-                      {/* Center: Aria Robot (Selected) */}
-                      <div
-                        className={styles.avatarCenterItem}
-                        onClick={() => handleSavePreferences('aria', selectedTone)}
-                        title="Select Aria"
+                      <button
+                        type="button"
+                        className={`${styles.carouselNavBtn} ${styles.carouselNavNext}`}
+                        onClick={() => shiftCarousel(1)}
+                        aria-label="Next avatar"
                       >
-                        <RobotAvatar size={105} variant={selectedAppearance} glow />
-                      </div>
-
-                      {/* Right: Blue Robot */}
-                      <div
-                        className={styles.avatarSideItem}
-                        onClick={() => handleSavePreferences('blue', selectedTone)}
-                        title="Select Blue Robot"
-                      >
-                        <RobotAvatar size={64} variant="blue" />
-                      </div>
+                        ›
+                      </button>
                     </div>
 
                     {/* Pagination Dots per screens_v2/customise.png */}
-                    <div className={styles.dotsRow}>
-                      <span className={styles.dotInactive} />
-                      <span className={styles.dotInactive} />
-                      <span className={styles.dotActive} />
-                      <span className={styles.dotInactive} />
-                      <span className={styles.dotInactive} />
-                      <span className={styles.dotInactive} />
-                      <span className={styles.dotInactive} />
-                      <span className={styles.dotInactive} />
-                      <span className={styles.dotInactive} />
+                    <div className={styles.dotsRow} role="tablist" aria-label="Avatar positions">
+                      {AVATAR_OPTIONS.map((avatar, idx) => {
+                        const isActive = idx === activeAvatarIndex;
+                        return (
+                          <button
+                            key={avatar.id}
+                            type="button"
+                            role="tab"
+                            aria-selected={isActive}
+                            aria-label={`Center ${avatar.name} avatar`}
+                            onClick={() =>
+                              handleSavePreferences(avatar.id, selectedTone)
+                            }
+                            className={
+                              isActive ? styles.dotActive : styles.dotInactive
+                            }
+                          />
+                        );
+                      })}
                     </div>
                   </>
                 ) : (
-                  /* Tone Selection View */
+                  /* Tone Selection View per Section 9 */
                   <div className={styles.toneSelectionView}>
-                    {[
-                      {
-                        name: 'Socratic Peer',
-                        desc: 'Engages in cooperative peer dialogue and asks thought-provoking counter-questions.',
-                      },
-                      {
-                        name: "Devil's Advocate",
-                        desc: 'Challenges your assertions directly to test the robustness of your claims.',
-                      },
-                      {
-                        name: 'Scaffolding Mentor',
-                        desc: 'Provides structured guided prompts and supportive hints step by step.',
-                      },
-                    ].map((tone) => (
-                      <div
-                        key={tone.name}
-                        onClick={() => handleSavePreferences(selectedAppearance, tone.name)}
-                        className={`${styles.toneCard} ${selectedTone === tone.name ? styles.toneCardActive : ''
+                    {TONE_OPTIONS.map((tone) => {
+                      const isSelected = selectedTone === tone.name;
+                      return (
+                        <button
+                          key={tone.name}
+                          type="button"
+                          onClick={() =>
+                            handleSavePreferences(selectedAppearance, tone.name)
+                          }
+                          aria-pressed={isSelected}
+                          className={`${styles.toneCard} ${
+                            isSelected ? styles.toneCardActive : ''
                           }`}
-                      >
-                        <div className={styles.toneName}>{tone.name}</div>
-                        <p className={styles.toneDesc}>{tone.desc}</p>
-                      </div>
-                    ))}
+                        >
+                          <div className={styles.toneHeaderRow}>
+                            <span className={styles.toneName}>{tone.name}</span>
+                            {isSelected && (
+                              <span className={styles.toneSelectedBadge}>Selected</span>
+                            )}
+                          </div>
+                          <p className={styles.toneDesc}>{tone.desc}</p>
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
               </div>
