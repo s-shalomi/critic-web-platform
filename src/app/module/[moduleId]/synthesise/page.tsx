@@ -22,7 +22,8 @@ export default function SynthesiseStagePage() {
   const [synthesisText, setSynthesisText] = useState<string>('');
   const [aiFeedback, setAiFeedback] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [showIntroModal, setShowIntroModal] = useState<boolean>(true);
+  const [showTutorialModal, setShowTutorialModal] = useState<boolean>(false);
+  const [showHelpModal, setShowHelpModal] = useState<boolean>(false);
   const [agentPrefs, setAgentPrefs] = useState<ResolvedAgentPreferences>(DEFAULT_AGENT_PREFERENCES);
 
   // Evidence notes count for non-blocking AI nudge
@@ -115,192 +116,258 @@ export default function SynthesiseStagePage() {
 
   return (
     <div className={styles.container}>
-      {/* Header */}
-      <header className={styles.header}>
-        <button onClick={() => router.push('/dashboard')} className={styles.backBtn}>
-          ← Climate Change
-        </button>
-      </header>
-
-      {/* Non-blocking AI Contextual Nudge Banner */}
-      {notesCount === 0 && showNudge && (
-        <div
-          style={{
-            background: 'rgba(55, 243, 255, 0.12)',
-            borderBottom: '1px solid var(--primary-cyan)',
-            padding: '10px 24px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            color: 'var(--text-light)',
-            fontSize: '0.9rem',
-          }}
-        >
-          <span>
-            💡 <strong>AI Learning Nudge:</strong> You haven&apos;t gathered evidence notes in the{' '}
-            <strong>Familiarise</strong> stage yet! Gathering notes helps {agentPrefs.avatarName} cross-reference your reasoning.
-            You can continue exploring here or return to Familiarise anytime.
-          </span>
-          <button
-            onClick={() => setShowNudge(false)}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              color: 'var(--primary-cyan)',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              fontSize: '1rem',
-              marginLeft: '16px',
-            }}
-          >
-            ✕
-          </button>
-        </div>
-      )}
-
-      {/* Main Workspace Split */}
+      {/* Main Split Workspace */}
       <div className={styles.workspace}>
-        {/* Left Interactive Synthesis Editor Panel */}
-        <aside className={styles.leftEditorPanel}>
-          <div className={styles.editorHeader}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
-              <h2 className="cyan-neon-text" style={{ fontFamily: 'var(--font-orbitron)', fontSize: '1.15rem', margin: 0 }}>
-                FINAL CASEFILE SYNTHESIS
-              </h2>
-              <div
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  background: 'rgba(15, 23, 46, 0.85)',
-                  border: '1px solid rgba(55, 243, 255, 0.35)',
-                  borderRadius: '9999px',
-                  padding: '4px 10px 4px 6px',
-                }}
-              >
-                <RobotAvatar variant={agentPrefs.appearance} size={24} />
-                <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.76rem', color: '#D9DFF7' }}>
-                  <strong style={{ color: '#37F3FF' }}>{agentPrefs.avatarName}</strong> • Tone: {agentPrefs.toneName}
-                </span>
+        {/* Left Conclude Panel matching screens_v2/synthesis.png */}
+        <aside className={styles.leftConcludePanel}>
+          <div className={styles.topHeaderRow}>
+            <button onClick={() => router.push('/dashboard')} className={styles.backBtn}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12" />
+                <polyline points="12 19 5 12 12 5" />
+              </svg>
+              <span>Climate Change</span>
+            </button>
+          </div>
+
+          <div className={styles.headingRow}>
+            <h1 className={styles.sidebarHeading}>Conclude</h1>
+            <div className={styles.agentStatusRow}>
+              <div className={styles.agentTonePill} title={`Active persona: ${agentPrefs.avatarName} (${agentPrefs.toneName})`}>
+                <span className={styles.agentToneName}>{agentPrefs.avatarName}</span>
+                <span className={styles.agentToneDot}>•</span>
+                <span>Tone: {agentPrefs.toneName}</span>
               </div>
             </div>
-            <p className={styles.editorSubtitle}>
-              Synthesise your evidence, arguments, and evaluate opposing views into your final case.
-            </p>
           </div>
 
-          <div className={styles.textAreaContainer}>
-            <textarea
-              className={styles.synthesisTextArea}
-              placeholder="Write your casefile conclusion here... Structure your reasoning, cite concepts from your map, and address counterarguments."
-              value={synthesisText}
-              onChange={(e) => handleSynthesisTextChange(e.target.value)}
-            />
-          </div>
-
-          {/* AI Cross-Check Feedback Box */}
-          {aiFeedback && (
-            <div className={styles.feedbackCard}>
-              <div className={styles.feedbackHeader}>
-                <div className={styles.feedbackAvatarIcon}>
-                  <RobotAvatar variant={agentPrefs.appearance} size={32} />
-                </div>
-                <strong className="cyan-neon-text">
-                  {agentPrefs.avatarName.toUpperCase()} ({agentPrefs.toneName.toUpperCase()} TONE) REASONING AUDIT:
-                </strong>
-              </div>
-              <p className={styles.feedbackText}>{aiFeedback}</p>
+          {/* Non-blocking AI Contextual Nudge Banner */}
+          {notesCount === 0 && showNudge && (
+            <div className={styles.nudgeBanner}>
+              <span>
+                💡 <strong>AI Learning Nudge:</strong> Gather evidence notes in <strong>Annotate</strong> so{' '}
+                {agentPrefs.avatarName} can cross-reference your conclusions.
+              </span>
+              <button
+                onClick={() => setShowNudge(false)}
+                className={styles.nudgeCloseBtn}
+                aria-label="Dismiss nudge"
+              >
+                ✕
+              </button>
             </div>
           )}
 
-          <div className={styles.actionRow}>
-            <button
-              onClick={handleCrossCheckSynthesis}
-              className={`btn-primary-cyan ${styles.auditBtn}`}
-              disabled={loading || !synthesisText.trim()}
-            >
-              {loading
-                ? `${agentPrefs.avatarName.toUpperCase()} IS ANALYZING CASEFILE...`
-                : `🔍 AUDIT REASONING WITH ${agentPrefs.avatarName.toUpperCase()} (${agentPrefs.toneName.toUpperCase()})`}
-            </button>
+          {/* Rounded Dark Slate Container matching screens_v2/synthesis.png */}
+          <div className={styles.concludeCardContainer}>
+            {/* Top Agent Prompt + Optional Reasoning Audit Area */}
+            <div className={styles.promptHistoryArea}>
+              <div className={styles.agentPromptRow}>
+                <div className={styles.agentAvatarIcon}>
+                  <RobotAvatar variant={agentPrefs.appearance} size={46} />
+                </div>
+                <div className={styles.agentBubble}>
+                  <p className={styles.messageText}>
+                    Looking back at your entire map, what is your final take on these sources?
+                  </p>
+                </div>
+              </div>
 
-            <button onClick={handleCompleteModule} className={`btn-primary-pink ${styles.completeBtn}`}>
-              COMPLETE MODULE &amp; VIEW REVIEW →
-            </button>
+              {loading && (
+                <div className={styles.agentPromptRow}>
+                  <div className={styles.agentAvatarIcon}>
+                    <RobotAvatar variant={agentPrefs.appearance} size={46} />
+                  </div>
+                  <div className={styles.loadingBubble}>
+                    <span className={styles.dot}></span>
+                    <span className={styles.dot}></span>
+                    <span className={styles.dot}></span>
+                    <span className={styles.loadingText}>
+                      {agentPrefs.avatarName} ({agentPrefs.toneName}) is auditing your conclusion...
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {aiFeedback && !loading && (
+                <div className={styles.agentPromptRow}>
+                  <div className={styles.agentAvatarIcon}>
+                    <RobotAvatar variant={agentPrefs.appearance} size={46} />
+                  </div>
+                  <div className={`${styles.agentBubble} ${styles.auditFeedbackBubble}`}>
+                    <div className={styles.auditTag}>
+                      🔍 {agentPrefs.avatarName.toUpperCase()} ({agentPrefs.toneName.toUpperCase()}) REASONING AUDIT
+                    </div>
+                    <p className={styles.messageText}>{aiFeedback}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Bottom Conclusion Input Box inside the Slate Card matching screens_v2/synthesis.png */}
+            <div className={styles.conclusionBoxWrapper}>
+              <div className={styles.conclusionBox}>
+                <textarea
+                  className={styles.synthesisTextArea}
+                  placeholder="What conclusions can you make?"
+                  value={synthesisText}
+                  onChange={(e) => handleSynthesisTextChange(e.target.value)}
+                />
+                <div className={styles.boxActionsRow}>
+                  <button
+                    type="button"
+                    onClick={handleCrossCheckSynthesis}
+                    className={styles.auditBtn}
+                    disabled={loading || !synthesisText.trim()}
+                    title={`Ask ${agentPrefs.avatarName} to Socratic-audit your conclusion before submitting`}
+                  >
+                    {loading ? 'Auditing...' : `Audit with ${agentPrefs.avatarName}`}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCompleteModule}
+                    className={styles.submitModuleBtn}
+                  >
+                    Submit Module
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </aside>
 
-        {/* Right Interactive Concept Map Canvas using shared component */}
-        <ConceptMapCanvas moduleId={moduleId} stageTitle="synthesise" />
+        {/* Right Interactive Concept Map Canvas with Top-Right Tutorial & Help Buttons */}
+        <div className={styles.rightCanvasWrapper}>
+          <div className={styles.topRightActions}>
+            <button
+              type="button"
+              onClick={() => setShowTutorialModal(true)}
+              className={styles.tutorialBtn}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none" />
+              </svg>
+              <span>Tutorial</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowHelpModal(true)}
+              className={styles.helpCircleBtn}
+              aria-label="Conclude Stage Guide & AI Disclosure"
+              title="Conclude Stage Guide & AI Disclosure"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+            </button>
+          </div>
+
+          <ConceptMapCanvas moduleId={moduleId} stageTitle="synthesise" />
+        </div>
       </div>
 
-      {/* Bottom Stage Navigation Bar */}
-      <footer className={styles.stageNavBar}>
-        <button
-          onClick={() => router.push(`/module/${moduleId}/familiarise`)}
-          className={styles.stageStep}
-        >
-          01 familiarise
-        </button>
-        <button
-          onClick={() => router.push(`/module/${moduleId}/conceptualise`)}
-          className={styles.stageStep}
-        >
-          02 conceptualise
-        </button>
-        <button
-          onClick={() => router.push(`/module/${moduleId}/inquire`)}
-          className={styles.stageStep}
-        >
-          03 inquire + evaluate
-        </button>
-        <button
-          onClick={() => router.push(`/module/${moduleId}/synthesise`)}
-          className={`${styles.stageStep} ${styles.stageStepActive}`}
-        >
-          04 synthesise
-        </button>
+      {/* Floating Bottom Stage Navigation Dock (identical across all stages) */}
+      <footer className={styles.stageNavWrapper}>
+        <nav className={styles.stageNavBar} aria-label="Module stages">
+          <button
+            onClick={() => router.push(`/module/${moduleId}/familiarise`)}
+            className={styles.stageStep}
+          >
+            <span className={styles.stageCircle}>01</span>
+            <span className={styles.stageLabel}>Annotate</span>
+          </button>
+          <button
+            onClick={() => router.push(`/module/${moduleId}/conceptualise`)}
+            className={styles.stageStep}
+          >
+            <span className={styles.stageCircle}>02</span>
+            <span className={styles.stageLabel}>Mind Map</span>
+          </button>
+          <button
+            onClick={() => router.push(`/module/${moduleId}/inquire`)}
+            className={styles.stageStep}
+          >
+            <span className={styles.stageCircle}>03</span>
+            <span className={styles.stageLabel}>Challenge</span>
+          </button>
+          <button
+            onClick={() => router.push(`/module/${moduleId}/synthesise`)}
+            className={`${styles.stageStep} ${styles.stageStepActive}`}
+            aria-current="step"
+          >
+            <span className={`${styles.stageCircle} ${styles.stageCircleActive}`}>04</span>
+            <span className={styles.stageLabel}>Conclude</span>
+          </button>
+        </nav>
       </footer>
 
-      {/* Stage Intro Modal */}
-      {showIntroModal && (
-        <div className={styles.modalBackdrop}>
-          <div
-            className="glass-card-glow"
-            style={{ padding: '36px', maxWidth: '540px', width: '90%', textAlign: 'center' }}
-          >
-            <h3
-              className="cyan-neon-text"
-              style={{ fontFamily: 'var(--font-orbitron)', marginBottom: '16px', fontSize: '1.2rem' }}
+      {/* Tutorial Modal */}
+      {showTutorialModal && (
+        <div className={styles.modalBackdrop} onClick={() => setShowTutorialModal(false)}>
+          <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              onClick={() => setShowTutorialModal(false)}
+              className={styles.modalCloseBtn}
+              aria-label="Close tutorial"
             >
-              📝 SYNTHESISE CASEFILE DISCLOSURE
-            </h3>
-            <p className={styles.introModalText} style={{ marginBottom: '16px' }}>
-              Reflect on everything you learnt. Write your synthesis, and trigger the AI cross-check to evaluate
-              missing links or unaddressed arguments. You can also build and link concept nodes on the right.
+              ✕
+            </button>
+            <h3 className={styles.modalTitle}>Stage 04: Conclude Tutorial</h3>
+            <p className={styles.modalLead}>
+              Synthesise the evidence and concept links you built across the module into your final conclusion.
             </p>
-            <div
-              style={{
-                background: 'rgba(7, 11, 26, 0.7)',
-                border: '1px solid var(--accent-magenta)',
-                borderRadius: '10px',
-                padding: '16px',
-                textAlign: 'left',
-                fontSize: '0.88rem',
-                color: '#D9DFF7',
-                lineHeight: '1.5',
-              }}
+            <ol className={styles.tutorialStepsList}>
+              <li>
+                <strong>Review Your Mind Map:</strong> Inspect your connected nodes on the right canvas and make any final adjustments to your map.
+              </li>
+              <li>
+                <strong>Draft Your Conclusion:</strong> Write your final take on the sources in the conclusion box on the left, citing key concepts and addressing counter-arguments.
+              </li>
+              <li>
+                <strong>Audit or Submit:</strong> Click <strong>Audit with {agentPrefs.avatarName}</strong> for a Socratic cross-check of missing links, or click <strong>Submit Module</strong> to complete the module and view your review.
+              </li>
+            </ol>
+            <button
+              type="button"
+              onClick={() => setShowTutorialModal(false)}
+              className={styles.modalPrimaryBtn}
             >
-              <strong style={{ color: 'var(--accent-magenta)', display: 'block', marginBottom: '8px' }}>
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Help / Socratic AI Peer Disclosure Modal */}
+      {showHelpModal && (
+        <div className={styles.modalBackdrop} onClick={() => setShowHelpModal(false)}>
+          <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              onClick={() => setShowHelpModal(false)}
+              className={styles.modalCloseBtn}
+              aria-label="Close help"
+            >
+              ✕
+            </button>
+            <h3 className={styles.modalTitle}>Conclude &amp; Socratic AI Disclosure</h3>
+            <p className={styles.modalLead}>
+              Reflect on everything you learnt. Write your synthesis, and optionally trigger the AI cross-check to evaluate missing links or unaddressed arguments.
+            </p>
+            <div className={styles.disclosureBox}>
+              <strong className={styles.disclosureHeading}>
                 ⚠️ Mandatory Socratic Peer Disclosure:
               </strong>
-              <ul style={{ paddingLeft: '18px', margin: 0 }}>
-                <li style={{ marginBottom: '6px' }}>
-                  <strong>Socratic Cross-Checking:</strong> The AI agent (Aria) checks your synthesis against
-                  earlier evidence and concept nodes to question unaddressed arguments.
+              <ul className={styles.disclosureList}>
+                <li>
+                  <strong>Socratic Cross-Checking:</strong> The AI agent ({agentPrefs.avatarName}, {agentPrefs.toneName} tone) checks your conclusion against earlier evidence and concept nodes to question unaddressed arguments.
                 </li>
-                <li style={{ marginBottom: '6px' }}>
-                  <strong>Reasoning Test:</strong> Aria presents questions rather than factual corrections.
+                <li>
+                  <strong>Reasoning Test:</strong> {agentPrefs.avatarName} presents probing questions rather than factual corrections.
                 </li>
                 <li>
                   <strong>No Verified Facts:</strong> Do not treat agent questions or statements as verified facts.
@@ -308,11 +375,11 @@ export default function SynthesiseStagePage() {
               </ul>
             </div>
             <button
-              onClick={() => setShowIntroModal(false)}
-              className="btn-primary-cyan"
-              style={{ marginTop: '24px', padding: '12px 36px', fontWeight: 'bold' }}
+              type="button"
+              onClick={() => setShowHelpModal(false)}
+              className={styles.modalPrimaryBtn}
             >
-              UNDERSTOOD &amp; START
+              Understood
             </button>
           </div>
         </div>

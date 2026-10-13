@@ -833,6 +833,26 @@
 - **Tests Passing**:
   - `npm test` (31/31 tests passing across 8 test suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
+- **Immediate Next Step**: Implement Synthesise (`Conclude`) screen per `screens_v2/synthesis.png`.
+
+---
+
+### [2026-10-13] - UI Iteration 2: Synthesise (`Conclude`) Screen (`screens_v2/synthesis.png` & Section 9)
+
+- **Role**: Full Stack Developer
+- **Code Built & Updated**:
+  - **Synthesise / Conclude Stage Page ([`src/app/module/[moduleId]/synthesise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/synthesise/page.tsx) & [`synthesise.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/synthesise/synthesise.module.css))**:
+    - Built full-height `100dvh` split workspace matching [`screens_v2/synthesis.png`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/screens_v2/synthesis.png) using Section 9 tokens (`#37F3FF`, `#0F172E`, `#EAF6FF`, `#D9DFF7`, `Space Grotesk`, `Exo 2`).
+    - Left `#0F172E` panel (`padding-bottom: clamp(112px, 12.8vh, 124px)` for full dock clearance) with `← Climate Change` back button, `Conclude` heading, and selected agent persona/tone badge (`{agentPrefs.avatarName} • Tone: {agentPrefs.toneName}`).
+    - Rounded dark slate container (`#232B3E`) featuring:
+      - Top agent prompt turn with `<RobotAvatar variant={agentPrefs.appearance} size={46} />` and speech bubble (`"Looking back at your entire map, what is your final take on these sources?"`), plus inline Socratic Reasoning Audit feedback bubble when triggered.
+      - Bottom conclusion input box (`rgba(58, 69, 94, 0.62)`) with `<textarea>` placeholder `"What conclusions can you make?"`, `Audit with {agentPrefs.avatarName}` button (`POST /api/modules/${moduleId}/synthesis`), and purple-bordered `Submit Module` pill button (`border: 1.5px solid #8B5CF6`, `#A855F7` text, navigating to `/module/${moduleId}/review`).
+    - Top-right `Tutorial` pill button and `?` help circle button with `#8B5CF6` borders opening the stage tutorial and Socratic AI peer disclosure modals.
+    - Shared `<ConceptMapCanvas>` on the right and unified compact floating stage navigation dock (`01 Annotate`, `02 Mind Map`, `03 Challenge`, `04 Conclude` active) in the exact same position across all pages.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (31/31 tests passing across 8 test suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
 - **Immediate Next Step**: Await user feedback or next screen instruction.
 
 
