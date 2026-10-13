@@ -315,8 +315,17 @@ export function compressChatHistory(history: ChatTurn[]): string {
 }
 
 /**
+ * Verifies that an AI output is a completed sentence and not truncated mid-phrase.
+ */
+function isCompleteText(text: string): boolean {
+  if (!text) return false;
+  const trimmed = text.trim();
+  return /[.?!]["')\]]?$/.test(trimmed);
+}
+
+/**
  * Primary LLM caller using Groq only (openai/gpt-oss-120b).
- * Limits output to 110 tokens to enforce < 50 word ceiling and low latency.
+ * Allocates 500 tokens to accommodate reasoning tokens and deliver complete < 50 word replies.
  */
 export async function generateSocraticResponse(
   history: ChatTurn[],
@@ -342,7 +351,7 @@ export async function generateSocraticResponse(
           { role: 'user', content: formattedHistory },
         ],
         model: GROQ_PRIMARY_MODEL,
-        max_tokens: 110,
+        max_tokens: 500,
         temperature: 0.7,
       });
 
@@ -351,9 +360,13 @@ export async function generateSocraticResponse(
       );
 
       const completion = (await Promise.race([groqPromise, timeoutPromise])) as any;
-      const text = completion.choices[0]?.message?.content?.trim();
-      if (text) {
+      const choice = completion.choices?.[0];
+      const text = choice?.message?.content?.trim();
+      if (text && choice.finish_reason !== 'length' && isCompleteText(text)) {
         return { text, provider: 'groq' };
+      }
+      if (text && (!isCompleteText(text) || choice?.finish_reason === 'length')) {
+        console.warn('[AI Service] Response truncated or incomplete, falling back to rule.');
       }
     } catch (err: any) {
       if (isRateLimitError(err)) hadRateLimit = true;
@@ -458,7 +471,7 @@ Student's work so far: {text: [${notesList}]}${hintNudge}
           { role: 'user', content: prompt },
         ],
         model: GROQ_PRIMARY_MODEL,
-        max_tokens: 100,
+        max_tokens: 500,
         temperature: 0.7,
       });
 
@@ -467,9 +480,13 @@ Student's work so far: {text: [${notesList}]}${hintNudge}
       );
 
       const completion = (await Promise.race([groqPromise, timeoutPromise])) as any;
-      const text = completion.choices[0]?.message?.content?.trim();
-      if (text) {
+      const choice = completion.choices?.[0];
+      const text = choice?.message?.content?.trim();
+      if (text && choice.finish_reason !== 'length' && isCompleteText(text)) {
         return { text, provider: 'groq' };
+      }
+      if (text && (!isCompleteText(text) || choice?.finish_reason === 'length')) {
+        console.warn('[AI Service Hint] Hint truncated or incomplete, falling back to rule.');
       }
     } catch (err: any) {
       if (isRateLimitError(err)) hadRateLimit = true;

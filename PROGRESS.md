@@ -1025,3 +1025,25 @@
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
   - `npm run build` (Next.js production build succeeded with 12/12 static/dynamic routes compiled).
 - **Immediate Next Step**: Commit and deliver Section 4 implementation.
+
+---
+
+### [2026-10-13] - Fix: Resolve Response Cutoffs in Familiarise & Conceptualise Stages
+
+- **Role**: Full Stack Developer
+- **User Instruction**: *"in the familiarise and conceptualise stage, many of the agent responses are incomplete or cut off"*
+- **Root Cause Discovered**:
+  - `openai/gpt-oss-120b` on Groq is a reasoning model that produces 50–140 `reasoning_tokens` before emitting final answer tokens.
+  - Setting `max_tokens: 100` caused total completion tokens to hit the hard limit during reasoning or after only 2–10 words of the response, returning truncated phrases (`finish_reason: "length"`) or empty text.
+- **Code Built & Updated**:
+  - **Token Allowance Calibration ([`src/domains/ai/aiService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/ai/aiService.ts))**:
+    - Increased `max_tokens` to `500` in both `generateAvatarHint` and `generateSocraticResponse`. The prompt's explicit rule (*"Ask at most ONE question or give ONE nudge per message. Keep replies under 50 words"*) naturally constrains output to 20–40 words while giving the model sufficient room for reasoning tokens.
+  - **Sentence Completion Guardrail ([`src/domains/ai/aiService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/ai/aiService.ts))**:
+    - Added `isCompleteText(text)` checking for proper sentence-ending punctuation (`[.?!]["')\]]?$`).
+    - Guarded against `choice.finish_reason === 'length'` and incomplete sentences by automatically falling back to deterministic, complete Socratic fallback prompts under 50 words.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (37/37 tests passing across 8 test suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+  - Live API testing verified 100% complete sentences with `finish_reason: "stop"` and 20–37 word counts.
+- **Immediate Next Step**: Commit fix to `feature/iteration-2`.
