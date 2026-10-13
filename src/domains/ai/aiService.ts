@@ -1,17 +1,19 @@
 /**
  * Socratic AI Agent Service
  * Dedicated Groq-only implementation (openai/gpt-oss-120b) per user specification.
- * Enforces Socratic questioning, Devil's Advocate mode, non-definitive guardrails,
- * context window compression, and dynamic avatar hint generation for Familiarise and Conceptualise stages.
+ * Enforces all 7 Socratic Core Behaviour guardrails, Devil's Advocate & Scaffolding modes,
+ * cross-stage tone adherence, 15-turn context window compression, and dynamic avatar hints.
  */
 
 import Groq from 'groq-sdk';
 import https from 'https';
 
+export type AgentMode = 'Socratic' | 'DevilsAdvocate' | 'Scaffolding';
+
 export interface ChatTurn {
   sender: 'student' | 'agent';
   text: string;
-  messageType?: 'chat' | 'devils_advocate' | 'hint' | 'nudge';
+  messageType?: 'chat' | 'devils_advocate' | 'hint' | 'nudge' | 'scaffolding';
 }
 
 export interface ModuleSnapshot {
@@ -19,6 +21,8 @@ export interface ModuleSnapshot {
   currentStage: string;
   notes: Array<{ highlightedText: string; noteText: string }>;
   conceptNodes: Array<{ text: string }>;
+  conceptLinks?: Array<{ fromText: string; toText: string }>;
+  sources?: Array<{ title: string; authorName?: string; excerpt: string }>;
   synthesisDraft?: string;
   agentPersonality?: string;
   avatarName?: string;
@@ -65,63 +69,138 @@ function isRateLimitError(err: any): boolean {
 }
 
 /**
- * Constructs system prompt enforcing Socratic guardrails and persona tone
+ * Builds an explicit vocal and phrasing directive for the user's selected tone
+ * so the agent consistently responds in the selected tone across all stages.
+ */
+export function buildToneDirective(agentPersonality?: string): string {
+  const raw = (agentPersonality || 'Friendly').trim();
+  const lower = raw.toLowerCase();
+
+  if (lower.includes('witty challenger') || lower.includes('witty')) {
+    return `SELECTED TONE — WITTY CHALLENGER (${raw}): Use a playful, sharp, and strategic voice. Incorporate clever wit, light-hearted roasts, and sharp provocations to challenge the student's thinking while keeping it fun.`;
+  }
+  if (lower.includes('mentor')) {
+    return `SELECTED TONE — MENTOR (${raw}): Use a relatable, calm, patient, and non-judgmental voice. Guide the student with thoughtful, reflective questions that foster self-discovery.`;
+  }
+  if (lower.includes('curious explorer') || lower.includes('curious')) {
+    return `SELECTED TONE — CURIOUS EXPLORER (${raw}): Use a gentle, inquisitive, and enthusiastic voice. Show genuine fascination with the student's ideas and warmly encourage them to dig deeper.`;
+  }
+  if (lower.includes("devil's advocate") || lower.includes('devils advocate')) {
+    return `SELECTED TONE — DEVIL'S ADVOCATE (${raw}): Use a rigorous, skeptical, assumption-testing voice that pushes the student to consider counter-perspectives and alternative interpretations.`;
+  }
+  if (lower.includes('friendly')) {
+    return `SELECTED TONE — FRIENDLY (${raw}): Use an encouraging, warm, and engaging voice without sounding corporate. Use natural Gen Z phrasing, light humor, and supportive language.`;
+  }
+  return `SELECTED TONE — ${raw}: Strictly adopt the phrasing, voice, and questioning style of "${raw}" in every sentence.`;
+}
+
+/**
+ * Applies tone-specific opening flair to deterministic fallback questions
+ * so offline/fallback turns also honor the student's selected tone in all stages.
+ */
+export function applyToneToFallback(question: string, agentPersonality?: string): string {
+  const lower = (agentPersonality || '').toLowerCase();
+  if (lower.includes('witty')) {
+    return `Plot twist—let's stress-test that! ${question}`;
+  }
+  if (lower.includes('mentor')) {
+    return `Take a calm step back and reflect on this: ${question}`;
+  }
+  if (lower.includes('curious')) {
+    return `Ooh, I'm really curious about where your thinking leads here—${question.charAt(0).toLowerCase()}${question.slice(1)}`;
+  }
+  if (lower.includes("devil's advocate") || lower.includes('devils advocate')) {
+    return `Let's push back on that assumption for a second: ${question}`;
+  }
+  if (lower.includes('friendly')) {
+    return `Love how you're diving into this! Quick question for you: ${question}`;
+  }
+  return question;
+}
+
+/**
+ * Constructs system prompt enforcing all 7 Socratic guardrails, persona tone,
+ * agent mode (Socratic, DevilsAdvocate, Scaffolding), and full module snapshot.
  */
 export function buildSocraticSystemPrompt(
   snapshot: ModuleSnapshot,
-  mode: 'Socratic' | 'DevilsAdvocate' = 'Socratic'
+  mode: AgentMode = 'Socratic'
 ): string {
   const avatarName = snapshot.avatarName || 'Aria';
-  const tone = snapshot.agentPersonality || 'Socratic Peer';
+  const tone = snapshot.agentPersonality || 'Friendly';
+  const toneDirective = buildToneDirective(tone);
 
   const notesText = snapshot.notes
     .map((n) => `-[Highlight: "${n.highlightedText}"] Note: "${n.noteText}"`)
     .join('\n');
   const nodesText = snapshot.conceptNodes.map((n) => `-[Concept Node: "${n.text}"]`).join('\n');
+  const linksText = (snapshot.conceptLinks || [])
+    .map((l) => `-[Concept Link: "${l.fromText}" <-> "${l.toText}"]`)
+    .join('\n');
+  const sourcesText = (snapshot.sources || [])
+    .map(
+      (s) =>
+        `-[Source: "${s.title}"${s.authorName ? ` by ${s.authorName}` : ''}]: "${s.excerpt}"`
+    )
+    .join('\n');
+
+  let modeInstruction = 'SOCRATIC INQUIRY MODE: Prompt the student to question assumptions, seek alternative viewpoints, and assess evidence credibility.';
+  if (mode === 'DevilsAdvocate') {
+    modeInstruction = `DEVIL'S ADVOCATE MODE: Simulate an opposing argument or a common misinformation claim related to "${snapshot.topicTitle}", clearly scoped to the provided source material below. Ask the student to evaluate its credibility. NEVER present the opposing claim in a way that could be mistaken as your own personal belief (frame it as "Some critics argue..." or "Consider a perspective claiming...").`;
+  } else if (mode === 'Scaffolding') {
+    modeInstruction = `SCAFFOLDING MODE: Break down the analytical step for the student by pointing them to specific provided sources or prior notes/nodes and asking a foundational open-ended question to help them build their argument without doing the thinking for them.`;
+  }
 
   return `
 You are ${avatarName}, an AI peer acting as a ${tone} on the topic of "${snapshot.topicTitle}".
+${toneDirective}
 
-CRITICAL SOCRATIC GUARDRAILS (MUST OBEY strictly):
-1. NEVER deliver a direct factual claim, verdict, or definitive opinion.
-2. NEVER say "That is correct", "You are right", "You are wrong", or "That is false".
-3. EVERY substantive turn MUST end with a probing Socratic question, a counter-perspective, or a prompt to evaluate evidence credibility.
-4. Reference the student's prior notes and concept map nodes where relevant.
-5. If asked for factual evidence, direct the student back to the provided topic sources or ask how they could verify the claim.
-6. Always complete your thoughts and sentences fully. Never stop mid-sentence.
+CRITICAL SOCRATIC GUARDRAILS (MUST OBEY STRICTLY IN ALL STAGES):
+1. NEVER deliver a direct factual claim, opinion, or verdict on the topic content.
+2. EVERY substantive turn MUST end with a probing Socratic question, a prompt to reconsider, or a counter-perspective. However, you may briefly respond to or encourage the user in the first section of your response.
+3. Reference the student's own prior inputs (notes, concept nodes, links, chat history) within the same module wherever relevant.
+4. NEVER fabricate sources or citations. If asked for factual evidence, direct the student back to the provided topic sources or ask the student how they could find supporting/contradicting evidence themselves.
+5. NEVER use definitive phrases like "That is correct", "You are right", "You are wrong", or "That is false".
+6. NEVER ask leading questions. Critical thinking must NOT be done for the user.
+7. Strictly use the user's selected tone (${tone}) in your phrasing and questioning style.
+8. Always complete your thoughts and sentences fully. Never stop mid-sentence.
 
 CURRENT INVESTIGATION CONTEXT:
 Topic: ${snapshot.topicTitle}
 Current Stage: ${snapshot.currentStage}
 
+${sourcesText ? `PROVIDED MODULE SOURCES:\n${sourcesText}\n` : ''}
 STUDENT EVIDENCE NOTES:
 ${notesText || '(No notes taken yet)'}
 
 STUDENT CONCEPT MAP NODES:
 ${nodesText || '(No concept nodes created yet)'}
 
-${snapshot.synthesisDraft ? `STUDENT DRAFT SYNTHESIS:\n${snapshot.synthesisDraft}` : ''}
-
-CURRENT MODE: ${
-    mode === 'DevilsAdvocate'
-      ? "DEVIL'S ADVOCATE MODE (Simulate a common opposing argument or popular climate skepticism claim, clearly asking the student to critique its validity without claiming it is your true belief)."
-      : 'SOCRATIC INQUIRY MODE'
-  }
+${linksText ? `STUDENT CONCEPT MAP LINKS:\n${linksText}\n` : ''}
+${snapshot.synthesisDraft ? `STUDENT DRAFT SYNTHESIS:\n${snapshot.synthesisDraft}\n` : ''}
+CURRENT MODE: ${modeInstruction}
   `.trim();
 }
 
 /**
- * Compress history: keeps last 10 turns as raw text, summarizes older turns
+ * Compress history: keeps the last 15 turns of dialogue in raw text.
+ * Older conversation turns are summarized into a short content-aware string.
  */
 export function compressChatHistory(history: ChatTurn[]): string {
-  if (history.length <= 10) {
+  const MAX_RAW_TURNS = 15;
+  if (history.length <= MAX_RAW_TURNS) {
     return history.map((h) => `${h.sender.toUpperCase()}: ${h.text}`).join('\n');
   }
 
-  const olderTurns = history.slice(0, history.length - 10);
-  const recentTurns = history.slice(history.length - 10);
+  const olderTurns = history.slice(0, history.length - MAX_RAW_TURNS);
+  const recentTurns = history.slice(history.length - MAX_RAW_TURNS);
 
-  const olderSummary = `[Summary of earlier dialogue: Student and agent discussed ${olderTurns.length} turns regarding evidence assumptions.]`;
+  const keySnippets = olderTurns
+    .slice(-4)
+    .map((t) => `${t.sender}: "${t.text.slice(0, 60).replace(/\s+/g, ' ').trim()}"`)
+    .join('; ');
+
+  const olderSummary = `[Summary of earlier dialogue (${olderTurns.length} turns): ${keySnippets}]`;
   const recentText = recentTurns.map((h) => `${h.sender.toUpperCase()}: ${h.text}`).join('\n');
 
   return `${olderSummary}\n${recentText}`;
@@ -133,7 +212,7 @@ export function compressChatHistory(history: ChatTurn[]): string {
 export async function generateSocraticResponse(
   history: ChatTurn[],
   snapshot: ModuleSnapshot,
-  mode: 'Socratic' | 'DevilsAdvocate' = 'Socratic'
+  mode: AgentMode = 'Socratic'
 ): Promise<{ text: string; provider: 'groq' | 'fallback_rule' | 'rate_limit_error'; isError?: boolean }> {
   const groqApiKey = getSanitizedKey('GROQ_API_KEY');
   const systemPrompt = buildSocraticSystemPrompt(snapshot, mode);
@@ -181,20 +260,23 @@ export async function generateSocraticResponse(
     };
   }
 
-  // Instant Socratic fallback rule
+  // Instant Socratic fallback rule with tone awareness
   const fallbackSocraticReplies = [
-    'What specific evidence from the sources supports that perspective? How might someone with an opposing view challenge it?',
-    'If we look at long-term regional climate trends versus short-term weather anomalies, how does that affect your conclusion?',
-    'What assumptions are embedded in that claim, and what additional data would you need to verify it?',
-    'How do the scientific observations in your notes compare with public social claims on this issue?',
+    'What specific evidence from the provided sources supports that perspective, and how might someone with an opposing view challenge it?',
+    'How do the observations in your notes compare with the broader claims made across the module sources?',
+    'What underlying assumptions are embedded in that claim, and what additional evidence from the sources would you need to test it?',
+    'If you compare the different sources in this module, what tensions or missing links stand out in your reasoning?',
   ];
   const randomReply = fallbackSocraticReplies[Math.floor(Math.random() * fallbackSocraticReplies.length)];
-  return { text: randomReply, provider: 'fallback_rule' };
+  return {
+    text: applyToneToFallback(randomReply, snapshot.agentPersonality),
+    provider: 'fallback_rule',
+  };
 }
 
 /**
  * Dynamic Avatar Socratic Hint Generator for Familiarise and Conceptualise stages.
- * Groq-only implementation (openai/gpt-oss-120b).
+ * Enforces all 7 Socratic guardrails and the user's selected tone.
  */
 export async function generateAvatarHint(params: {
   stage: string;
@@ -203,57 +285,77 @@ export async function generateAvatarHint(params: {
   sourceText?: string;
   notes?: Array<{ highlightedText: string; noteText: string }>;
   conceptNodes?: Array<{ text: string }>;
-  conceptLinks?: Array<{ fromNodeId?: string; toNodeId?: string }>;
+  conceptLinks?: Array<{ fromNodeId?: string; toNodeId?: string; fromText?: string; toText?: string }>;
   agentPersonality?: string;
   avatarName?: string;
 }): Promise<{ text: string; provider: 'groq' | 'fallback_rule' | 'rate_limit_error'; isError?: boolean }> {
   const groqApiKey = getSanitizedKey('GROQ_API_KEY');
 
   const avatarName = params.avatarName || 'Aria';
-  const tone = params.agentPersonality || 'Socratic Peer';
+  const tone = params.agentPersonality || 'Friendly';
+  const toneDirective = buildToneDirective(tone);
   const stage = params.stage || 'familiarise';
   const topicTitle = params.topicTitle || 'Climate Change';
 
-  const notesList = (params.notes || []).map((n) => `"${n.noteText}"`).join(', ');
+  const notesList = (params.notes || [])
+    .map((n) => `[Highlight: "${n.highlightedText}"] Note: "${n.noteText}"`)
+    .join('; ');
   const nodesList = (params.conceptNodes || []).map((n) => `"${n.text}"`).join(', ');
+  const namedLinks = (params.conceptLinks || [])
+    .filter((l) => l.fromText && l.toText)
+    .map((l) => `"${l.fromText}" <-> "${l.toText}"`)
+    .join(', ');
   const linksCount = (params.conceptLinks || []).length;
+
+  const systemPrompt = `
+You are ${avatarName}, an AI peer acting as a ${tone} on the topic of "${topicTitle}".
+${toneDirective}
+
+CRITICAL SOCRATIC GUARDRAILS (MUST OBEY STRICTLY):
+1. NEVER state a direct factual claim, opinion, or verdict on the topic content.
+2. End your response with ONE concise, open-ended Socratic question (you may include a brief encouraging remark in the first sentence).
+3. Reference both the source currently in view AND the student's existing notes/concept nodes where present.
+4. NEVER fabricate sources or citations.
+5. NEVER use definitive phrases like "That is correct", "You are right", "You are wrong", or "That is false".
+6. NEVER ask leading questions; do not do the critical thinking for the user.
+7. Strictly use the user's selected tone (${tone}).
+  `.trim();
 
   let prompt = '';
   if (stage === 'conceptualise') {
     prompt = `
-You are ${avatarName}, an AI peer acting as a ${tone} on the topic of "${topicTitle}".
-The student is currently on the "conceptualise" stage, where they build a visual concept map of ideas and evidence.
-The student just clicked on your avatar for guidance on their concept map.
+The student is on the "conceptualise" (Mind Map) stage and clicked your avatar for a Socratic hint.
+
+SOURCE CURRENTLY IN VIEW:
+Title: ${params.sourceTitle || 'Module Evidence Source'}
+Excerpt: "${params.sourceText ? params.sourceText.slice(0, 300) : 'Source evidence on screen'}"
 
 STUDENT'S EXISTING CONCEPT NODES:
 ${nodesList || '(No concept nodes created yet on the canvas)'}
 
 STUDENT'S CONCEPT CONNECTIONS / LINKS:
-${linksCount > 0 ? `${linksCount} links connected between nodes` : 'No connections linked between nodes yet'}
+${namedLinks || (linksCount > 0 ? `${linksCount} links connected between nodes` : 'No connections linked between nodes yet')}
 
 STUDENT'S EVIDENCE NOTES:
 ${notesList || '(No notes taken yet)'}
 
-REQUIREMENTS:
-1. Provide ONE concise Socratic Question directly referencing the student's concept nodes.
-2. DO NOT state direct answers or conclusions.
-3. Keep to 1-2 complete sentences ending in a question.
+Task: Ask ONE concise Socratic question (1-2 sentences) in your ${tone} voice that relates the source currently in view and the student's existing concept nodes/notes without asking a leading question.
     `.trim();
   } else {
     prompt = `
-You are ${avatarName}, an AI peer acting as a ${tone} on the topic of "${topicTitle}".
-The student is currently on the "${stage}" stage and just clicked on your avatar for guidance.
+The student is on the "${stage}" (Read + Annotate) stage and clicked your avatar for a Socratic hint.
 
-CONTEXT:
-Source in view: ${params.sourceTitle || 'Climate Evidence Source'}
-Excerpt: "${params.sourceText ? params.sourceText.slice(0, 300) : 'General evidence on climate patterns'}"
-Student notes: ${notesList || 'None yet'}
-Concept nodes: ${nodesList || 'None yet'}
+SOURCE CURRENTLY IN VIEW:
+Title: ${params.sourceTitle || 'Module Evidence Source'}
+Excerpt: "${params.sourceText ? params.sourceText.slice(0, 300) : 'Source evidence on screen'}"
 
-REQUIREMENTS:
-1. Provide exactly ONE concise, probing Socratic Question related to the source currently on screen.
-2. DO NOT state direct conclusions or verdicts.
-3. Keep to 1-2 complete sentences ending in a question.
+STUDENT'S EXISTING NOTES:
+${notesList || '(No notes taken yet)'}
+
+STUDENT'S EXISTING CONCEPT NODES:
+${nodesList || '(No concept nodes created yet)'}
+
+Task: Ask ONE concise Socratic question (1-2 sentences) in your ${tone} voice related to the source currently in view and the student's existing notes/nodes without asking a leading question.
     `.trim();
   }
 
@@ -268,7 +370,7 @@ REQUIREMENTS:
 
       const groqPromise = groqClient.chat.completions.create({
         messages: [
-          { role: 'system', content: `You are ${avatarName}, a Socratic peer.` },
+          { role: 'system', content: systemPrompt },
           { role: 'user', content: prompt },
         ],
         model: GROQ_PRIMARY_MODEL,
@@ -293,45 +395,47 @@ REQUIREMENTS:
 
   if (hadRateLimit) {
     return {
-      text: '⚠️ The AI hint service is temporarily rate limited. Please try clicking Aria again in a few moments.',
+      text: '⚠️ The AI hint service is temporarily rate limited. Please try clicking again in a few moments.',
       provider: 'rate_limit_error',
       isError: true,
     };
   }
 
-  // Instant stage-aware fallback rule (0ms latency)
+  // Instant stage-aware and tone-aware fallback rule (0ms latency)
   const nodeA = params.conceptNodes?.[0]?.text;
   const nodeB = params.conceptNodes?.[1]?.text;
+  const noteA = params.notes?.[0]?.noteText;
 
   const conceptualiseFallbackHints = nodeA && nodeB
     ? [
-        `How do you see "${nodeA}" influencing or causing "${nodeB}" in your reasoning?`,
+        `How do you see "${nodeA}" and "${nodeB}" relating to the source "${params.sourceTitle || 'on screen'}"?`,
         `What underlying evidence or assumption connects "${nodeA}" and "${nodeB}"?`,
-        `Is there an intermediate assumption or missing link connecting "${nodeA}" and "${nodeB}"?`,
+        `Is there an alternative interpretation or missing link between "${nodeA}" and "${nodeB}"?`,
       ]
     : nodeA
     ? [
-        `What counter-evidence or complementary concept could you link to "${nodeA}"?`,
+        `What concept from "${params.sourceTitle || 'this source'}" could you link to "${nodeA}"?`,
         `What assumptions are embedded inside your concept node "${nodeA}"?`,
-        `How does "${nodeA}" relate back to the climate evidence you gathered?`,
+        `How does "${nodeA}" relate back to the evidence you highlighted?`,
       ]
     : [
-        'What key concept from the evidence could you turn into your first concept node?',
-        'How might you represent the cause-and-effect relationships from the sources as nodes?',
+        'What key concept from the source currently on screen could you turn into your first concept node?',
+        'How might you represent the relationships in these sources as concept nodes?',
         'Which claim from your notes would make the strongest starting concept node?',
       ];
 
-  const fallbackHints: Record<string, string[]> = {
-    familiarise: [
-      'What underlying assumptions might the author be making in this claim?',
-      'What evidence in this source could challenge or support your initial thoughts?',
-      'How does this evidence distinguish between short-term weather anomalies and long-term climate trends?',
-      'What additional data would you need before trusting the claim in this source?',
-    ],
-    conceptualise: conceptualiseFallbackHints,
-  };
+  const familiariseFallbackHints = noteA
+    ? [
+        `How does the claim in "${params.sourceTitle || 'this source'}" compare with your note "${noteA}"?`,
+        `Building on your note "${noteA}", what underlying assumption might the author of this source be making?`,
+      ]
+    : [
+        'What underlying assumptions might the author be making in this source?',
+        'What evidence in this source could challenge or support your initial thoughts?',
+        'What additional information would you need before evaluating the credibility of this source?',
+      ];
 
-  const list = fallbackHints[stage] || fallbackHints.familiarise;
+  const list = stage === 'conceptualise' ? conceptualiseFallbackHints : familiariseFallbackHints;
   const hint = list[Math.floor(Math.random() * list.length)];
-  return { text: hint, provider: 'fallback_rule' };
+  return { text: applyToneToFallback(hint, tone), provider: 'fallback_rule' };
 }

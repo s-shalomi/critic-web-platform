@@ -877,4 +877,23 @@
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
 - **Immediate Next Step**: Wait for user approval before proceeding to Stage 2.
 
+---
 
+### [2026-10-13] - AI Agent Alignment Stage 2: Core Socratic Guardrails, Cross-Stage Tone Enforcement, Modes & 15-Turn History Compression
+
+- **Role**: Full Stack Developer
+- **Code Built & Updated**:
+  - **Cross-Stage Tone Directives (`buildToneDirective` & `applyToneToFallback` in [`src/domains/ai/aiService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/ai/aiService.ts))**:
+    - Mapped all 5 user-selectable tones (`Friendly`, `Mentor`, `Witty Challenger`, `Curious Explorer`, `Devil's Advocate`) to explicit stylistic directives injected into `buildSocraticSystemPrompt`, `generateAvatarHint`, and the offline Socratic fallback rule engine (`applyToneToFallback`) per [`requirements.md` L52](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/requirements.md#L52).
+  - **Strict 7-Point Socratic Guardrails & Agent Modes (`Socratic`, `DevilsAdvocate`, `Scaffolding`)**:
+    - Added explicit anti-leading-question (`"Don't you think that..."` prohibition), single-probing-question, no-declarative-judgments, no-summarizing-conclusion, and no-fabricated-sources guardrails across both `buildSocraticSystemPrompt` and `generateAvatarHint`.
+    - Added `Scaffolding` mode to `AgentMode` so students entering Inquire with minimal/no prior notes receive guiding scaffolding questions rather than aggressive counterarguments.
+  - **15-Turn Context Window & Content-Aware Summarization (`compressChatHistory`)**:
+    - Updated `MAX_RAW_TURNS` from `6` to `15` per [`requirements.md` L65](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/requirements.md#L65), retaining the last 15 turns in raw text and summarizing older turns with content-aware excerpts.
+  - **Test Suite Expansion ([`tests/ai.test.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/tests/ai.test.ts))**:
+    - Added unit tests verifying 15-turn history retention, anti-leading-question guardrails, cross-stage tone directive injection across all 5 tones, and `Scaffolding` mode prompts.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (32/32 tests passing across 8 test suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+- **Immediate Next Step**: Proceed to Stage 3 (Full Cross-Stage Context Snapshot, Tone-Consistent Openers & Dynamic Topic Resolution).
