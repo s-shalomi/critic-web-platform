@@ -103,4 +103,29 @@ describe('Socratic AI Engine Tests', () => {
     expect(chatRes.text).toBeDefined();
     expect(hintRes.text).toBeDefined();
   });
+
+  test('generateAvatarHint maintains student context without reciting every item of work', async () => {
+    const hint = await generateAvatarHint({
+      stage: 'familiarise',
+      topicTitle: 'Climate Change',
+      sourceTitle: 'Social Media Post',
+      sourceText: 'Be careful and try staying in your house...',
+      notes: [
+        { highlightedText: 'extreme snow', noteText: 'Author confuses weather with climate' },
+        { highlightedText: 'global warming', noteText: 'Sarcastic tone used to dismiss science' },
+        { highlightedText: 'near record cold', noteText: 'Anecdotal weather observation' },
+      ],
+      conceptNodes: [
+        { text: 'Weather vs Climate' },
+        { text: 'Jet Stream Disruption' },
+        { text: 'Arctic Warming' },
+      ],
+      agentPersonality: 'Mentor',
+    });
+
+    expect(hint.text).toBeDefined();
+    expect(hint.text.length).toBeGreaterThan(10);
+    // Should be a focused Socratic question (1-2 sentences), not reciting every note
+    expect(hint.text.split(/[.?!]+/).filter(Boolean).length).toBeLessThanOrEqual(4);
+  });
 });

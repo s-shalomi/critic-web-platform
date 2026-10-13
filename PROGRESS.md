@@ -968,3 +968,22 @@
   - `npm test` (32/32 tests passing across 8 test suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
 - **Immediate Next Step**: All 7 stages of [`ALIGNMENT_PLAN.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/ALIGNMENT_PLAN.md) complete and verified.
+
+---
+
+### [2026-10-13] - AI Agent Behaviour Refinement: Selective Context Usage in Familiarise & Conceptualise Stages
+
+- **Role**: Full Stack Developer
+- **User Instruction**: *"The AI agent should have context of the student's work but should not refer to every item of work it on every click in familiarise and conceptualise stages"*
+- **Code Built & Updated**:
+  - **Selective Context Guardrail ([`src/domains/ai/aiService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/ai/aiService.ts))**:
+    - Replaced the previous directive that forced referencing notes/nodes on every click with a **Selective Context Usage Guardrail**: the agent retains full background context of the student's notes, concept nodes, and map links, but uses them as silent background awareness rather than reciting or listing every item of work on every click.
+    - Updated prompt instructions for both Familiarise and Conceptualise: prompts instruct the model to focus on the source currently in view (author assumptions, rhetorical framing, missing evidence, credibility) or examine a single specific relationship/gap on the canvas without dumping a laundry list of the student's work.
+    - Diversified instant fallback pools for Familiarise and Conceptualise with varied source-focused and conceptual questions so repetitive note recitations never occur.
+  - **Test Suite Expansion ([`tests/ai.test.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/tests/ai.test.ts))**:
+    - Added unit test verifying `generateAvatarHint` maintains student context without reciting a laundry list or inventory of all items when supplied multiple notes and nodes.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (33/33 tests passing across 8 test suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+- **Immediate Next Step**: Commit refinement to `feature/iteration-2`.

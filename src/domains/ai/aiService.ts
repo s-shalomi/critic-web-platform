@@ -314,11 +314,12 @@ ${toneDirective}
 CRITICAL SOCRATIC GUARDRAILS (MUST OBEY STRICTLY):
 1. NEVER state a direct factual claim, opinion, or verdict on the topic content.
 2. End your response with ONE concise, open-ended Socratic question (you may include a brief encouraging remark in the first sentence).
-3. Reference both the source currently in view AND the student's existing notes/concept nodes where present.
+3. SELECTIVE CONTEXT USAGE: You have background context of the student's work (their notes, concept nodes, and map links), but DO NOT recite, list, or refer to every item of their work on every click. Use their work as silent background context to understand their thinking. Focus primarily on the source currently in view or a single specific idea/connection. Never rattle off an inventory, checklist, or laundry list of their notes or nodes.
 4. NEVER fabricate sources or citations.
 5. NEVER use definitive phrases like "That is correct", "You are right", "You are wrong", or "That is false".
 6. NEVER ask leading questions; do not do the critical thinking for the user.
 7. Strictly use the user's selected tone (${tone}).
+8. Keep your response concise (1-2 sentences).
   `.trim();
 
   let prompt = '';
@@ -330,16 +331,18 @@ SOURCE CURRENTLY IN VIEW:
 Title: ${params.sourceTitle || 'Module Evidence Source'}
 Excerpt: "${params.sourceText ? params.sourceText.slice(0, 300) : 'Source evidence on screen'}"
 
-STUDENT'S EXISTING CONCEPT NODES:
+STUDENT'S EXISTING CONCEPT NODES (BACKGROUND CONTEXT - DO NOT RECITE ALL):
 ${nodesList || '(No concept nodes created yet on the canvas)'}
 
-STUDENT'S CONCEPT CONNECTIONS / LINKS:
+STUDENT'S CONCEPT CONNECTIONS / LINKS (BACKGROUND CONTEXT):
 ${namedLinks || (linksCount > 0 ? `${linksCount} links connected between nodes` : 'No connections linked between nodes yet')}
 
-STUDENT'S EVIDENCE NOTES:
+STUDENT'S EVIDENCE NOTES (BACKGROUND CONTEXT):
 ${notesList || '(No notes taken yet)'}
 
-Task: Ask ONE concise Socratic question (1-2 sentences) in your ${tone} voice that relates the source currently in view and the student's existing concept nodes/notes without asking a leading question.
+INSTRUCTION:
+Ask ONE concise Socratic question (1-2 sentences) in your ${tone} voice that prompts the student to examine a specific connection, underlying assumption, or potential gap in logic.
+IMPORTANT: You have context of their work, but DO NOT refer to every item of work or list out their nodes. Focus on ONE thoughtful angle or relationship without asking a leading question.
     `.trim();
   } else {
     prompt = `
@@ -349,13 +352,13 @@ SOURCE CURRENTLY IN VIEW:
 Title: ${params.sourceTitle || 'Module Evidence Source'}
 Excerpt: "${params.sourceText ? params.sourceText.slice(0, 300) : 'Source evidence on screen'}"
 
-STUDENT'S EXISTING NOTES:
-${notesList || '(No notes taken yet)'}
+STUDENT'S EXISTING WORK (BACKGROUND CONTEXT ONLY - DO NOT RECITE ALL):
+Notes: ${notesList || '(No notes taken yet)'}
+Concept Nodes: ${nodesList || '(No concept nodes created yet)'}
 
-STUDENT'S EXISTING CONCEPT NODES:
-${nodesList || '(No concept nodes created yet)'}
-
-Task: Ask ONE concise Socratic question (1-2 sentences) in your ${tone} voice related to the source currently in view and the student's existing notes/nodes without asking a leading question.
+INSTRUCTION:
+Ask ONE concise Socratic question (1-2 sentences) in your ${tone} voice related to the source currently in view (e.g. evaluating unstated assumptions, rhetorical spin vs empirical proof, missing evidence, or author credibility).
+IMPORTANT: You have context of the student's work, but DO NOT recite, list, or refer to every item of work. Use their work only as background awareness to avoid asking something they already resolved, and focus your question on the source material currently in view.
     `.trim();
   }
 
@@ -401,39 +404,44 @@ Task: Ask ONE concise Socratic question (1-2 sentences) in your ${tone} voice re
     };
   }
 
-  // Instant stage-aware and tone-aware fallback rule (0ms latency)
+  // Instant stage-aware and tone-aware fallback hints with rich variety
+  // (Has background context of the student's work without reciting every item on every click)
   const nodeA = params.conceptNodes?.[0]?.text;
   const nodeB = params.conceptNodes?.[1]?.text;
   const noteA = params.notes?.[0]?.noteText;
 
-  const conceptualiseFallbackHints = nodeA && nodeB
-    ? [
-        `How do you see "${nodeA}" and "${nodeB}" relating to the source "${params.sourceTitle || 'on screen'}"?`,
-        `What underlying evidence or assumption connects "${nodeA}" and "${nodeB}"?`,
-        `Is there an alternative interpretation or missing link between "${nodeA}" and "${nodeB}"?`,
-      ]
-    : nodeA
-    ? [
-        `What concept from "${params.sourceTitle || 'this source'}" could you link to "${nodeA}"?`,
-        `What assumptions are embedded inside your concept node "${nodeA}"?`,
-        `How does "${nodeA}" relate back to the evidence you highlighted?`,
-      ]
-    : [
-        'What key concept from the source currently on screen could you turn into your first concept node?',
-        'How might you represent the relationships in these sources as concept nodes?',
-        'Which claim from your notes would make the strongest starting concept node?',
-      ];
+  const conceptualiseFallbackHints = [
+    `What underlying assumption connects the concepts in "${params.sourceTitle || 'this source'}"?`,
+    `Looking at this source, what might be a cause-and-effect relationship that isn't immediately obvious?`,
+    `How might a critical reader question the link between this source and your concept map?`,
+    `What critical piece of evidence is still needed to bridge the concepts you are developing?`,
+    ...(nodeA && nodeB
+      ? [
+          `What evidence or assumption connects "${nodeA}" and "${nodeB}"?`,
+          `Could "${nodeA}" and "${nodeB}" be correlated without one directly causing the other?`,
+        ]
+      : nodeA
+      ? [
+          `What assumption is embedded inside your concept node "${nodeA}"?`,
+          `What evidence from this source could support or challenge "${nodeA}"?`,
+        ]
+      : [
+          'What central concept from this source could you turn into your first concept node?',
+        ]),
+  ];
 
-  const familiariseFallbackHints = noteA
-    ? [
-        `How does the claim in "${params.sourceTitle || 'this source'}" compare with your note "${noteA}"?`,
-        `Building on your note "${noteA}", what underlying assumption might the author of this source be making?`,
-      ]
-    : [
-        'What underlying assumptions might the author be making in this source?',
-        'What evidence in this source could challenge or support your initial thoughts?',
-        'What additional information would you need before evaluating the credibility of this source?',
-      ];
+  const familiariseFallbackHints = [
+    `What unstated assumption is the author relying on to make this claim?`,
+    `Is the author presenting verifiable empirical data here, or relying primarily on rhetorical framing?`,
+    `What alternative explanation or counter-evidence might this source be leaving out?`,
+    `What additional information would you need before evaluating the credibility of this source?`,
+    `How does the author's tone influence the persuasiveness of their claim?`,
+    ...(noteA
+      ? [
+          `How does the author's argument in "${params.sourceTitle || 'this source'}" compare with what you noted earlier?`,
+        ]
+      : []),
+  ];
 
   const list = stage === 'conceptualise' ? conceptualiseFallbackHints : familiariseFallbackHints;
   const hint = list[Math.floor(Math.random() * list.length)];
