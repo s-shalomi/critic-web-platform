@@ -23,13 +23,13 @@
 
 /* Left Sidebar matching screens_v2/familiarise.png with larger width and independent scroll region */
 .sidebar {
-  width: clamp(320px, 26vw, 370px);
+  width: clamp(360px, 30vw, 430px);
   flex-shrink: 0;
   height: 100%;
   min-height: 0;
   background: #0F172E;
   border-right: 2px solid rgba(139, 92, 246, 0.48);
-  padding: clamp(26px, 3.2vh, 36px) clamp(24px, 2.2vw, 32px) clamp(18px, 2.2vh, 24px);
+  padding: clamp(28px, 3.4vh, 38px) clamp(28px, 2.5vw, 36px) clamp(18px, 2.2vh, 24px);
   display: flex;
   flex-direction: column;
   position: relative;
@@ -44,7 +44,7 @@
   border: none;
   color: #EAF6FF;
   font-family: var(--font-display);
-  font-size: clamp(1.08rem, 0.96rem + 0.3vw, 1.25rem);
+  font-size: clamp(1.12rem, 0.98rem + 0.32vw, 1.3rem);
   font-weight: 700;
   cursor: pointer;
   padding: 4px 0;
@@ -60,10 +60,10 @@
 
 .stageHeading {
   font-family: var(--font-display);
-  font-size: clamp(1.7rem, 1.35rem + 0.8vw, 2.08rem);
+  font-size: clamp(1.8rem, 1.4rem + 0.85vw, 2.2rem);
   font-weight: 700;
   color: #EAF6FF;
-  margin: clamp(22px, 3vh, 34px) 0 clamp(18px, 2.4vh, 26px);
+  margin: clamp(24px, 3.2vh, 36px) 0 clamp(20px, 2.6vh, 30px);
   letter-spacing: -0.35px;
   line-height: 1.16;
   flex-shrink: 0;
@@ -78,7 +78,7 @@
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
   display: flex;
   flex-direction: column;
-  gap: 13px;
+  gap: 15px;
   padding-right: 6px;
   padding-bottom: 10px;
 }
@@ -88,11 +88,11 @@
   border: 1px solid rgba(143, 166, 201, 0.28);
   color: #D9DFF7;
   font-family: var(--font-display);
-  font-size: clamp(1rem, 0.92rem + 0.22vw, 1.12rem);
+  font-size: clamp(1.04rem, 0.95rem + 0.24vw, 1.18rem);
   font-weight: 600;
   text-align: left;
   cursor: pointer;
-  padding: 11px 22px;
+  padding: 13px 24px;
   border-radius: 9999px;
   transition: all 0.2s ease;
   width: 100%;
