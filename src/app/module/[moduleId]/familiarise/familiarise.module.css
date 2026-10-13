@@ -717,11 +717,11 @@
   box-shadow: 0 0 14px rgba(55, 243, 255, 0.35);
 }
 
-/* Floating Stage Navigation Dock Using Color & Surface Contrast for Navigation Affordance */
+/* Floating Stage Navigation Dock */
 .stageNavWrapper {
   flex-shrink: 0;
   width: 100%;
-  padding: 8px 24px clamp(18px, 2.5vh, 28px);
+  padding: 8px 24px clamp(20px, 2.8vh, 32px);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -729,33 +729,68 @@
 }
 
 .stageNavBar {
-  background: linear-gradient(180deg, rgba(30, 42, 74, 0.84) 0%, rgba(16, 24, 48, 0.92) 100%);
-  backdrop-filter: blur(18px) saturate(140%);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
-  border: 1px solid rgba(143, 166, 201, 0.28);
+  background: linear-gradient(180deg, rgba(64, 78, 108, 0.8) 0%, rgba(45, 57, 83, 0.88) 100%);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  border: 1.5px solid rgba(138, 160, 200, 0.36);
   border-radius: 22px;
-  padding: 8px 12px;
+  padding: 14px clamp(28px, 3.8vw, 46px);
   display: flex;
   align-items: center;
-  gap: clamp(10px, 1.5vw, 18px);
+  gap: clamp(28px, 4.2vw, 54px);
   box-shadow:
-    0 20px 44px rgba(0, 0, 0, 0.62),
-    0 0 28px rgba(55, 243, 255, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    0 20px 44px -8px rgba(4, 8, 22, 0.72),
+    0 0 28px rgba(55, 243, 255, 0.08),
+    inset 0 1px 1px rgba(255, 255, 255, 0.2);
 }
 
 .stageStep {
-  background: rgba(15, 23, 46, 0.55);
-  border: 1px solid rgba(139, 92, 246, 0.28);
+  background: transparent;
+  border: none;
   border-radius: 16px;
-  padding: 10px 24px 9px;
-  min-width: 112px;
+  padding: 6px 12px;
+  min-width: 88px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 7px;
+  gap: 10px;
   cursor: pointer;
   position: relative;
+  transition:
+    transform 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+    background 0.24s ease;
+}
+
+.stageStep:hover:not(.stageStepActive) {
+  transform: translateY(-4px);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.stageStep:focus-visible {
+  outline: 2px solid #37F3FF;
+  outline-offset: 4px;
+}
+
+.stageStepActive {
+  cursor: default;
+}
+
+.stageCircle {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #43B5CD 0%, #3499B0 100%);
+  border: 2px solid #7C4DFF;
+  color: #0F172E;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.28),
+    inset 0 1px 1px rgba(255, 255, 255, 0.3);
   transition:
     transform 0.24s cubic-bezier(0.22, 1, 0.36, 1),
     background 0.24s ease,
@@ -763,84 +798,45 @@
     box-shadow 0.24s ease;
 }
 
-.stageStep:hover:not(.stageStepActive) {
-  background: linear-gradient(180deg, rgba(55, 243, 255, 0.14) 0%, rgba(139, 92, 246, 0.18) 100%);
-  border-color: rgba(55, 243, 255, 0.68);
-  transform: translateY(-3px);
-  box-shadow:
-    0 10px 22px rgba(0, 0, 0, 0.42),
-    0 0 16px rgba(55, 243, 255, 0.2);
-}
-
-.stageStepActive {
-  background: linear-gradient(180deg, rgba(55, 243, 255, 0.2) 0%, rgba(56, 189, 248, 0.08) 100%);
-  border: 1.5px solid #37F3FF;
-  box-shadow:
-    0 8px 20px rgba(0, 0, 0, 0.38),
-    0 0 20px rgba(55, 243, 255, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-}
-
-.stageStepActive::after {
-  content: '';
-  position: absolute;
-  bottom: 4px;
-  width: 22px;
-  height: 2.5px;
-  border-radius: 9999px;
-  background: #37F3FF;
-  box-shadow: 0 0 8px #37F3FF;
-}
-
-.stageCircle {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, rgba(56, 189, 248, 0.24) 0%, rgba(139, 92, 246, 0.32) 100%);
-  border: 1.5px solid rgba(168, 85, 247, 0.72);
-  color: #EAF6FF;
-  font-family: var(--font-display);
-  font-size: 0.98rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.24s ease;
-}
-
 .stageStep:hover:not(.stageStepActive) .stageCircle {
   background: #37F3FF;
-  border-color: #EAF6FF;
+  border-color: #8B5CF6;
   color: #0F172E;
-  box-shadow: 0 0 16px rgba(55, 243, 255, 0.75);
-  transform: scale(1.06);
+  box-shadow:
+    0 0 20px rgba(55, 243, 255, 0.72),
+    0 4px 12px rgba(0, 0, 0, 0.3);
+  transform: scale(1.08);
 }
 
 .stageCircleActive {
   background: #37F3FF;
-  border: 2px solid rgba(168, 85, 247, 0.85);
+  border: 2px solid #7C4DFF;
   color: #0F172E;
-  box-shadow: 0 0 18px rgba(55, 243, 255, 0.85);
+  box-shadow:
+    0 0 22px rgba(55, 243, 255, 0.82),
+    0 0 42px rgba(55, 243, 255, 0.3),
+    inset 0 1px 2px rgba(255, 255, 255, 0.55);
   font-weight: 700;
 }
 
 .stageLabel {
   font-family: var(--font-display);
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #D9DFF7;
+  font-size: 0.96rem;
+  font-weight: 500;
+  color: #B4C0D9;
   letter-spacing: 0.1px;
-  transition: color 0.22s ease;
-  padding-bottom: 3px;
+  transition: color 0.22s ease, text-shadow 0.22s ease;
+  white-space: nowrap;
 }
 
 .stageStep:hover:not(.stageStepActive) .stageLabel {
-  color: #37F3FF;
+  color: #EAF6FF;
 }
 
 .stageStepActive .stageLabel {
   color: #EAF6FF;
-  font-weight: 700;
+  font-weight: 600;
+  text-shadow: 0 0 12px rgba(234, 246, 255, 0.28);
 }
 
 /* Loading State */
