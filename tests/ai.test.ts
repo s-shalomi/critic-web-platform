@@ -241,4 +241,23 @@ describe('Socratic AI Engine Tests', () => {
     expect(hint.text).toBeDefined();
     expect(hint.text.toLowerCase()).not.toMatch(/establish(ing)? (a |the )?link|concept map/);
   });
+
+  test('generateAvatarHint in familiarise stage strictly scopes questions to the source in view and notes for that source', async () => {
+    const hint = await generateAvatarHint({
+      stage: 'familiarise',
+      topicTitle: 'Climate Change',
+      sourceTitle: 'Social Media Post',
+      sourceText: 'Be careful and try staying in your house...',
+      notes: [
+        { highlightedText: 'staying in your house', noteText: 'Author appeal to emotion' },
+      ],
+      agentPersonality: 'Mentor',
+    });
+
+    expect(hint.text).toBeDefined();
+    expect(hint.text.toLowerCase()).not.toMatch(/establish(ing)? (a |the )?link|concept map/);
+    const wordCount = hint.text.trim().split(/\s+/).length;
+    expect(wordCount).toBeLessThan(50);
+  });
 });
+

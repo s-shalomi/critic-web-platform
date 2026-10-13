@@ -1068,3 +1068,29 @@
   - `npm test` (38/38 tests passing across 8 test suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
 - **Immediate Next Step**: Commit refinement to `feature/iteration-2`.
+
+---
+
+### [2026-10-13] - Refinement: Strictly Scope Familiarise Agent to the Source in View and Its Notes
+
+- **Role**: Full Stack Developer
+- **User Instruction**: *"the familiarise stage does not only ask about the source in view and notes for that source."*
+- **Root Causes Discovered**:
+  - In `src/app/module/[moduleId]/familiarise/page.tsx`, `handleAgentClick` was serializing `notes.map(...)` (all notes across all sources in the module) instead of `sourceNotes` (only notes matching `selectedSourceId`).
+  - In `src/app/api/modules/[moduleId]/agent/hint/route.ts`, the check `Array.isArray(body.notes) && body.notes.length > 0` fell back to retrieving all module notes from the store when `body.notes` was empty (i.e. student had not yet taken notes on the currently selected source).
+- **Code Built & Updated**:
+  - **Client-Side Source Notes Scoping ([`src/app/module/[moduleId]/familiarise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/familiarise/page.tsx))**:
+    - Scoped `notes` payload in `handleAgentClick` to `sourceNotes` and added `sourceId: selectedSourceId`.
+  - **API Fallback Isolation ([`src/app/api/modules/[moduleId]/agent/hint/route.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/api/modules/%5BmoduleId%5D/agent/hint/route.ts))**:
+    - Respected `Array.isArray(body.notes)` even when length is 0 so the server never substitutes notes from other sources. When falling back to the session store, filtered notes by `body.sourceId` during Familiarise stage.
+  - **Strict Stage Scope Directives ([`src/domains/ai/aiService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/ai/aiService.ts))**:
+    - Added `STRICT STAGE SCOPE` to `buildSocraticSystemPrompt` and `generateAvatarHint` for Familiarise: only ask about the specific excerpt, claims, and rhetoric in the source currently in view and notes for that source; never ask about other sources or outside topics.
+    - Updated `familiariseFallbackHints` to directly reference the student's note on this excerpt or prompt them to highlight a specific claim in the excerpt if no notes exist yet.
+  - **Test Suite Updates ([`tests/ai.test.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/tests/ai.test.ts) & [`tests/concepts.test.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/tests/concepts.test.ts))**:
+    - Added unit test in `tests/ai.test.ts` asserting Familiarise stage hints focus strictly on the current source and its notes without leaking or referencing outside links.
+    - Isolated module IDs in `tests/concepts.test.ts` with timestamped keys to avoid cross-run state contamination.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (39/39 tests passing across 8 test suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+- **Immediate Next Step**: Commit changes to `feature/iteration-2`.

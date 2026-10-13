@@ -319,9 +319,10 @@ export default function FamiliariseStagePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           stage: 'familiarise',
+          sourceId: selectedSourceId,
           sourceTitle: currentSource?.title,
           sourceText: currentSource?.content?.text,
-          notes: notes.map((n) => ({
+          notes: sourceNotes.map((n) => ({
             highlightedText: n.highlightedText,
             noteText: n.noteText,
           })),

@@ -24,13 +24,18 @@ export async function POST(
       resolveTopicContextForModule(params.moduleId),
     ]);
 
-    // Prefer client's real-time notes if provided, otherwise fall back to server store
-    const resolvedNotes = Array.isArray(body.notes) && body.notes.length > 0
+    const isFamiliarise = stage === 'familiarise';
+
+    // Prefer client's real-time notes for this source if provided, otherwise fall back to server store
+    const resolvedNotes = Array.isArray(body.notes)
       ? body.notes.map((n: any) => ({
           highlightedText: String(n.highlightedText || ''),
           noteText: String(n.noteText || ''),
         }))
-      : notesData.map((n) => ({
+      : (isFamiliarise && body.sourceId
+          ? notesData.filter((n) => n.sourceId === body.sourceId)
+          : notesData
+        ).map((n) => ({
           highlightedText: n.highlightedText,
           noteText: n.noteText,
         }));
@@ -46,8 +51,6 @@ export async function POST(
     const rawLinks = Array.isArray(body.conceptLinks) && body.conceptLinks.length > 0
       ? body.conceptLinks
       : conceptsData.links;
-
-    const isFamiliarise = stage === 'familiarise';
 
     const hintResult = await generateAvatarHint({
       stage,

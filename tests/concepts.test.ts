@@ -9,14 +9,14 @@ import { convertNoteToNode, createNote } from '../src/domains/notes/noteService'
 
 describe('Concepts Domain & Note Conversion Tests', () => {
   test('getConceptualiseData starts clean without hardcoded dummy nodes', async () => {
-    const moduleId = 'mod_clean_canvas_test';
+    const moduleId = `mod_clean_canvas_${Date.now()}`;
     const data = await getConceptualiseData(moduleId);
     expect(data.nodes).toEqual([]);
     expect(data.links).toEqual([]);
   });
 
   test('convertNoteToNode automatically generates a Concept Node in concept store', async () => {
-    const moduleId = 'mod_convert_test';
+    const moduleId = `mod_convert_${Date.now()}`;
     const note = await createNote({
       moduleId,
       sourceId: 'source-1',
@@ -35,7 +35,7 @@ describe('Concepts Domain & Note Conversion Tests', () => {
   });
 
   test('Updates concept node text and position coordinates', async () => {
-    const moduleId = 'mod_update_node_test';
+    const moduleId = `mod_update_node_${Date.now()}`;
     const node = await createConceptNode({
       moduleId,
       text: 'jet stream disruption',
@@ -49,7 +49,7 @@ describe('Concepts Domain & Note Conversion Tests', () => {
   });
 
   test('Deletes concept node, cleans up connected links, and reverts note convertedToNode', async () => {
-    const moduleId = 'mod_delete_node_links_test';
+    const moduleId = `mod_delete_node_links_${Date.now()}`;
     const note = await createNote({
       moduleId,
       sourceId: 'source-test',

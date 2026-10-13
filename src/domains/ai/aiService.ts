@@ -244,11 +244,14 @@ export function buildSocraticSystemPrompt(
     stagePrompt = `
 Stage: Familiarise. Your goal is to help students interact with the source and get familiarised with it so that they can identify claims, biases and assumptions in it.
 
-Ask one concise Socratic Question related to the source currently in view and the student's existing notes. If the student has not taken any notes, ask a question that encourages them to start. If the student has notes, ask a question that encourages them to think more deeply about the source.
-Stage rule: Do NOT ask the student about establishing links, connecting nodes, or building a concept map (establishing links belongs strictly to the Conceptualise stage). Focus exclusively on evaluating this source, identifying claims, rhetoric, unstated assumptions, or taking annotations.
+Ask one concise Socratic Question related exclusively to the source currently in view and the student's existing notes for this source. If the student has not taken any notes on this source, ask a question about a claim or assumption in this source that encourages them to start taking notes. If the student has notes for this source, ask a question that encourages them to think more deeply about the connection between their note and the source text.
+
+STRICT STAGE SCOPE:
+- Only ask about the specific excerpt, claims, and rhetoric inside the source currently in view and the student's notes on this source. Do NOT ask about other sources, outside topics, or general knowledge.
+- Do NOT ask the student about establishing links, drawing links, connecting nodes, or building a concept map (establishing links belongs strictly to the Conceptualise stage). Focus exclusively on evaluating this source, identifying claims, rhetoric, unstated assumptions, or taking annotations.
 
 ${sourcesText ? `Source in view: ${sourcesText}` : ''}
-Student's work so far: {text: [${notesList}]}${hintNudge}
+Student's notes on this source so far: {text: [${notesList}]}${hintNudge}
     `.trim();
   } else if (stage === 'conceptualise') {
     stagePrompt = `
@@ -450,11 +453,14 @@ Student's work so far: {text: [${notesList}]}, {concepts: [${nodesList}], links:
     prompt = `
 Stage: Familiarise. Your goal is to help students interact with the source and get familiarised with it so that they can identify claims, biases and assumptions in it.
 
-Ask one concise Socratic Question related to the source currently in view and the student's existing notes. If the student has not taken any notes, ask a question that encourages them to start. If the student has notes, ask a question that encourages them to think more deeply about the source.
-Stage rule: Do NOT ask the student about establishing links, drawing links, connecting nodes, or building a concept map (establishing links belongs strictly to the Conceptualise stage). Focus exclusively on evaluating this source, identifying claims, rhetoric, unstated assumptions, or taking annotations.
+Ask one concise Socratic Question related exclusively to the source currently in view and the student's existing notes for this source. If the student has not taken any notes on this source, ask a question about a claim or assumption in this source that encourages them to start taking notes. If the student has notes for this source, ask a question that encourages them to think more deeply about the connection between their note and the source text.
+
+STRICT STAGE SCOPE:
+- Only ask about the specific excerpt, claims, and rhetoric inside the source currently in view and the student's notes on this source. Do NOT ask about other sources, outside topics, or general knowledge.
+- Do NOT ask the student about establishing links, drawing links, connecting nodes, or building a concept map (establishing links belongs strictly to the Conceptualise stage). Focus exclusively on evaluating this source, identifying claims, rhetoric, unstated assumptions, or taking annotations.
 
 Source in view: ${sourceInfo}
-Student's work so far: {text: [${notesList}]}${hintNudge}
+Student's notes on this source so far: {text: [${notesList}]}${hintNudge}
     `.trim();
   }
 
@@ -548,16 +554,19 @@ Student's work so far: {text: [${notesList}]}${hintNudge}
   ];
 
   const familiariseFallbackHints = [
-    `What unstated assumption is the author relying on to make this claim?`,
-    `Is the author presenting verifiable empirical data here, or relying primarily on rhetorical framing?`,
-    `What alternative explanation or counter-evidence might this source be leaving out?`,
-    `What additional information would you need before evaluating the credibility of this source?`,
-    `How does the author's tone influence the persuasiveness of their claim?`,
+    `What unstated assumption is the author relying on in this source to make their point?`,
+    `Is the author presenting verifiable empirical data here in this excerpt, or relying primarily on rhetorical framing?`,
+    `What alternative explanation or counter-evidence might this author be leaving out?`,
+    `What additional information would you need before evaluating the credibility of this author's claim?`,
+    `How does the author's tone in this text influence how persuasive their argument seems?`,
     ...(noteA
       ? [
-          `How does the author's argument in "${params.sourceTitle || 'this source'}" compare with what you noted earlier?`,
+          `Looking at your note on "${noteA}", what specific wording in this excerpt led you to that thought?`,
+          `You noted "${noteA}" on this source—what evidence right here in the text supports or challenges that?`,
         ]
-      : []),
+      : [
+          `What specific claim in this excerpt stands out to you as worth highlighting and noting?`,
+        ]),
   ];
 
   const list = stage === 'conceptualise' ? conceptualiseFallbackHints : familiariseFallbackHints;
