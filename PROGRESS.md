@@ -915,3 +915,22 @@
   - `npm test` (32/32 tests passing across 8 test suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
 - **Immediate Next Step**: Proceed to Stage 4 & Stage 5 (Devil's Advocate Triggering, Scaffolding Mode, Non-Blocking Nudges & Friendly Retry UX).
+
+---
+
+### [2026-10-13] - AI Agent Alignment Stages 4 & 5: Devil's Advocate Triggering, Scaffolding Mode, Non-Blocking Nudges & Retry UX
+
+- **Role**: Full Stack Developer
+- **Code Built & Updated**:
+  - **Stage 4 — Devil's Advocate & Scaffolding Mode Triggering ([`src/app/module/[moduleId]/inquire/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/inquire/page.tsx))**:
+    - Refined `effectiveMode` selection per [`requirements.md` L47–48, L88–89](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/requirements.md#L47-L48):
+      - Triggers `DevilsAdvocate` when manually toggled, when `Devil's Advocate` tone is selected, when high-confidence assertions are combined with low supporting evidence (`isHighConfidenceLowEvidence`), or randomly (~30%) when the student has prior activity.
+      - Triggers `Scaffolding` mode when the student has minimal prior activity (`0` notes and `0` concept nodes), ensuring guiding/scaffolding questions rather than challenging existing claims.
+  - **Stage 5 — Non-Blocking Contextual Nudges & One-Click Retry UX**:
+    - Fixed `notesCount` synchronization (`Math.max(prev, data.notes.length)`) in [`inquire/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/inquire/page.tsx) and [`synthesise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/synthesise/page.tsx) so client-side notes in `localStorage` are never overwritten by an empty server array.
+    - Added inline `↻ Retry` buttons across [`familiarise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/familiarise/page.tsx), [`conceptualise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/conceptualise/page.tsx), [`inquire/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/inquire/page.tsx), and [`synthesise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/synthesise/page.tsx) whenever an AI response indicates rate-limiting or temporary service demand (`⚠️`).
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (32/32 tests passing across 8 test suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+- **Immediate Next Step**: Proceed to Stage 6 (Student-Scoped & Server-Persisted Agent Preferences).

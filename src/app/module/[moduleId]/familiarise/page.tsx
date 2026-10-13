@@ -557,6 +557,25 @@ export default function FamiliariseStagePage() {
                   <span className={styles.speechToneBadge}>{agentPrefs.toneName}</span>
                 </div>
                 <p>{agentSpeech}</p>
+                {agentSpeech.includes('⚠️') && (
+                  <button
+                    type="button"
+                    onClick={handleAgentClick}
+                    style={{
+                      marginTop: '6px',
+                      padding: '4px 10px',
+                      borderRadius: '999px',
+                      border: '1px solid #37F3FF',
+                      background: 'rgba(55, 243, 255, 0.14)',
+                      color: '#37F3FF',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    ↻ Retry
+                  </button>
+                )}
                 <button
                   onClick={() => setAgentSpeech(null)}
                   className={styles.closeSpeechBtn}

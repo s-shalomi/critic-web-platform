@@ -65,7 +65,7 @@ export default function SynthesiseStagePage() {
       .then((res) => res.json())
       .then((data) => {
         if (data.notes) {
-          setNotesCount(data.notes.length);
+          setNotesCount((prev) => Math.max(prev, data.notes.length));
         }
       });
 
@@ -135,7 +135,7 @@ export default function SynthesiseStagePage() {
       }
     } catch (err) {
       setAiFeedback(
-        'Have you considered connecting the evidence from the sources to your conclusions? What counter-arguments remain unaddressed in your synthesis?'
+        '⚠️ AI service is temporarily busy. Please click Retry to re-run your synthesis audit.'
       );
     } finally {
       setLoading(false);
@@ -231,6 +231,25 @@ export default function SynthesiseStagePage() {
                       🔍 {agentPrefs.avatarName.toUpperCase()} ({agentPrefs.toneName.toUpperCase()}) REASONING AUDIT
                     </div>
                     <p className={styles.messageText}>{aiFeedback}</p>
+                    {aiFeedback.includes('⚠️') && (
+                      <button
+                        type="button"
+                        onClick={handleCrossCheckSynthesis}
+                        style={{
+                          marginTop: '8px',
+                          padding: '5px 12px',
+                          borderRadius: '999px',
+                          border: '1px solid #37F3FF',
+                          background: 'rgba(55, 243, 255, 0.14)',
+                          color: '#37F3FF',
+                          fontSize: '0.78rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        ↻ Retry Audit
+                      </button>
+                    )}
                   </div>
                 </div>
               )}

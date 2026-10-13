@@ -132,18 +132,7 @@ export default function InquireEvaluateStagePage() {
     chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
 
-  const submitMessage = async () => {
-    if (!inputText.trim() || loading) return;
-
-    const userText = inputText.trim();
-    const userMsg: ChatMessage = {
-      id: `msg_${Date.now()}`,
-      sender: 'student',
-      text: userText,
-    };
-
-    setMessages((prev) => [...prev, userMsg]);
-    setInputText('');
+  const sendInquireTurn = async (userText: string, baseHistory: ChatMessage[]) => {
     setLoading(true);
 
     try {
@@ -163,22 +152,39 @@ export default function InquireEvaluateStagePage() {
       }
 
       const highConfidenceRegex =
-        /\b(definitely|obviously|clearly|always|never|proves|fake|hoax|certainly|guaranteed|undeniable|true|false)\b/i;
-      const isHighConfidence = highConfidenceRegex.test(userText);
+        /\b(definitely|obviously|clearly|always|never|proves|fake|hoax|certainly|guaranteed|undeniable|true|false|100%|without a doubt|everyone knows)\b/i;
+      const hasEvidenceKeywords =
+        /\b(source|article|post|study|data|according to|author|evidence|quote|measured|statistic|research)\b/i.test(
+          userText
+        );
+      const isShortOrUnsupported =
+        userText.split(/\s+/).length < 30 ||
+        !hasEvidenceKeywords ||
+        (localNotes.length === 0 && notesCount === 0);
+      const isHighConfidenceLowEvidence =
+        highConfidenceRegex.test(userText) && isShortOrUnsupported;
       const shouldTriggerRandomly = Math.random() < 0.3;
+
+      const hasMinimalPriorActivity =
+        notesCount === 0 &&
+        (!Array.isArray(localNotes) || localNotes.length === 0) &&
+        (!Array.isArray(localNodes) || localNodes.length === 0);
+
       const effectiveMode =
         isDevilsAdvocate ||
         agentPrefs.toneId === 'devils_advocate' ||
-        isHighConfidence ||
-        shouldTriggerRandomly
+        isHighConfidenceLowEvidence ||
+        (!hasMinimalPriorActivity && shouldTriggerRandomly)
           ? 'DevilsAdvocate'
+          : hasMinimalPriorActivity
+          ? 'Scaffolding'
           : 'Socratic';
 
       const res = await fetch(`/api/modules/${moduleId}/inquire/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          history: messages,
+          history: baseHistory,
           userMessage: userText,
           mode: effectiveMode,
           notes: Array.isArray(localNotes) ? localNotes : [],
@@ -207,12 +213,43 @@ export default function InquireEvaluateStagePage() {
         {
           id: `msg_err_${Date.now()}`,
           sender: 'agent',
-          text: 'What underlying assumptions might we challenge in that claim? What evidence is needed to test it?',
+          text: '⚠️ AI service is temporarily busy. Please click Retry to resend your message.',
         },
       ]);
     } finally {
       setLoading(false);
     }
+  };
+
+  const submitMessage = async () => {
+    if (!inputText.trim() || loading) return;
+
+    const userText = inputText.trim();
+    const userMsg: ChatMessage = {
+      id: `msg_${Date.now()}`,
+      sender: 'student',
+      text: userText,
+    };
+
+    const historyBeforeTurn = [...messages];
+    setMessages((prev) => [...prev, userMsg]);
+    setInputText('');
+    await sendInquireTurn(userText, historyBeforeTurn);
+  };
+
+  const handleRetryLastTurn = async () => {
+    if (loading) return;
+    const lastStudentIdx = [...messages]
+      .map((m, i) => ({ sender: m.sender, i }))
+      .reverse()
+      .find((x) => x.sender === 'student')?.i;
+    if (lastStudentIdx === undefined) return;
+
+    const lastStudentMsg = messages[lastStudentIdx];
+    const historyUpToStudent = messages.slice(0, lastStudentIdx);
+    const cleanedMessages = messages.slice(0, lastStudentIdx + 1);
+    setMessages(cleanedMessages);
+    await sendInquireTurn(lastStudentMsg.text, historyUpToStudent);
   };
 
   const handleSendMessage = async (e: React.FormEvent) => {
@@ -317,6 +354,26 @@ export default function InquireEvaluateStagePage() {
                       <div className={styles.devilsTag}>DEVIL&apos;S ADVOCATE COUNTER-CLAIM</div>
                     )}
                     <p className={styles.messageText}>{m.text}</p>
+                    {m.sender === 'agent' && m.text.includes('⚠️') && (
+                      <button
+                        type="button"
+                        onClick={handleRetryLastTurn}
+                        disabled={loading}
+                        style={{
+                          marginTop: '8px',
+                          padding: '5px 12px',
+                          borderRadius: '999px',
+                          border: '1px solid #37F3FF',
+                          background: 'rgba(55, 243, 255, 0.14)',
+                          color: '#37F3FF',
+                          fontSize: '0.78rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        ↻ Retry
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
