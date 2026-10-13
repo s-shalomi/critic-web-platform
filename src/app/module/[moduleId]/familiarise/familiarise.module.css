@@ -729,19 +729,34 @@
 }
 
 .stageNavBar {
-  background: linear-gradient(180deg, rgba(64, 78, 108, 0.8) 0%, rgba(45, 57, 83, 0.88) 100%);
+  background: linear-gradient(180deg, rgba(64, 78, 108, 0.58) 0%, rgba(45, 57, 83, 0.68) 100%);
   backdrop-filter: blur(20px) saturate(150%);
   -webkit-backdrop-filter: blur(20px) saturate(150%);
-  border: 1.5px solid rgba(138, 160, 200, 0.36);
+  border: 1.5px solid rgba(138, 160, 200, 0.32);
   border-radius: 22px;
   padding: 14px clamp(28px, 3.8vw, 46px);
   display: flex;
   align-items: center;
   gap: clamp(28px, 4.2vw, 54px);
   box-shadow:
-    0 20px 44px -8px rgba(4, 8, 22, 0.72),
-    0 0 28px rgba(55, 243, 255, 0.08),
-    inset 0 1px 1px rgba(255, 255, 255, 0.2);
+    0 18px 38px -8px rgba(4, 8, 22, 0.62),
+    0 0 24px rgba(55, 243, 255, 0.06),
+    inset 0 1px 1px rgba(255, 255, 255, 0.18);
+  transition:
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    background 0.28s ease,
+    border-color 0.28s ease,
+    box-shadow 0.28s ease;
+}
+
+.stageNavBar:hover {
+  transform: scale(1.035) translateY(-2px);
+  background: linear-gradient(180deg, rgba(64, 78, 108, 0.92) 0%, rgba(40, 52, 78, 0.96) 100%);
+  border-color: rgba(148, 196, 232, 0.52);
+  box-shadow:
+    0 24px 50px -8px rgba(4, 8, 22, 0.82),
+    0 0 32px rgba(55, 243, 255, 0.14),
+    inset 0 1px 1px rgba(255, 255, 255, 0.28);
 }
 
 .stageStep {
@@ -763,7 +778,7 @@
 
 .stageStep:hover:not(.stageStepActive) {
   transform: translateY(-4px);
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .stageStep:focus-visible {
@@ -780,7 +795,7 @@
   height: 50px;
   border-radius: 50%;
   background: linear-gradient(180deg, #43B5CD 0%, #3499B0 100%);
-  border: none;
+  border: 2px solid rgba(125, 242, 255, 0.65);
   color: #0F172E;
   font-family: var(--font-display);
   font-size: 1.05rem;
@@ -794,11 +809,13 @@
   transition:
     transform 0.24s cubic-bezier(0.22, 1, 0.36, 1),
     background 0.24s ease,
+    border-color 0.24s ease,
     box-shadow 0.24s ease;
 }
 
 .stageStep:hover:not(.stageStepActive) .stageCircle {
   background: #37F3FF;
+  border-color: #EAF6FF;
   color: #0F172E;
   box-shadow:
     0 0 20px rgba(55, 243, 255, 0.72),
@@ -808,7 +825,7 @@
 
 .stageCircleActive {
   background: #37F3FF;
-  border: none;
+  border: 2px solid #EAF6FF;
   color: #0F172E;
   box-shadow:
     0 0 22px rgba(55, 243, 255, 0.82),
