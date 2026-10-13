@@ -29,7 +29,7 @@
   height: 100%;
   background: #0F172E;
   border-right: 1.5px solid rgba(139, 92, 246, 0.45);
-  padding: clamp(18px, 2.2vh, 26px) clamp(22px, 2.4vw, 36px) clamp(150px, 17vh, 168px);
+  padding: clamp(18px, 2.2vh, 26px) clamp(22px, 2.4vw, 36px) clamp(112px, 12.8vh, 124px);
   display: flex;
   flex-direction: column;
   z-index: 20;
@@ -423,7 +423,7 @@
 /* Floating Stage Navigation Dock (identical position & styling to Familiarise & Conceptualise) */
 .stageNavWrapper {
   position: fixed;
-  bottom: clamp(18px, 2.6vh, 28px);
+  bottom: clamp(12px, 1.8vh, 18px);
   left: 55%;
   transform: translateX(-50%);
   z-index: 50;
@@ -436,11 +436,11 @@
   backdrop-filter: blur(20px) saturate(150%);
   -webkit-backdrop-filter: blur(20px) saturate(150%);
   border: 1.5px solid rgba(139, 92, 246, 0.45);
-  border-radius: 22px;
-  padding: 14px clamp(28px, 3.8vw, 46px);
+  border-radius: 20px;
+  padding: 9px clamp(22px, 3vw, 36px);
   display: flex;
   align-items: center;
-  gap: clamp(28px, 4.2vw, 54px);
+  gap: clamp(20px, 3.2vw, 42px);
   box-shadow:
     0 18px 38px -8px rgba(4, 8, 22, 0.62),
     0 0 24px rgba(55, 243, 255, 0.06),
@@ -465,13 +465,13 @@
 .stageStep {
   background: transparent;
   border: none;
-  border-radius: 16px;
-  padding: 6px 12px;
-  min-width: 88px;
+  border-radius: 14px;
+  padding: 4px 10px;
+  min-width: 76px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
   cursor: pointer;
   position: relative;
   transition:
@@ -480,7 +480,7 @@
 }
 
 .stageStep:hover:not(.stageStepActive) {
-  transform: translateY(-4px);
+  transform: translateY(-3px);
   background: rgba(255, 255, 255, 0.06);
 }
 
@@ -494,14 +494,14 @@
 }
 
 .stageCircle {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: linear-gradient(180deg, #43B5CD 0%, #3499B0 100%);
   border: 2px solid rgba(125, 242, 255, 0.65);
   color: #0F172E;
   font-family: var(--font-display);
-  font-size: 1.05rem;
+  font-size: 0.94rem;
   font-weight: 600;
   display: flex;
   align-items: center;
@@ -531,15 +531,15 @@
   border: 2px solid #EAF6FF;
   color: #0F172E;
   box-shadow:
-    0 0 22px rgba(55, 243, 255, 0.82),
-    0 0 42px rgba(55, 243, 255, 0.3),
+    0 0 20px rgba(55, 243, 255, 0.82),
+    0 0 36px rgba(55, 243, 255, 0.3),
     inset 0 1px 2px rgba(255, 255, 255, 0.55);
   font-weight: 700;
 }
 
 .stageLabel {
   font-family: var(--font-display);
-  font-size: 0.96rem;
+  font-size: 0.86rem;
   font-weight: 500;
   color: #B4C0D9;
   letter-spacing: 0.1px;
