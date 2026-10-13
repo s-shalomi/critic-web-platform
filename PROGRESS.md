@@ -792,4 +792,27 @@
 - **Tests Passing**:
   - `npm test` (31/31 tests passing across 8 test suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
+- **Immediate Next Step**: Implement Conceptualise screen per `screens_v2/conceptualise.png` and `screens_v2/conceptualise_nodes.png`.
+
+---
+
+### [2026-10-13] - UI Iteration 2: Conceptualise Screen (`screens_v2/conceptualise.png` & `screens_v2/conceptualise_nodes.png`)
+
+- **Role**: Full Stack Developer
+- **Code Built & Updated**:
+  - **Conceptualise Stage Page ([`src/app/module/[moduleId]/conceptualise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/conceptualise/page.tsx) & [`conceptualise.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/conceptualise/conceptualise.module.css))**:
+    - Built full-height `100dvh` split workspace matching [`screens_v2/conceptualise.png`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/screens_v2/conceptualise.png) and [`screens_v2/conceptualise_nodes.png`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/screens_v2/conceptualise_nodes.png) using Section 9 tokens (`#37F3FF`, `#0F172E`, `#EAF6FF`, `#D9DFF7`, `Space Grotesk`, `Exo 2`).
+    - Left `#0F172E` panel with `← Climate Change` back button, collapsible toggle, `Mind Map Connections` heading, horizontal source card carousel with `◀` / `▶` arrow buttons, glowing purple pagination dots, author initials avatar (`DT`), and purple capsule inline note highlights with hover/pinned tooltips.
+    - Bottom-left companion robot dock rendering `<RobotAvatar variant={agentPrefs.appearance} size={136} />` and `{agentPrefs.avatarName} • Tone: {agentPrefs.toneName}` badge with Socratic hint speech bubble.
+    - Top-right `Tutorial` pill button and `?` help circle button with purple borders opening the stage tutorial and Socratic AI peer disclosure modals.
+    - Floating stage navigation dock (`01 Annotate`, `02 Mind Map` active, `03 Challenge`, `04 Conclude`) with cyan/ice-white number strokes and hover scale/opacity elevation.
+  - **Shared Concept Map Canvas ([`src/shared/components/ConceptMapCanvas/ConceptMapCanvas.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/ConceptMapCanvas/ConceptMapCanvas.tsx) & [`ConceptMapCanvas.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/ConceptMapCanvas/ConceptMapCanvas.module.css))**:
+    - Updated right-side vertical toolbar with crisp SVG icons matching `screens_v2/conceptualise.png` (`✋` Pan, `◯` Create Node, `╱` Link Nodes, `TT` Edit Node Text, `🗑️` Delete Node, plus `+`/`−`/`⌖` zoom and reset controls).
+    - Styled circular concept nodes with dark navy radial gradient, `#7C4DFF` purple rim, cyan/purple ambient glow, bold `#EAF6FF` `Space Grotesk` labels, and `#37F3FF` glowing link lines matching `screens_v2/conceptualise_nodes.png`.
+    - Preserved 100% of existing node/link creation, editing, deletion, note-revert syncing, audio feedback, and canvas pan/zoom functionality.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (31/31 tests passing across 8 test suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
 - **Immediate Next Step**: Await user feedback or next screen instruction.
+

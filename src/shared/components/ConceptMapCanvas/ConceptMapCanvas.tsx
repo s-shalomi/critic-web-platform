@@ -459,6 +459,31 @@ export default function ConceptMapCanvas({
     setZoomLevel(1);
   };
 
+  const handleToolbarEditNode = () => {
+    if (selectedNodeId) {
+      const target = nodes.find((n) => n.id === selectedNodeId);
+      if (target) {
+        setEditingNodeId(target.id);
+        setEditNodeText(target.text);
+        return;
+      }
+    }
+    if (nodes.length > 0) {
+      const lastNode = nodes[nodes.length - 1];
+      setSelectedNodeId(lastNode.id);
+      setEditingNodeId(lastNode.id);
+      setEditNodeText(lastNode.text);
+    } else {
+      setShowAddNodeModal(true);
+    }
+  };
+
+  const handleToolbarDeleteNode = () => {
+    if (selectedNodeId) {
+      handleDeleteNode(selectedNodeId);
+    }
+  };
+
   return (
     <main
       ref={canvasStageRef}
@@ -473,10 +498,12 @@ export default function ConceptMapCanvas({
       onMouseLeave={handleMouseUpCanvas}
       onWheel={handleWheelCanvas}
     >
-      <div className={styles.canvasHeader}>
-        <h1 className={styles.stageTitle}>{stageTitle}</h1>
-        <span className={styles.panHint}>Drag background or use ✋ to pan • Scroll to move</span>
-      </div>
+      {stageTitle && stageTitle !== 'conceptualise' && (
+        <div className={styles.canvasHeader}>
+          <h1 className={styles.stageTitle}>{stageTitle}</h1>
+          <span className={styles.panHint}>Drag background or use ✋ to pan • Scroll to move</span>
+        </div>
+      )}
 
       <div className={`${styles.canvasStage} ${isPanning ? styles.canvasStagePanning : ''}`}>
         <div
@@ -529,8 +556,8 @@ export default function ConceptMapCanvas({
                     y1={y1}
                     x2={x2}
                     y2={y2}
-                    stroke={isHovered ? '#FF4FD8' : '#37F3FF'}
-                    strokeWidth={isHovered ? 4 : 3}
+                    stroke={isHovered ? '#A855F7' : '#37F3FF'}
+                    strokeWidth={isHovered ? 3.5 : 2.5}
                     className={styles.svgLineGlow}
                     pointerEvents="stroke"
                   />
@@ -636,68 +663,128 @@ export default function ConceptMapCanvas({
         </div>
       </div>
 
-      {/* Control Toolbar */}
+      {/* Right-Side Vertical Tool Dock matching screens_v2/conceptualise.png */}
       <div className={styles.canvasToolbar}>
         <button
-          onClick={() => setZoomLevel((z) => Math.min(z + 0.15, 2.2))}
-          className={styles.toolbarBtn}
-          title="Zoom In (Ctrl + Scroll Up)"
-        >
-          🔍+
-        </button>
-        <button
-          onClick={() => setZoomLevel((z) => Math.max(z - 0.15, 0.4))}
-          className={styles.toolbarBtn}
-          title="Zoom Out (Ctrl + Scroll Down)"
-        >
-          🔍-
-        </button>
-        <button
-          onClick={handleResetView}
-          className={styles.toolbarBtn}
-          title="Reset View / Center Mind Map"
-        >
-          🎯
-        </button>
-        <button
+          type="button"
           onClick={() => {
             setActiveTool('pan');
             setLinkSourceNodeId(null);
           }}
           className={`${styles.toolbarBtn} ${activeTool === 'pan' ? styles.activeToolBtn : ''}`}
           title="Pan Tool (Click and drag canvas to move around)"
+          aria-label="Pan Tool"
         >
-          ✋
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0" />
+            <path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2" />
+            <path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8" />
+            <path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15" />
+          </svg>
         </button>
+
         <button
+          type="button"
           onClick={() => setShowAddNodeModal(true)}
-          className={`${styles.toolbarBtn} ${activeTool === 'add_node' ? styles.activeToolBtn : ''}`}
+          className={`${styles.toolbarBtn} ${showAddNodeModal ? styles.activeToolBtn : ''}`}
           title="Create Concept Node"
+          aria-label="Create Concept Node"
         >
-          ◯
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="12" r="8.5" />
+          </svg>
         </button>
+
         <button
+          type="button"
           onClick={() => {
             setActiveTool('link');
             setLinkSourceNodeId(null);
           }}
           className={`${styles.toolbarBtn} ${activeTool === 'link' ? styles.activeToolBtn : ''}`}
           title="Create Link (Click 2 nodes to connect)"
+          aria-label="Create Link"
         >
-          🖋️
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+            <line x1="5" y1="19" x2="19" y2="5" />
+          </svg>
+        </button>
+
+        <button
+          type="button"
+          onClick={handleToolbarEditNode}
+          className={`${styles.toolbarBtn} ${editingNodeId ? styles.activeToolBtn : ''}`}
+          title="Edit Selected Node Text (or double-click any node)"
+          aria-label="Edit Node Text"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 7V5h12v2" />
+            <path d="M10 5v14" />
+            <path d="M8 19h4" />
+            <path d="M14 11h6" />
+            <path d="M17 11v8" />
+            <path d="M15.5 19h3" />
+          </svg>
+        </button>
+
+        <button
+          type="button"
+          onClick={handleToolbarDeleteNode}
+          className={styles.toolbarBtn}
+          title={selectedNodeId ? 'Delete Selected Node' : 'Select a node first to delete it'}
+          aria-label="Delete Selected Node"
+          style={{ opacity: selectedNodeId ? 1 : 0.65 }}
+        >
+          <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="3 6 5 6 21 6" />
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+            <line x1="10" y1="11" x2="10" y2="17" />
+            <line x1="14" y1="11" x2="14" y2="17" />
+          </svg>
+        </button>
+
+        <div className={styles.toolbarDivider} />
+
+        <button
+          type="button"
+          onClick={() => setZoomLevel((z) => Math.min(z + 0.15, 2.2))}
+          className={styles.toolbarSubBtn}
+          title="Zoom In (Ctrl + Scroll Up)"
+          aria-label="Zoom In"
+        >
+          +
+        </button>
+        <button
+          type="button"
+          onClick={() => setZoomLevel((z) => Math.max(z - 0.15, 0.4))}
+          className={styles.toolbarSubBtn}
+          title="Zoom Out (Ctrl + Scroll Down)"
+          aria-label="Zoom Out"
+        >
+          −
+        </button>
+        <button
+          type="button"
+          onClick={handleResetView}
+          className={styles.toolbarSubBtn}
+          title="Reset View / Center Mind Map"
+          aria-label="Reset View"
+        >
+          ⌖
         </button>
       </div>
 
       {/* Create Node Modal */}
       {showAddNodeModal && (
-        <div className={styles.modalBackdrop}>
-          <div className="glass-card-glow" style={{ padding: '32px', maxWidth: '420px', width: '90%' }}>
-            <h3 className="cyan-neon-text" style={{ fontFamily: 'var(--font-orbitron)', marginBottom: '16px' }}>
-              CREATE CONCEPT NODE
-            </h3>
+        <div className={styles.modalBackdrop} onClick={() => setShowAddNodeModal(false)}>
+          <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
+            <h3 className={styles.modalTitle}>Create Concept Node</h3>
+            <p className={styles.modalSubtitle}>
+              Enter a key concept or claim to add to your mind map canvas.
+            </p>
             <input
               type="text"
-              placeholder="e.g. key concept / arctic deep freeze"
+              placeholder="e.g. record setting cold / extreme weather"
               value={newNodeText}
               onChange={(e) => setNewNodeText(e.target.value)}
               onKeyDown={(e) => {
@@ -707,12 +794,12 @@ export default function ConceptMapCanvas({
               className={styles.modalInput}
               autoFocus
             />
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '20px' }}>
+            <div className={styles.modalActions}>
               <button onClick={() => setShowAddNodeModal(false)} className={styles.cancelBtn}>
                 Cancel
               </button>
-              <button onClick={handleAddNode} className="btn-primary-cyan">
-                CREATE NODE
+              <button onClick={handleAddNode} className={styles.createNodeBtn}>
+                Create Node
               </button>
             </div>
           </div>
