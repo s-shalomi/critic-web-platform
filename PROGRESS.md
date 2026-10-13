@@ -1195,12 +1195,12 @@
     - Added graceful fallback targeting `[data-tour="concept-canvas"]` if `[data-tour="concept-node"]` is ever absent.
   - **Tutorial Configuration ([`src/shared/config/tutorials.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/config/tutorials.ts))**:
     - Split Pan tool and Node Selection into separate, dedicated steps:
-      - `[data-tour="tool-pan"]`: *"Use the hand tool to pan and move around your canvas workspace."*
+      - `[data-tour="tool-pan"]`: *"Use the hand tool to pan around the canvas or select a node."*
       - `[data-tour="concept-node"]`: *"Select a node to edit and delete it (selected nodes glow blue)."*
   - **Requirements ([`requirements.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/requirements.md))**:
-    - Updated Section 10 Stage 2 to document that the tutorial points directly to concept nodes on the canvas.
+    - Updated Section 10 Stage 2 to document that the hand tool can be used to pan or select a node, and the tutorial points directly to concept nodes on the canvas.
   - **Test Suite Updates ([`tests/tutorial.test.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/tests/tutorial.test.ts))**:
-    - Added assertions verifying that `conceptualise` contains `[data-tour="concept-node"]` and that this step instructs users to select a node to edit and delete it.
+    - Added assertions verifying that `conceptualise` contains `[data-tour="concept-node"]`, that `tool-pan` mentions selecting a node, and that `concept-node` instructs users to select a node to edit and delete it.
 - **Dependencies Introduced**: None.
 - **Tests Passing**:
   - `npm test` (47/47 tests passing across 9 test suites).

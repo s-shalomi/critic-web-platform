@@ -53,8 +53,8 @@ export const STAGE_TUTORIAL_STEPS: Record<StageKey, TutorialStep[]> = {
     },
     {
       targetSelector: '[data-tour="tool-pan"]',
-      title: 'Pan Canvas (✋)',
-      content: 'Use the hand tool to pan and move around your canvas workspace.',
+      title: 'Pan & Select (✋)',
+      content: 'Use the hand tool to pan around the canvas or select a node.',
       placement: 'left',
     },
     {

@@ -119,6 +119,13 @@ describe('Tooltip Onboarding Tutorial & Stage Overviews', () => {
       expect(
         conceptualiseSteps.some(
           (s) =>
+            s.targetSelector === '[data-tour="tool-pan"]' &&
+            s.content.toLowerCase().includes('select a node')
+        )
+      ).toBe(true);
+      expect(
+        conceptualiseSteps.some(
+          (s) =>
             s.targetSelector === '[data-tour="concept-node"]' &&
             s.content.toLowerCase().includes('select a node to edit and delete')
         )
