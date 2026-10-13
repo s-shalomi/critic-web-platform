@@ -498,12 +498,15 @@ export default function ConceptMapCanvas({
       onMouseLeave={handleMouseUpCanvas}
       onWheel={handleWheelCanvas}
     >
-      {stageTitle && stageTitle !== 'conceptualise' && (
-        <div className={styles.canvasHeader}>
-          <h1 className={styles.stageTitle}>{stageTitle}</h1>
-          <span className={styles.panHint}>Drag background or use ✋ to pan • Scroll to move</span>
-        </div>
-      )}
+      {stageTitle &&
+        stageTitle !== 'conceptualise' &&
+        stageTitle !== 'inquire + evaluate' &&
+        stageTitle !== 'synthesise' && (
+          <div className={styles.canvasHeader}>
+            <h1 className={styles.stageTitle}>{stageTitle}</h1>
+            <span className={styles.panHint}>Drag background or use ✋ to pan • Scroll to move</span>
+          </div>
+        )}
 
       <div className={`${styles.canvasStage} ${isPanning ? styles.canvasStagePanning : ''}`}>
         <div

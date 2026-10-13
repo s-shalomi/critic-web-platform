@@ -30,7 +30,8 @@ export default function InquireEvaluateStagePage() {
   const [inputText, setInputText] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [isDevilsAdvocate, setIsDevilsAdvocate] = useState<boolean>(false);
-  const [showIntroModal, setShowIntroModal] = useState<boolean>(true);
+  const [showTutorialModal, setShowTutorialModal] = useState<boolean>(false);
+  const [showHelpModal, setShowHelpModal] = useState<boolean>(false);
   const [agentPrefs, setAgentPrefs] = useState<ResolvedAgentPreferences>(DEFAULT_AGENT_PREFERENCES);
 
   // Evidence notes count for non-blocking AI nudge
@@ -99,11 +100,10 @@ export default function InquireEvaluateStagePage() {
     chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
 
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const submitMessage = async () => {
     if (!inputText.trim() || loading) return;
 
-    const userText = inputText;
+    const userText = inputText.trim();
     const userMsg: ChatMessage = {
       id: `msg_${Date.now()}`,
       sender: 'student',
@@ -165,269 +165,330 @@ export default function InquireEvaluateStagePage() {
     }
   };
 
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await submitMessage();
+  };
+
   return (
     <div className={styles.container}>
-      {/* Header */}
-      <header className={styles.header}>
-        <button onClick={() => router.push('/dashboard')} className={styles.backBtn}>
-          ← Climate Change
-        </button>
-      </header>
-
-      {/* Non-blocking AI Contextual Nudge Banner */}
-      {notesCount === 0 && showNudge && (
-        <div
-          style={{
-            background: 'rgba(55, 243, 255, 0.12)',
-            borderBottom: '1px solid var(--primary-cyan)',
-            padding: '10px 24px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            color: 'var(--text-light)',
-            fontSize: '0.9rem',
-          }}
-        >
-          <span>
-            💡 <strong>AI Learning Nudge:</strong> You haven&apos;t gathered evidence notes in the{' '}
-            <strong>Familiarise</strong> stage yet! Gathering notes helps {agentPrefs.avatarName} cross-reference your reasoning.
-            You can continue exploring here or return to Familiarise anytime.
-          </span>
-          <button
-            onClick={() => setShowNudge(false)}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              color: 'var(--primary-cyan)',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              fontSize: '1rem',
-              marginLeft: '16px',
-            }}
-          >
-            ✕
-          </button>
-        </div>
-      )}
-
       {/* Main Workspace Split */}
       <div className={styles.workspace}>
-        {/* Left Interactive Chat Panel */}
+        {/* Left Interactive Socratic Inquiry Chat Panel */}
         <aside className={styles.chatPanel}>
-          <div className={styles.chatHeader}>
-            <div className={styles.chatTitleGroup}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <RobotAvatar variant={agentPrefs.appearance} size={36} />
-                <div>
-                  <h2
-                    className="cyan-neon-text"
-                    style={{ fontFamily: 'var(--font-orbitron)', fontSize: '1.1rem', margin: 0 }}
-                  >
-                    SOCRATIC INQUIRY
-                  </h2>
-                  <div
-                    style={{
-                      fontFamily: 'var(--font-display)',
-                      fontSize: '0.78rem',
-                      color: '#D9DFF7',
-                      marginTop: '2px',
-                    }}
-                  >
-                    <strong style={{ color: '#37F3FF' }}>{agentPrefs.avatarName}</strong> • Tone:{' '}
-                    <span style={{ color: '#EAF6FF', fontWeight: 600 }}>{agentPrefs.toneName}</span>
-                  </div>
-                </div>
-              </div>
+          <div className={styles.topHeaderRow}>
+            <button onClick={() => router.push('/dashboard')} className={styles.backBtn}>
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="19" y1="12" x2="5" y2="12" />
+                <polyline points="12 19 5 12 12 5" />
+              </svg>
+              <span>Climate Change</span>
+            </button>
+          </div>
+
+          <div className={styles.headingRow}>
+            <h1 className={styles.sidebarHeading}>Challenge Everything</h1>
+
+            <div className={styles.agentStatusRow}>
+              <span className={styles.agentTonePill}>
+                <strong className={styles.agentToneName}>{agentPrefs.avatarName}</strong>
+                <span className={styles.agentToneDot}>•</span>
+                <span>Tone: {agentPrefs.toneName}</span>
+              </span>
+
               <button
+                type="button"
                 onClick={() => setIsDevilsAdvocate(!isDevilsAdvocate)}
                 className={`${styles.devilsBtn} ${isDevilsAdvocate ? styles.devilsBtnActive : ''}`}
                 title="Toggle Devil's Advocate Mode"
               >
-                {isDevilsAdvocate ? "😈 Devil's Advocate Active" : "😈 Enable Devil's Advocate"}
+                {isDevilsAdvocate ? "Devil's Advocate: ON" : "Devil's Advocate"}
               </button>
             </div>
           </div>
 
-          <div className={styles.messagesList}>
-            {messages.map((m) => (
-              <div
-                key={m.id}
-                className={`${styles.messageRow} ${
-                  m.sender === 'student' ? styles.studentRow : styles.agentRow
-                }`}
+          {/* Non-blocking AI Contextual Nudge Banner */}
+          {notesCount === 0 && showNudge && (
+            <div className={styles.nudgeBanner}>
+              <span>
+                💡 <strong>AI Nudge:</strong> Gathering evidence notes in{' '}
+                <strong>Annotate</strong> helps {agentPrefs.avatarName} cross-reference your
+                reasoning.
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowNudge(false)}
+                className={styles.nudgeCloseBtn}
+                aria-label="Dismiss nudge"
               >
-                {m.sender === 'agent' && (
-                  <div className={styles.agentAvatarIcon}>
-                    <RobotAvatar variant={agentPrefs.appearance} size={34} />
-                  </div>
-                )}
+                ✕
+              </button>
+            </div>
+          )}
 
+          {/* Rounded Dark Slate Chat Card matching screens_v2/inquire_eval.png */}
+          <div className={styles.chatCardContainer}>
+            <div className={styles.messagesList}>
+              {messages.map((m) => (
                 <div
-                  className={`${styles.messageBubble} ${
-                    m.sender === 'student'
-                      ? styles.studentBubble
-                      : m.messageType === 'devils_advocate'
-                      ? styles.devilsAdvocateBubble
-                      : styles.agentBubble
+                  key={m.id}
+                  className={`${styles.messageRow} ${
+                    m.sender === 'student' ? styles.studentRow : styles.agentRow
                   }`}
                 >
                   {m.sender === 'agent' && (
                     <div
-                      style={{
-                        fontFamily: 'var(--font-display)',
-                        fontSize: '0.74rem',
-                        fontWeight: 700,
-                        color: '#37F3FF',
-                        marginBottom: '4px',
-                      }}
+                      className={styles.agentAvatarIcon}
+                      title={`${agentPrefs.avatarName} (${agentPrefs.toneName})`}
                     >
-                      {agentPrefs.avatarName} ({agentPrefs.toneName})
+                      <RobotAvatar variant={agentPrefs.appearance} size={46} />
                     </div>
                   )}
-                  {m.messageType === 'devils_advocate' && (
-                    <div className={styles.devilsTag}>DEVIL&apos;S ADVOCATE COUNTER-CLAIM</div>
-                  )}
-                  <p>{m.text}</p>
-                </div>
-              </div>
-            ))}
 
-            {loading && (
-              <div className={`${styles.messageRow} ${styles.agentRow}`}>
-                <div className={styles.agentAvatarIcon}>
-                  <RobotAvatar variant={agentPrefs.appearance} size={34} />
+                  <div
+                    className={`${styles.messageBubble} ${
+                      m.sender === 'student'
+                        ? styles.studentBubble
+                        : m.messageType === 'devils_advocate'
+                        ? styles.devilsAdvocateBubble
+                        : styles.agentBubble
+                    }`}
+                  >
+                    {m.messageType === 'devils_advocate' && (
+                      <div className={styles.devilsTag}>DEVIL&apos;S ADVOCATE COUNTER-CLAIM</div>
+                    )}
+                    <p className={styles.messageText}>{m.text}</p>
+                  </div>
                 </div>
-                <div className={styles.loadingBubble}>
-                  <span className={styles.dot} />
-                  <span className={styles.dot} />
-                  <span className={styles.dot} />
-                  <span className={styles.loadingText}>
-                    {agentPrefs.avatarName} ({agentPrefs.toneName}) is analyzing reasoning...
-                  </span>
-                </div>
-              </div>
-            )}
-            <div ref={chatBottomRef} />
-          </div>
+              ))}
 
-          {/* Input Box */}
-          <form onSubmit={handleSendMessage} className={styles.inputContainer}>
-            <div className={styles.inputBox}>
-              <input
-                type="text"
-                placeholder="What would you like to know? (Challenge claims or ask questions)"
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                className={styles.chatInput}
-                disabled={loading}
-              />
-              <div className={styles.inputActions}>
-                <button type="button" className={styles.iconBtn} title="Upload Evidence Image">
-                  📷
-                </button>
-                <button type="button" className={styles.iconBtn} title="Insert Code Snippet">
-                  &lt;&gt;
-                </button>
-                <button type="button" className={styles.iconBtn} title="Voice Input">
-                  🎤
-                </button>
+              {loading && (
+                <div className={`${styles.messageRow} ${styles.agentRow}`}>
+                  <div className={styles.agentAvatarIcon}>
+                    <RobotAvatar variant={agentPrefs.appearance} size={46} />
+                  </div>
+                  <div className={styles.loadingBubble}>
+                    <span className={styles.dot} />
+                    <span className={styles.dot} />
+                    <span className={styles.dot} />
+                    <span className={styles.loadingText}>
+                      {agentPrefs.avatarName} ({agentPrefs.toneName}) is thinking...
+                    </span>
+                  </div>
+                </div>
+              )}
+              <div ref={chatBottomRef} />
+            </div>
+
+            {/* Bottom Input Box inside the Chat Card matching screens_v2/inquire_eval.png */}
+            <form onSubmit={handleSendMessage} className={styles.inputContainer}>
+              <div className={styles.inputBox}>
+                <textarea
+                  rows={2}
+                  placeholder="Challenge yourself and the material. Ask questions about your beliefs and the source credibility."
+                  value={inputText}
+                  onChange={(e) => setInputText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      submitMessage();
+                    }
+                  }}
+                  className={styles.chatInput}
+                  disabled={loading}
+                />
                 <button
                   type="submit"
                   className={styles.sendBtn}
                   disabled={loading || !inputText.trim()}
                   title="Send Message"
+                  aria-label="Send Message"
                 >
-                  ↑
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <line x1="12" y1="19" x2="12" y2="5" />
+                    <polyline points="5 12 12 5 19 12" />
+                  </svg>
                 </button>
               </div>
-            </div>
-          </form>
+            </form>
+          </div>
         </aside>
 
-        {/* Right Interactive Concept Map Canvas using shared component */}
-        <ConceptMapCanvas moduleId={moduleId} stageTitle="inquire + evaluate" />
+        {/* Right Interactive Concept Map Canvas Area */}
+        <div className={styles.rightCanvasWrapper}>
+          {/* Top-Right Action Bar (Tutorial & Help) */}
+          <div className={styles.topRightActions}>
+            <button
+              type="button"
+              onClick={() => setShowTutorialModal(true)}
+              className={styles.tutorialBtn}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="9.5" stroke="#EAF6FF" strokeWidth="1.8" />
+                <polygon points="10,8.5 16,12 10,15.5" fill="#EAF6FF" />
+              </svg>
+              <span>Tutorial</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowHelpModal(true)}
+              className={styles.helpCircleBtn}
+              aria-label="About Socratic AI Peer & Disclosure"
+              title="About Socratic AI Peer & Disclosure"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="9.5" stroke="#EAF6FF" strokeWidth="1.8" />
+                <path
+                  d="M9.5 9.5C9.5 8.12 10.62 7 12 7C13.38 7 14.5 8.12 14.5 9.5C14.5 10.65 13.72 11.62 12.66 11.91C12.26 12.02 12 12.38 12 12.8V13.5"
+                  stroke="#EAF6FF"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                />
+                <circle cx="12" cy="16.5" r="1" fill="#EAF6FF" />
+              </svg>
+            </button>
+          </div>
+
+          <ConceptMapCanvas moduleId={moduleId} stageTitle="inquire + evaluate" />
+        </div>
       </div>
 
-      {/* Stage Navigation Bar */}
-      <footer className={styles.stageNavBar}>
-        <button
-          onClick={() => router.push(`/module/${moduleId}/familiarise`)}
-          className={styles.stageStep}
-        >
-          01 familiarise
-        </button>
-        <button
-          onClick={() => router.push(`/module/${moduleId}/conceptualise`)}
-          className={styles.stageStep}
-        >
-          02 conceptualise
-        </button>
-        <button
-          onClick={() => router.push(`/module/${moduleId}/inquire`)}
-          className={`${styles.stageStep} ${styles.stageStepActive}`}
-        >
-          03 inquire + evaluate
-        </button>
-        <button
-          onClick={() => router.push(`/module/${moduleId}/synthesise`)}
-          className={styles.stageStep}
-        >
-          04 synthesise
-        </button>
-      </footer>
-
-      {/* Stage Intro Modal */}
-      {showIntroModal && (
-        <div className={styles.modalBackdrop}>
-          <div
-            className="glass-card-glow"
-            style={{ padding: '36px', maxWidth: '540px', width: '90%', textAlign: 'center' }}
+      {/* Floating Stage Navigation Dock (matching Familiarise & Conceptualise) */}
+      <div className={styles.stageNavWrapper}>
+        <nav className={styles.stageNavBar} aria-label="Module stages">
+          <button
+            type="button"
+            onClick={() => router.push(`/module/${moduleId}/familiarise`)}
+            className={styles.stageStep}
           >
-            <h3
-              className="cyan-neon-text"
-              style={{ fontFamily: 'var(--font-orbitron)', marginBottom: '16px', fontSize: '1.2rem' }}
+            <span className={styles.stageCircle}>01</span>
+            <span className={styles.stageLabel}>Annotate</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => router.push(`/module/${moduleId}/conceptualise`)}
+            className={styles.stageStep}
+          >
+            <span className={styles.stageCircle}>02</span>
+            <span className={styles.stageLabel}>Mind Map</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => router.push(`/module/${moduleId}/inquire`)}
+            className={`${styles.stageStep} ${styles.stageStepActive}`}
+            aria-current="step"
+          >
+            <span className={`${styles.stageCircle} ${styles.stageCircleActive}`}>03</span>
+            <span className={styles.stageLabel}>Challenge</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => router.push(`/module/${moduleId}/synthesise`)}
+            className={styles.stageStep}
+          >
+            <span className={styles.stageCircle}>04</span>
+            <span className={styles.stageLabel}>Conclude</span>
+          </button>
+        </nav>
+      </div>
+
+      {/* Tutorial Modal */}
+      {showTutorialModal && (
+        <div className={styles.modalBackdrop} onClick={() => setShowTutorialModal(false)}>
+          <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => setShowTutorialModal(false)}
+              className={styles.modalCloseBtn}
+              aria-label="Close tutorial"
             >
-              ❓ INQUIRE &amp; EVALUATE DISCLOSURE
-            </h3>
-            <p className={styles.introModalText} style={{ marginBottom: '16px' }}>
-              Interrogate topic material, question assumptions, seek alternative viewpoints, and assess the
-              credibility of evidence. You can also build and link concept nodes on the right.
+              ✕
+            </button>
+            <h2 className={styles.modalTitle}>Stage 03: Challenge Everything</h2>
+            <p className={styles.modalLead}>
+              Interrogate topic material, question assumptions, seek alternative viewpoints, and
+              assess the credibility of evidence alongside your mind map.
             </p>
-            <div
-              style={{
-                background: 'rgba(7, 11, 26, 0.7)',
-                border: '1px solid var(--accent-magenta)',
-                borderRadius: '10px',
-                padding: '16px',
-                textAlign: 'left',
-                fontSize: '0.88rem',
-                color: '#D9DFF7',
-                lineHeight: '1.5',
-              }}
+            <ol className={styles.tutorialStepsList}>
+              <li>
+                <strong>Dialogue with {agentPrefs.avatarName}:</strong> Respond to Socratic questions
+                or ask your own questions in the chat box to test your reasoning.
+              </li>
+              <li>
+                <strong>Devil&apos;s Advocate Mode:</strong> Toggle Devil&apos;s Advocate to have{' '}
+                {agentPrefs.avatarName} actively challenge your claims with counter-perspectives.
+              </li>
+              <li>
+                <strong>Refine Your Mind Map:</strong> As new insights emerge in the dialogue, add,
+                edit, or connect concept nodes directly on the right canvas.
+              </li>
+            </ol>
+            <button onClick={() => setShowTutorialModal(false)} className={styles.modalPrimaryBtn}>
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Help / Socratic AI Disclosure Modal */}
+      {showHelpModal && (
+        <div className={styles.modalBackdrop} onClick={() => setShowHelpModal(false)}>
+          <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => setShowHelpModal(false)}
+              className={styles.modalCloseBtn}
+              aria-label="Close help"
             >
-              <strong style={{ color: 'var(--accent-magenta)', display: 'block', marginBottom: '8px' }}>
+              ✕
+            </button>
+            <h2 className={styles.modalTitle}>Inquire &amp; Evaluate Disclosure</h2>
+            <p className={styles.modalLead}>
+              You are chatting with <strong>{agentPrefs.avatarName}</strong> using your selected{' '}
+              <strong>{agentPrefs.toneName}</strong> tone.
+            </p>
+            <div className={styles.disclosureBox}>
+              <strong className={styles.disclosureHeading}>
                 ⚠️ Mandatory Socratic Peer Disclosure:
               </strong>
-              <ul style={{ paddingLeft: '18px', margin: 0 }}>
-                <li style={{ marginBottom: '6px' }}>
-                  <strong>Socratic Questioning &amp; Devil&apos;s Advocate:</strong> Aria acts as a Socratic peer
-                  and will challenge your assumptions with counter-perspectives.
-                </li>
-                <li style={{ marginBottom: '6px' }}>
-                  <strong>Reasoning Test:</strong> Aria may take positions it does not &quot;believe&quot; to
-                  test your evidence evaluation.
+              <ul className={styles.disclosureList}>
+                <li>
+                  <strong>Socratic Questioning &amp; Devil&apos;s Advocate:</strong>{' '}
+                  {agentPrefs.avatarName} acts as a Socratic peer and will challenge your assumptions
+                  with counter-perspectives.
                 </li>
                 <li>
-                  <strong>No Verified Facts:</strong> Do not treat agent statements as verified facts.
+                  <strong>Reasoning Test:</strong> {agentPrefs.avatarName} may take positions it does
+                  not &ldquo;believe&rdquo; to test your evidence evaluation.
+                </li>
+                <li>
+                  <strong>No Verified Facts:</strong> Do not treat agent statements as verified
+                  facts.
                 </li>
               </ul>
             </div>
-            <button
-              onClick={() => setShowIntroModal(false)}
-              className="btn-primary-cyan"
-              style={{ marginTop: '24px', padding: '12px 36px', fontWeight: 'bold' }}
-            >
-              UNDERSTOOD &amp; START
+            <button onClick={() => setShowHelpModal(false)} className={styles.modalPrimaryBtn}>
+              Understood
             </button>
           </div>
         </div>
