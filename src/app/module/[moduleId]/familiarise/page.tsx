@@ -542,7 +542,7 @@ export default function FamiliariseStagePage() {
               }`}
               title={`Click ${agentPrefs.avatarName} (${agentPrefs.toneName} tone) for a Socratic hint`}
             >
-              <RobotAvatar variant={agentPrefs.appearance} size={112} />
+              <RobotAvatar variant={agentPrefs.appearance} size={130} />
             </button>
 
             <div className={styles.agentMetaPill} onClick={handleAgentClick}>
@@ -647,45 +647,100 @@ export default function FamiliariseStagePage() {
             </div>
           )}
 
-          {/* Dedicated Bottom Dock Zone inside Right Workspace */}
+          {/* Dedicated Bottom Navigation Dock Zone inside Right Workspace */}
           <div className={styles.stageNavWrapper}>
-            <footer className={styles.stageNavBar} aria-label="Module stages">
+            <nav className={styles.stageNavBar} aria-label="Module stage navigation">
               <button
                 type="button"
                 onClick={() => router.push(`/module/${moduleId}/familiarise`)}
                 className={`${styles.stageStep} ${styles.stageStepActive}`}
+                aria-current="step"
               >
                 <span className={`${styles.stageCircle} ${styles.stageCircleActive}`}>01</span>
-                <span className={styles.stageLabel}>Annotate</span>
+                <span className={styles.stageStepTextGroup}>
+                  <span className={styles.stageLabel}>Annotate</span>
+                  <span className={styles.stageActiveSub}>Current Stage</span>
+                </span>
               </button>
+
+              <span className={styles.stageConnector} aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </span>
 
               <button
                 type="button"
                 onClick={() => router.push(`/module/${moduleId}/conceptualise`)}
                 className={styles.stageStep}
+                title="Navigate to Stage 02: Mind Map (Conceptualise)"
               >
                 <span className={styles.stageCircle}>02</span>
-                <span className={styles.stageLabel}>Mind Map</span>
+                <span className={styles.stageStepTextGroup}>
+                  <span className={styles.stageLabel}>
+                    Mind Map <span className={styles.stageHoverArrow}>→</span>
+                  </span>
+                  <span className={styles.stageGoSub}>Go to stage</span>
+                </span>
               </button>
+
+              <span className={styles.stageConnector} aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </span>
 
               <button
                 type="button"
                 onClick={() => router.push(`/module/${moduleId}/inquire`)}
                 className={styles.stageStep}
+                title="Navigate to Stage 03: Challenge (Inquire + Evaluate)"
               >
                 <span className={styles.stageCircle}>03</span>
-                <span className={styles.stageLabel}>Challenge</span>
+                <span className={styles.stageStepTextGroup}>
+                  <span className={styles.stageLabel}>
+                    Challenge <span className={styles.stageHoverArrow}>→</span>
+                  </span>
+                  <span className={styles.stageGoSub}>Go to stage</span>
+                </span>
               </button>
+
+              <span className={styles.stageConnector} aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </span>
 
               <button
                 type="button"
                 onClick={() => router.push(`/module/${moduleId}/synthesise`)}
                 className={styles.stageStep}
+                title="Navigate to Stage 04: Conclude (Synthesise)"
               >
                 <span className={styles.stageCircle}>04</span>
-                <span className={styles.stageLabel}>Conclude</span>
+                <span className={styles.stageStepTextGroup}>
+                  <span className={styles.stageLabel}>
+                    Conclude <span className={styles.stageHoverArrow}>→</span>
+                  </span>
+                  <span className={styles.stageGoSub}>Go to stage</span>
+                </span>
               </button>
-            </footer>
+
+              <div className={styles.dockDivider} aria-hidden="true" />
+
+              <button
+                type="button"
+                onClick={() => router.push(`/module/${moduleId}/conceptualise`)}
+                className={styles.nextStageBtn}
+                title="Continue to Mind Map stage"
+              >
+                <span>Next Stage</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                  <polyline points="12 5 19 12 12 19" />
+                </svg>
+              </button>
+            </nav>
           </div>
         </main>
       </div>

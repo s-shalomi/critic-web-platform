@@ -21,15 +21,15 @@
   overflow: hidden;
 }
 
-/* Left Sidebar matching screens_v2/familiarise.png with independent scroll region */
+/* Left Sidebar matching screens_v2/familiarise.png with larger width and independent scroll region */
 .sidebar {
-  width: clamp(256px, 21vw, 304px);
+  width: clamp(320px, 26vw, 370px);
   flex-shrink: 0;
   height: 100%;
   min-height: 0;
   background: #0F172E;
-  border-right: 1.5px solid rgba(139, 92, 246, 0.45);
-  padding: clamp(20px, 2.6vh, 30px) clamp(18px, 1.8vw, 26px) clamp(16px, 2vh, 22px);
+  border-right: 2px solid rgba(139, 92, 246, 0.48);
+  padding: clamp(26px, 3.2vh, 36px) clamp(24px, 2.2vw, 32px) clamp(18px, 2.2vh, 24px);
   display: flex;
   flex-direction: column;
   position: relative;
@@ -39,12 +39,12 @@
 .backBtn {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 11px;
   background: transparent;
   border: none;
   color: #EAF6FF;
   font-family: var(--font-display);
-  font-size: clamp(0.98rem, 0.88rem + 0.25vw, 1.12rem);
+  font-size: clamp(1.08rem, 0.96rem + 0.3vw, 1.25rem);
   font-weight: 700;
   cursor: pointer;
   padding: 4px 0;
@@ -60,12 +60,12 @@
 
 .stageHeading {
   font-family: var(--font-display);
-  font-size: clamp(1.42rem, 1.15rem + 0.75vw, 1.8rem);
+  font-size: clamp(1.7rem, 1.35rem + 0.8vw, 2.08rem);
   font-weight: 700;
   color: #EAF6FF;
-  margin: clamp(18px, 2.6vh, 28px) 0 clamp(14px, 2vh, 20px);
-  letter-spacing: -0.3px;
-  line-height: 1.18;
+  margin: clamp(22px, 3vh, 34px) 0 clamp(18px, 2.4vh, 26px);
+  letter-spacing: -0.35px;
+  line-height: 1.16;
   flex-shrink: 0;
 }
 
@@ -78,21 +78,21 @@
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding-right: 4px;
-  padding-bottom: 8px;
+  gap: 13px;
+  padding-right: 6px;
+  padding-bottom: 10px;
 }
 
 .sourceNavItem {
-  background: rgba(24, 35, 62, 0.48);
-  border: 1px solid rgba(143, 166, 201, 0.26);
+  background: rgba(24, 35, 62, 0.5);
+  border: 1px solid rgba(143, 166, 201, 0.28);
   color: #D9DFF7;
   font-family: var(--font-display);
-  font-size: clamp(0.9rem, 0.84rem + 0.2vw, 1rem);
+  font-size: clamp(1rem, 0.92rem + 0.22vw, 1.12rem);
   font-weight: 600;
   text-align: left;
   cursor: pointer;
-  padding: 9px 18px;
+  padding: 11px 22px;
   border-radius: 9999px;
   transition: all 0.2s ease;
   width: 100%;
@@ -103,15 +103,15 @@
 .sourceNavItem:hover:not(.activeSourceNavItem) {
   border-color: rgba(217, 223, 247, 0.55);
   color: #EAF6FF;
-  background: rgba(24, 35, 62, 0.75);
+  background: rgba(24, 35, 62, 0.78);
 }
 
 .activeSourceNavItem {
   background: rgba(55, 243, 255, 0.14);
-  border: 1.25px solid #37F3FF;
+  border: 1.5px solid #37F3FF;
   color: #37F3FF;
   font-weight: 700;
-  box-shadow: 0 0 14px rgba(55, 243, 255, 0.14);
+  box-shadow: 0 0 16px rgba(55, 243, 255, 0.15);
 }
 
 /* Bottom-Left Selected Agent Avatar & Tone Dock */
@@ -717,11 +717,11 @@
   box-shadow: 0 0 14px rgba(55, 243, 255, 0.35);
 }
 
-/* Dedicated Bottom Stage Dock Zone */
+/* Dedicated Bottom Stage Navigation Dock Zone with Clear Interactive Affordances */
 .stageNavWrapper {
   flex-shrink: 0;
   width: 100%;
-  padding: 8px 24px clamp(14px, 2vh, 22px);
+  padding: 10px 24px clamp(16px, 2.2vh, 24px);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -729,68 +729,168 @@
 }
 
 .stageNavBar {
-  background: rgba(68, 82, 108, 0.8);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(143, 166, 201, 0.32);
-  border-radius: 16px;
-  padding: 10px 36px 9px;
+  background: rgba(15, 23, 46, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(143, 166, 201, 0.28);
+  border-radius: 18px;
+  padding: 8px 12px;
   display: flex;
   align-items: center;
-  gap: clamp(28px, 4vw, 52px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  gap: 8px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55), 0 0 24px rgba(55, 243, 255, 0.08);
 }
 
 .stageStep {
-  background: transparent;
-  border: none;
-  padding: 0;
+  background: rgba(24, 35, 62, 0.45);
+  border: 1px solid rgba(143, 166, 201, 0.2);
+  border-radius: 12px;
+  padding: 8px 14px 8px 10px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 5px;
+  gap: 10px;
   cursor: pointer;
-  transition: transform 0.2s ease;
+  transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+  text-align: left;
 }
 
-.stageStep:hover {
+.stageStep:hover:not(.stageStepActive) {
+  background: rgba(34, 49, 84, 0.78);
+  border-color: rgba(55, 243, 255, 0.55);
   transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35), 0 0 14px rgba(55, 243, 255, 0.14);
+}
+
+.stageStepActive {
+  background: rgba(55, 243, 255, 0.13);
+  border: 1.5px solid #37F3FF;
+  box-shadow: 0 0 20px rgba(55, 243, 255, 0.18);
+  cursor: default;
 }
 
 .stageCircle {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background: rgba(56, 195, 216, 0.78);
-  border: 1.5px solid rgba(168, 85, 247, 0.65);
-  color: #0F172E;
+  background: #0F172E;
+  border: 1.5px solid rgba(55, 243, 255, 0.5);
+  color: #EAF6FF;
   font-family: var(--font-display);
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: 0.88rem;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  flex-shrink: 0;
+  transition: all 0.22s ease;
+}
+
+.stageStep:hover:not(.stageStepActive) .stageCircle {
+  background: #37F3FF;
+  border-color: #37F3FF;
+  color: #0F172E;
+  box-shadow: 0 0 12px rgba(55, 243, 255, 0.6);
 }
 
 .stageCircleActive {
   background: #37F3FF;
-  border: 2px solid rgba(168, 85, 247, 0.8);
+  border: 2px solid rgba(168, 85, 247, 0.75);
+  color: #0F172E;
   box-shadow: 0 0 16px rgba(55, 243, 255, 0.8);
-  font-weight: 700;
+}
+
+.stageStepTextGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
 }
 
 .stageLabel {
-  font-family: var(--font-body);
-  font-size: 0.86rem;
-  font-weight: 500;
-  color: rgba(217, 223, 247, 0.78);
-  transition: color 0.2s ease;
+  font-family: var(--font-display);
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #EAF6FF;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  line-height: 1.2;
 }
 
 .stageStepActive .stageLabel {
-  color: #EAF6FF;
+  color: #37F3FF;
+}
+
+.stageActiveSub {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
   font-weight: 600;
+  color: #37F3FF;
+  letter-spacing: 0.2px;
+}
+
+.stageGoSub {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: rgba(217, 223, 247, 0.62);
+  transition: color 0.2s ease;
+}
+
+.stageStep:hover:not(.stageStepActive) .stageGoSub {
+  color: #37F3FF;
+}
+
+.stageHoverArrow {
+  font-size: 0.82rem;
+  color: rgba(217, 223, 247, 0.55);
+  transition: transform 0.2s ease, color 0.2s ease;
+  display: inline-block;
+}
+
+.stageStep:hover:not(.stageStepActive) .stageHoverArrow {
+  color: #37F3FF;
+  transform: translateX(3px);
+}
+
+.stageConnector {
+  color: rgba(143, 166, 201, 0.42);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1px;
+}
+
+.dockDivider {
+  width: 1px;
+  height: 32px;
+  background: rgba(143, 166, 201, 0.25);
+  margin: 0 4px;
+}
+
+.nextStageBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, rgba(55, 243, 255, 0.18) 0%, rgba(168, 85, 247, 0.22) 100%);
+  border: 1.25px solid #37F3FF;
+  color: #EAF6FF;
+  font-family: var(--font-display);
+  font-size: 0.88rem;
+  font-weight: 700;
+  padding: 10px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.22s ease;
+  white-space: nowrap;
+}
+
+.nextStageBtn:hover {
+  background: #37F3FF;
+  color: #0F172E;
+  box-shadow: 0 0 18px rgba(55, 243, 255, 0.45);
+  transform: translateY(-1px);
 }
 
 /* Loading State */
