@@ -8,6 +8,8 @@ import {
   getStudentStorageKey,
   hasSeenModuleDisclosure,
   markModuleDisclosureSeen,
+  hasSeenStageTutorial,
+  markStageTutorialSeen,
 } from '@/shared/utils/storage';
 import { reportStudentProgress } from '@/shared/utils/reportProgress';
 import ConceptMapCanvas from '@/shared/components/ConceptMapCanvas/ConceptMapCanvas';
@@ -18,6 +20,9 @@ import {
   DEFAULT_AGENT_PREFERENCES,
   ResolvedAgentPreferences,
 } from '@/shared/components/RobotAvatar/RobotAvatar';
+import { TooltipTutorial } from '@/shared/components/TooltipTutorial/TooltipTutorial';
+import { StageOverviewModal } from '@/shared/components/StageOverviewModal/StageOverviewModal';
+import { STAGE_TUTORIAL_STEPS } from '@/shared/config/tutorials';
 
 interface ChatMessage {
   id: string;
@@ -36,6 +41,7 @@ export default function InquireEvaluateStagePage() {
   const [loading, setLoading] = useState<boolean>(false);
   const [isDevilsAdvocate, setIsDevilsAdvocate] = useState<boolean>(false);
   const [showTutorialModal, setShowTutorialModal] = useState<boolean>(false);
+  const [showOverviewModal, setShowOverviewModal] = useState<boolean>(false);
   const [showHelpModal, setShowHelpModal] = useState<boolean>(false);
   const [agentPrefs, setAgentPrefs] = useState<ResolvedAgentPreferences>(DEFAULT_AGENT_PREFERENCES);
 
@@ -44,6 +50,18 @@ export default function InquireEvaluateStagePage() {
   const [showNudge, setShowNudge] = useState<boolean>(true);
 
   const chatBottomRef = useRef<HTMLDivElement>(null);
+
+  const handleCloseHelpModal = () => {
+    setShowHelpModal(false);
+    if (!hasSeenStageTutorial(moduleId, 'inquire')) {
+      setShowTutorialModal(true);
+    }
+  };
+
+  const handleCloseTutorial = () => {
+    setShowTutorialModal(false);
+    markStageTutorialSeen(moduleId, 'inquire');
+  };
 
   useEffect(() => {
     const chatKey = getStudentStorageKey('critic_chat', moduleId);
@@ -55,6 +73,8 @@ export default function InquireEvaluateStagePage() {
     if (!hasSeenModuleDisclosure(moduleId)) {
       setShowHelpModal(true);
       markModuleDisclosureSeen(moduleId);
+    } else if (!hasSeenStageTutorial(moduleId, 'inquire')) {
+      setShowTutorialModal(true);
     }
 
     reportStudentProgress('inquire');
@@ -262,7 +282,7 @@ export default function InquireEvaluateStagePage() {
       {/* Main Workspace Split */}
       <div className={styles.workspace}>
         {/* Left Interactive Socratic Inquiry Chat Panel */}
-        <aside className={styles.chatPanel}>
+        <aside className={styles.chatPanel} data-tour="chat-panel">
           <div className={styles.topHeaderRow}>
             <button onClick={() => router.push('/dashboard')} className={styles.backBtn}>
               <svg
@@ -471,6 +491,8 @@ export default function InquireEvaluateStagePage() {
               type="button"
               onClick={() => setShowTutorialModal(true)}
               className={styles.tutorialBtn}
+              data-tour="tutorial-btn"
+              title="View Stage Tutorial"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                 <circle cx="12" cy="12" r="9.5" stroke="#EAF6FF" strokeWidth="1.8" />
@@ -481,9 +503,11 @@ export default function InquireEvaluateStagePage() {
 
             <button
               type="button"
+              onClick={() => setShowOverviewModal(true)}
               className={styles.helpCircleBtn}
+              data-tour="help-btn"
               aria-label="Help"
-              title="Help"
+              title="Stage Overview: Why Challenging Assumptions Matters"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                 <circle cx="12" cy="12" r="9.5" stroke="#EAF6FF" strokeWidth="1.8" />
@@ -503,7 +527,7 @@ export default function InquireEvaluateStagePage() {
       </div>
 
       {/* Floating Stage Navigation Dock (matching Familiarise & Conceptualise) */}
-      <div className={styles.stageNavWrapper}>
+      <div className={styles.stageNavWrapper} data-tour="stage-dock">
         <nav className={styles.stageNavBar} aria-label="Module stages">
           <button
             type="button"
@@ -544,49 +568,28 @@ export default function InquireEvaluateStagePage() {
         </nav>
       </div>
 
-      {/* Tutorial Modal */}
-      {showTutorialModal && (
-        <div className={styles.modalBackdrop} onClick={() => setShowTutorialModal(false)}>
-          <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
-            <button
-              onClick={() => setShowTutorialModal(false)}
-              className={styles.modalCloseBtn}
-              aria-label="Close tutorial"
-            >
-              ✕
-            </button>
-            <h2 className={styles.modalTitle}>Stage 03: Challenge Everything</h2>
-            <p className={styles.modalLead}>
-              Interrogate topic material, question assumptions, seek alternative viewpoints, and
-              assess the credibility of evidence alongside your mind map.
-            </p>
-            <ol className={styles.tutorialStepsList}>
-              <li>
-                <strong>Dialogue with {agentPrefs.avatarName}:</strong> Respond to Socratic questions
-                or ask your own questions in the chat box to test your reasoning.
-              </li>
-              <li>
-                <strong>Devil&apos;s Advocate Mode:</strong> Toggle Devil&apos;s Advocate to have{' '}
-                {agentPrefs.avatarName} actively challenge your claims with counter-perspectives.
-              </li>
-              <li>
-                <strong>Refine Your Mind Map:</strong> As new insights emerge in the dialogue, add,
-                edit, or connect concept nodes directly on the right canvas.
-              </li>
-            </ol>
-            <button onClick={() => setShowTutorialModal(false)} className={styles.modalPrimaryBtn}>
-              Got it
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Interactive Tooltip Onboarding Tutorial */}
+      <TooltipTutorial
+        stageName="Challenge"
+        steps={STAGE_TUTORIAL_STEPS.inquire}
+        isOpen={showTutorialModal}
+        onClose={handleCloseTutorial}
+        onComplete={handleCloseTutorial}
+      />
+
+      {/* Stage Overview Modal (? Button) */}
+      <StageOverviewModal
+        stage="inquire"
+        isOpen={showOverviewModal}
+        onClose={() => setShowOverviewModal(false)}
+      />
 
       {/* Mandatory AI Disclosure Modal */}
       {showHelpModal && (
-        <div className={styles.modalBackdrop} onClick={() => setShowHelpModal(false)}>
+        <div className={styles.modalBackdrop} onClick={handleCloseHelpModal}>
           <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
             <button
-              onClick={() => setShowHelpModal(false)}
+              onClick={handleCloseHelpModal}
               className={styles.modalCloseBtn}
               aria-label="Close disclosure"
             >
@@ -614,7 +617,7 @@ export default function InquireEvaluateStagePage() {
                 </li>
               </ol>
             </div>
-            <button onClick={() => setShowHelpModal(false)} className={styles.modalPrimaryBtn}>
+            <button onClick={handleCloseHelpModal} className={styles.modalPrimaryBtn}>
               Understood
             </button>
           </div>

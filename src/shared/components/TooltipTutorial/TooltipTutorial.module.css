@@ -1,0 +1,292 @@
+/* TooltipTutorial Styles - Cyberpunk Glassmorphic Theme */
+
+.tutorialRoot {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: auto;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 15, 29, 0.72);
+  backdrop-filter: blur(2px);
+  cursor: pointer;
+  transition: opacity 0.25s ease;
+}
+
+/* Spotlight Ring Around Active Target Element */
+.spotlightRing {
+  position: fixed;
+  border-radius: 10px;
+  pointer-events: none;
+  border: 2px solid #37F3FF;
+  box-shadow:
+    0 0 0 9999px rgba(8, 14, 28, 0.65),
+    0 0 24px rgba(55, 243, 255, 0.65),
+    inset 0 0 16px rgba(55, 243, 255, 0.2);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: spotlightPulse 2.4s infinite ease-in-out;
+  z-index: 10000;
+}
+
+@keyframes spotlightPulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 9999px rgba(8, 14, 28, 0.65),
+      0 0 18px rgba(55, 243, 255, 0.55),
+      inset 0 0 12px rgba(55, 243, 255, 0.15);
+    border-color: #37F3FF;
+  }
+  50% {
+    box-shadow:
+      0 0 0 9999px rgba(8, 14, 28, 0.65),
+      0 0 32px rgba(168, 85, 247, 0.75),
+      inset 0 0 20px rgba(168, 85, 247, 0.25);
+    border-color: #A855F7;
+  }
+}
+
+/* Floating Tooltip Card */
+.tooltipCard {
+  position: fixed;
+  width: 360px;
+  max-width: calc(100vw - 32px);
+  background: rgba(15, 23, 46, 0.96);
+  border: 1.5px solid rgba(55, 243, 255, 0.45);
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.6),
+    0 0 28px rgba(55, 243, 255, 0.25);
+  border-radius: 14px;
+  padding: 20px 22px;
+  backdrop-filter: blur(20px);
+  z-index: 10001;
+  transition:
+    top 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    left 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: 'Exo 2', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #EAF6FF;
+}
+
+.tooltipCentered {
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%);
+}
+
+/* Directional Arrow Pointers */
+.tooltipArrow {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background: rgba(15, 23, 46, 0.96);
+  border: 1.5px solid rgba(55, 243, 255, 0.45);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+.arrow_bottom {
+  top: -8px;
+  left: calc(50% - 7px);
+  border-bottom: none;
+  border-right: none;
+}
+
+.arrow_top {
+  bottom: -8px;
+  left: calc(50% - 7px);
+  border-top: none;
+  border-left: none;
+}
+
+.arrow_left {
+  right: -8px;
+  top: calc(50% - 7px);
+  border-bottom: none;
+  border-left: none;
+}
+
+.arrow_right {
+  left: -8px;
+  top: calc(50% - 7px);
+  border-top: none;
+  border-right: none;
+}
+
+/* Header Row with Badges and Close Button */
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.badgeGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stageBadge {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #37F3FF;
+  background: rgba(55, 243, 255, 0.12);
+  border: 1px solid rgba(55, 243, 255, 0.3);
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+.stepBadge {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #D9DFF7;
+  opacity: 0.85;
+}
+
+.closeBtn {
+  background: transparent;
+  border: none;
+  color: #8FA6C9;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.closeBtn:hover {
+  color: #EAF6FF;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Title & Content */
+.stepTitle {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #EAF6FF;
+  margin: 0 0 8px 0;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+}
+
+.stepContent {
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: #D9DFF7;
+  margin: 0 0 16px 0;
+}
+
+/* Progress Dots Row */
+.dotsRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.progressDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(217, 223, 247, 0.2);
+  transition: all 0.25s ease;
+}
+
+.activeDot {
+  width: 22px;
+  border-radius: 999px;
+  background: #37F3FF;
+  box-shadow: 0 0 10px rgba(55, 243, 255, 0.6);
+}
+
+.completedDot {
+  background: rgba(55, 243, 255, 0.45);
+}
+
+/* Action Controls */
+.actionsRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 10px;
+  border-top: 1px solid rgba(217, 223, 247, 0.12);
+}
+
+.skipBtn {
+  background: transparent;
+  border: none;
+  color: #8FA6C9;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.skipBtn:hover {
+  color: #EAF6FF;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.navBtnGroup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.backBtn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(217, 223, 247, 0.2);
+  color: #D9DFF7;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  padding: 7px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.backBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #EAF6FF;
+  border-color: rgba(55, 243, 255, 0.4);
+}
+
+.nextBtn {
+  background: linear-gradient(135deg, #37F3FF 0%, #22D3EE 100%);
+  border: none;
+  color: #0F172E;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 7px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 0 16px rgba(55, 243, 255, 0.4);
+  transition: all 0.2s ease;
+}
+
+.nextBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 22px rgba(55, 243, 255, 0.65);
+}
+
+.nextBtn:active {
+  transform: translateY(0);
+}

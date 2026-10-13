@@ -8,6 +8,8 @@ import {
   getStudentStorageKey,
   hasSeenModuleDisclosure,
   markModuleDisclosureSeen,
+  hasSeenStageTutorial,
+  markStageTutorialSeen,
 } from '@/shared/utils/storage';
 import { reportStudentProgress } from '@/shared/utils/reportProgress';
 import {
@@ -17,6 +19,9 @@ import {
   DEFAULT_AGENT_PREFERENCES,
   ResolvedAgentPreferences,
 } from '@/shared/components/RobotAvatar/RobotAvatar';
+import { TooltipTutorial } from '@/shared/components/TooltipTutorial/TooltipTutorial';
+import { StageOverviewModal } from '@/shared/components/StageOverviewModal/StageOverviewModal';
+import { STAGE_TUTORIAL_STEPS } from '@/shared/config/tutorials';
 
 interface Source {
   id: string;
@@ -58,6 +63,7 @@ export default function FamiliariseStagePage() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [showIntroModal, setShowIntroModal] = useState<boolean>(false);
   const [showTutorialModal, setShowTutorialModal] = useState<boolean>(false);
+  const [showOverviewModal, setShowOverviewModal] = useState<boolean>(false);
   const [agentSpeech, setAgentSpeech] = useState<string | null>(null);
   const [agentLoading, setAgentLoading] = useState<boolean>(false);
   const [agentPrefs, setAgentPrefs] = useState<ResolvedAgentPreferences>(DEFAULT_AGENT_PREFERENCES);
@@ -75,6 +81,18 @@ export default function FamiliariseStagePage() {
   const [editText, setEditText] = useState<string>('');
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
+  const handleCloseIntroModal = () => {
+    setShowIntroModal(false);
+    if (!hasSeenStageTutorial(moduleId, 'familiarise')) {
+      setShowTutorialModal(true);
+    }
+  };
+
+  const handleCloseTutorial = () => {
+    setShowTutorialModal(false);
+    markStageTutorialSeen(moduleId, 'familiarise');
+  };
+
   useEffect(() => {
     setLoading(true);
     setAgentPrefs(getStoredAgentPreferences());
@@ -84,6 +102,8 @@ export default function FamiliariseStagePage() {
     if (!hasSeenModuleDisclosure(moduleId)) {
       setShowIntroModal(true);
       markModuleDisclosureSeen(moduleId);
+    } else if (!hasSeenStageTutorial(moduleId, 'familiarise')) {
+      setShowTutorialModal(true);
     }
 
     // Inform teacher portal this student is on the Familiarise stage
@@ -489,7 +509,7 @@ export default function FamiliariseStagePage() {
       {/* Main Split Workspace matching screens_v2/familiarise.png */}
       <div className={styles.workspace}>
         {/* Left Sidebar */}
-        <aside className={styles.sidebar}>
+        <aside className={styles.sidebar} data-tour="sidebar-sources">
           <button onClick={() => router.push('/dashboard')} className={styles.backBtn}>
             <svg
               width="18"
@@ -524,7 +544,7 @@ export default function FamiliariseStagePage() {
           </nav>
 
           {/* Bottom-Left Selected Agent Avatar & Tone Display */}
-          <div className={styles.agentSidebarDock}>
+          <div className={styles.agentSidebarDock} data-tour="agent-dock">
             {agentLoading && (
               <div className={styles.loadingSpeechBubble}>
                 <div className={styles.spinnerSmall} />
@@ -622,6 +642,8 @@ export default function FamiliariseStagePage() {
               type="button"
               onClick={() => setShowTutorialModal(true)}
               className={styles.tutorialBtn}
+              data-tour="tutorial-btn"
+              title="View Stage Tutorial"
             >
               <span className={styles.iconSquare}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
@@ -633,9 +655,11 @@ export default function FamiliariseStagePage() {
 
             <button
               type="button"
+              onClick={() => setShowOverviewModal(true)}
               className={styles.helpCircleBtn}
+              data-tour="help-btn"
               aria-label="Help"
-              title="Help"
+              title="Stage Overview: Why Annotate Matters"
             >
               <span className={styles.iconSquare}>?</span>
             </button>
@@ -650,7 +674,7 @@ export default function FamiliariseStagePage() {
               </div>
             ) : currentSource ? (
               <div className={styles.sourceCardContainer}>
-                <article className={styles.sourceCard}>
+                <article className={styles.sourceCard} data-tour="source-reading">
                   <div className={styles.authorHeader}>
                     <div className={styles.authorAvatar}>
                       {getAuthorInitials(currentSource.content.authorName || currentSource.title)}
@@ -708,7 +732,7 @@ export default function FamiliariseStagePage() {
           )}
 
           {/* Floating Stage Navigation Dock */}
-          <div className={styles.stageNavWrapper}>
+          <div className={styles.stageNavWrapper} data-tour="stage-dock">
             <nav className={styles.stageNavBar} aria-label="Module stages">
               <button
                 type="button"
@@ -754,51 +778,28 @@ export default function FamiliariseStagePage() {
       {/* Toast Notification Banner */}
       {toastMsg && <div className={styles.toastBanner}>{toastMsg}</div>}
 
-      {/* Tutorial Modal */}
-      {showTutorialModal && (
-        <div className={styles.modalBackdrop} onClick={() => setShowTutorialModal(false)}>
-          <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
-            <button
-              onClick={() => setShowTutorialModal(false)}
-              className={styles.modalCloseBtn}
-              aria-label="Close tutorial"
-            >
-              ✕
-            </button>
-            <h3 className={styles.modalTitle}>How to Read + Annotate</h3>
-            <ol className={styles.tutorialStepsList}>
-              <li>
-                <strong>Select a Source:</strong> Use the pills on the left sidebar to switch
-                between the Social Media Post, comments, articles, and video transcripts.
-              </li>
-              <li>
-                <strong>Highlight Claims:</strong> Click and drag your cursor across any sentence or
-                phrase inside the source card to highlight it and attach an annotation note.
-              </li>
-              <li>
-                <strong>Manage &amp; Convert Notes:</strong> Hover over or click any highlighted
-                text to edit your note, delete it, or click <strong>+ Convert to node</strong> to
-                send it directly to your Mind Map.
-              </li>
-              <li>
-                <strong>Ask {agentPrefs.avatarName}:</strong> Click your companion avatar in the
-                bottom-left corner anytime for a Socratic question tailored to your active{' '}
-                <strong>{agentPrefs.toneName}</strong> tone.
-              </li>
-            </ol>
-            <button onClick={() => setShowTutorialModal(false)} className={styles.modalPrimaryBtn}>
-              Got it
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Interactive Tooltip Onboarding Tutorial */}
+      <TooltipTutorial
+        stageName="Annotate"
+        steps={STAGE_TUTORIAL_STEPS.familiarise}
+        isOpen={showTutorialModal}
+        onClose={handleCloseTutorial}
+        onComplete={handleCloseTutorial}
+      />
+
+      {/* Stage Overview Modal (? Button) */}
+      <StageOverviewModal
+        stage="familiarise"
+        isOpen={showOverviewModal}
+        onClose={() => setShowOverviewModal(false)}
+      />
 
       {/* Mandatory AI Disclosure Modal */}
       {showIntroModal && (
-        <div className={styles.modalBackdrop} onClick={() => setShowIntroModal(false)}>
+        <div className={styles.modalBackdrop} onClick={handleCloseIntroModal}>
           <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
             <button
-              onClick={() => setShowIntroModal(false)}
+              onClick={handleCloseIntroModal}
               className={styles.modalCloseBtn}
               aria-label="Close disclosure"
             >
@@ -826,7 +827,7 @@ export default function FamiliariseStagePage() {
                 </li>
               </ol>
             </div>
-            <button onClick={() => setShowIntroModal(false)} className={styles.modalPrimaryBtn}>
+            <button onClick={handleCloseIntroModal} className={styles.modalPrimaryBtn}>
               Understood
             </button>
           </div>

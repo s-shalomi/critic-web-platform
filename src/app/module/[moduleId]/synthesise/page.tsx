@@ -8,6 +8,8 @@ import {
   getStudentStorageKey,
   hasSeenModuleDisclosure,
   markModuleDisclosureSeen,
+  hasSeenStageTutorial,
+  markStageTutorialSeen,
 } from '@/shared/utils/storage';
 import { reportStudentProgress } from '@/shared/utils/reportProgress';
 import ConceptMapCanvas from '@/shared/components/ConceptMapCanvas/ConceptMapCanvas';
@@ -18,6 +20,9 @@ import {
   DEFAULT_AGENT_PREFERENCES,
   ResolvedAgentPreferences,
 } from '@/shared/components/RobotAvatar/RobotAvatar';
+import { TooltipTutorial } from '@/shared/components/TooltipTutorial/TooltipTutorial';
+import { StageOverviewModal } from '@/shared/components/StageOverviewModal/StageOverviewModal';
+import { STAGE_TUTORIAL_STEPS } from '@/shared/config/tutorials';
 
 export default function SynthesiseStagePage() {
   const router = useRouter();
@@ -28,12 +33,25 @@ export default function SynthesiseStagePage() {
   const [aiFeedback, setAiFeedback] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [showTutorialModal, setShowTutorialModal] = useState<boolean>(false);
+  const [showOverviewModal, setShowOverviewModal] = useState<boolean>(false);
   const [showHelpModal, setShowHelpModal] = useState<boolean>(false);
   const [agentPrefs, setAgentPrefs] = useState<ResolvedAgentPreferences>(DEFAULT_AGENT_PREFERENCES);
 
   // Evidence notes count for non-blocking AI nudge
   const [notesCount, setNotesCount] = useState<number>(0);
   const [showNudge, setShowNudge] = useState<boolean>(true);
+
+  const handleCloseHelpModal = () => {
+    setShowHelpModal(false);
+    if (!hasSeenStageTutorial(moduleId, 'synthesise')) {
+      setShowTutorialModal(true);
+    }
+  };
+
+  const handleCloseTutorial = () => {
+    setShowTutorialModal(false);
+    markStageTutorialSeen(moduleId, 'synthesise');
+  };
 
   useEffect(() => {
     const synthKey = getStudentStorageKey('critic_synthesis', moduleId);
@@ -44,6 +62,8 @@ export default function SynthesiseStagePage() {
     if (!hasSeenModuleDisclosure(moduleId)) {
       setShowHelpModal(true);
       markModuleDisclosureSeen(moduleId);
+    } else if (!hasSeenStageTutorial(moduleId, 'synthesise')) {
+      setShowTutorialModal(true);
     }
 
     reportStudentProgress('synthesise');
@@ -257,7 +277,7 @@ export default function SynthesiseStagePage() {
 
             {/* Bottom Conclusion Input Box inside the Slate Card matching screens_v2/synthesis.png */}
             <div className={styles.conclusionBoxWrapper}>
-              <div className={styles.conclusionBox}>
+              <div className={styles.conclusionBox} data-tour="conclusion-box">
                 <textarea
                   className={styles.synthesisTextArea}
                   placeholder="What conclusions can you make?"
@@ -269,6 +289,7 @@ export default function SynthesiseStagePage() {
                     type="button"
                     onClick={handleCrossCheckSynthesis}
                     className={styles.auditBtn}
+                    data-tour="audit-btn"
                     disabled={loading || !synthesisText.trim()}
                     title={`Ask ${agentPrefs.avatarName} to Socratic-audit your conclusion before submitting`}
                   >
@@ -278,6 +299,7 @@ export default function SynthesiseStagePage() {
                     type="button"
                     onClick={handleCompleteModule}
                     className={styles.submitModuleBtn}
+                    data-tour="submit-btn"
                   >
                     Submit Module
                   </button>
@@ -318,6 +340,8 @@ export default function SynthesiseStagePage() {
               type="button"
               onClick={() => setShowTutorialModal(true)}
               className={styles.tutorialBtn}
+              data-tour="tutorial-btn"
+              title="View Stage Tutorial"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />
@@ -327,9 +351,11 @@ export default function SynthesiseStagePage() {
             </button>
             <button
               type="button"
+              onClick={() => setShowOverviewModal(true)}
               className={styles.helpCircleBtn}
+              data-tour="help-btn"
               aria-label="Help"
-              title="Help"
+              title="Stage Overview: Why Synthesising a Conclusion Matters"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />
@@ -344,7 +370,7 @@ export default function SynthesiseStagePage() {
       </div>
 
       {/* Floating Bottom Stage Navigation Dock (identical across all stages) */}
-      <footer className={styles.stageNavWrapper}>
+      <footer className={styles.stageNavWrapper} data-tour="stage-dock">
         <nav className={styles.stageNavBar} aria-label="Module stages">
           <button
             onClick={() => router.push(`/module/${moduleId}/familiarise`)}
@@ -378,51 +404,29 @@ export default function SynthesiseStagePage() {
         </nav>
       </footer>
 
-      {/* Tutorial Modal */}
-      {showTutorialModal && (
-        <div className={styles.modalBackdrop} onClick={() => setShowTutorialModal(false)}>
-          <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
-            <button
-              type="button"
-              onClick={() => setShowTutorialModal(false)}
-              className={styles.modalCloseBtn}
-              aria-label="Close tutorial"
-            >
-              ✕
-            </button>
-            <h3 className={styles.modalTitle}>Stage 04: Conclude Tutorial</h3>
-            <p className={styles.modalLead}>
-              Synthesise the evidence and concept links you built across the module into your final conclusion.
-            </p>
-            <ol className={styles.tutorialStepsList}>
-              <li>
-                <strong>Review Your Mind Map:</strong> Inspect your connected nodes on the right canvas and make any final adjustments to your map.
-              </li>
-              <li>
-                <strong>Draft Your Conclusion:</strong> Write your final take on the sources in the conclusion box on the left, citing key concepts and addressing counter-arguments.
-              </li>
-              <li>
-                <strong>Audit or Submit:</strong> Click <strong>Audit with {agentPrefs.avatarName}</strong> for a Socratic cross-check of missing links, or click <strong>Submit Module</strong> to complete the module and view your review.
-              </li>
-            </ol>
-            <button
-              type="button"
-              onClick={() => setShowTutorialModal(false)}
-              className={styles.modalPrimaryBtn}
-            >
-              Got it
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Interactive Tooltip Onboarding Tutorial */}
+      <TooltipTutorial
+        stageName="Conclude"
+        steps={STAGE_TUTORIAL_STEPS.synthesise}
+        isOpen={showTutorialModal}
+        onClose={handleCloseTutorial}
+        onComplete={handleCloseTutorial}
+      />
+
+      {/* Stage Overview Modal (? Button) */}
+      <StageOverviewModal
+        stage="synthesise"
+        isOpen={showOverviewModal}
+        onClose={() => setShowOverviewModal(false)}
+      />
 
       {/* Mandatory AI Disclosure Modal */}
       {showHelpModal && (
-        <div className={styles.modalBackdrop} onClick={() => setShowHelpModal(false)}>
+        <div className={styles.modalBackdrop} onClick={handleCloseHelpModal}>
           <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
             <button
               type="button"
-              onClick={() => setShowHelpModal(false)}
+              onClick={handleCloseHelpModal}
               className={styles.modalCloseBtn}
               aria-label="Close disclosure"
             >
@@ -452,7 +456,7 @@ export default function SynthesiseStagePage() {
             </div>
             <button
               type="button"
-              onClick={() => setShowHelpModal(false)}
+              onClick={handleCloseHelpModal}
               className={styles.modalPrimaryBtn}
             >
               Understood

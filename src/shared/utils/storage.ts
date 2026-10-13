@@ -6,12 +6,12 @@
  */
 
 export function getStudentStorageKey(prefix: string, moduleId: string): string {
-  if (typeof window === 'undefined') {
+  if (typeof window === 'undefined' && typeof localStorage === 'undefined') {
     return `${prefix}_guest_${moduleId}`;
   }
 
   try {
-    const userStr = localStorage.getItem('critic_user');
+    const userStr = typeof localStorage !== 'undefined' ? localStorage.getItem('critic_user') : null;
     if (userStr) {
       const user = JSON.parse(userStr);
       const studentId = user.id || user.email || user.name || 'default_student';
@@ -29,7 +29,7 @@ export function getStudentStorageKey(prefix: string, moduleId: string): string {
  * start-of-module AI disclosure for the given moduleId.
  */
 export function hasSeenModuleDisclosure(moduleId: string): boolean {
-  if (typeof window === 'undefined') return false;
+  if (typeof window === 'undefined' && typeof localStorage === 'undefined') return false;
   try {
     const key = getStudentStorageKey('critic_disclosure_seen', moduleId);
     return localStorage.getItem(key) === 'true';
@@ -43,7 +43,7 @@ export function hasSeenModuleDisclosure(moduleId: string): boolean {
  * student and moduleId so it is only automatically displayed once on initial entry.
  */
 export function markModuleDisclosureSeen(moduleId: string): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined' && typeof localStorage === 'undefined') return;
   try {
     const key = getStudentStorageKey('critic_disclosure_seen', moduleId);
     localStorage.setItem(key, 'true');
@@ -51,3 +51,44 @@ export function markModuleDisclosureSeen(moduleId: string): void {
     console.error('Error saving critic_disclosure_seen to localStorage:', e);
   }
 }
+
+/**
+ * Checks whether the current student has already been shown the onboarding
+ * tutorial for a specific stage within the given module.
+ */
+export function hasSeenStageTutorial(moduleId: string, stage: string): boolean {
+  if (typeof window === 'undefined' && typeof localStorage === 'undefined') return false;
+  try {
+    const key = getStudentStorageKey(`critic_tutorial_seen_${stage}`, moduleId);
+    return localStorage.getItem(key) === 'true';
+  } catch (e) {
+    return false;
+  }
+}
+
+/**
+ * Marks the stage onboarding tutorial as seen so it does not auto-open again on entry.
+ */
+export function markStageTutorialSeen(moduleId: string, stage: string): void {
+  if (typeof window === 'undefined' && typeof localStorage === 'undefined') return;
+  try {
+    const key = getStudentStorageKey(`critic_tutorial_seen_${stage}`, moduleId);
+    localStorage.setItem(key, 'true');
+  } catch (e) {
+    console.error(`Error saving tutorial seen for stage ${stage}:`, e);
+  }
+}
+
+/**
+ * Resets the stage onboarding tutorial seen flag.
+ */
+export function resetStageTutorial(moduleId: string, stage: string): void {
+  if (typeof window === 'undefined' && typeof localStorage === 'undefined') return;
+  try {
+    const key = getStudentStorageKey(`critic_tutorial_seen_${stage}`, moduleId);
+    localStorage.removeItem(key);
+  } catch (e) {
+    console.error(`Error resetting tutorial seen for stage ${stage}:`, e);
+  }
+}
+

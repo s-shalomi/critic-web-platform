@@ -8,6 +8,8 @@ import {
   getStudentStorageKey,
   hasSeenModuleDisclosure,
   markModuleDisclosureSeen,
+  hasSeenStageTutorial,
+  markStageTutorialSeen,
 } from '@/shared/utils/storage';
 import { reportStudentProgress } from '@/shared/utils/reportProgress';
 import ConceptMapCanvas from '@/shared/components/ConceptMapCanvas/ConceptMapCanvas';
@@ -18,6 +20,9 @@ import {
   DEFAULT_AGENT_PREFERENCES,
   ResolvedAgentPreferences,
 } from '@/shared/components/RobotAvatar/RobotAvatar';
+import { TooltipTutorial } from '@/shared/components/TooltipTutorial/TooltipTutorial';
+import { StageOverviewModal } from '@/shared/components/StageOverviewModal/StageOverviewModal';
+import { STAGE_TUTORIAL_STEPS } from '@/shared/config/tutorials';
 
 interface Source {
   id: string;
@@ -52,6 +57,7 @@ export default function ConceptualiseStagePage() {
   const moduleId = (params?.moduleId as string) || 'mod_climate_change_demo';
 
   const [showTutorialModal, setShowTutorialModal] = useState<boolean>(false);
+  const [showOverviewModal, setShowOverviewModal] = useState<boolean>(false);
   const [showHelpModal, setShowHelpModal] = useState<boolean>(false);
   const [agentSpeech, setAgentSpeech] = useState<string | null>(null);
   const [agentLoading, setAgentLoading] = useState<boolean>(false);
@@ -67,6 +73,18 @@ export default function ConceptualiseStagePage() {
 
   const carouselRef = useRef<HTMLDivElement>(null);
 
+  const handleCloseHelpModal = () => {
+    setShowHelpModal(false);
+    if (!hasSeenStageTutorial(moduleId, 'conceptualise')) {
+      setShowTutorialModal(true);
+    }
+  };
+
+  const handleCloseTutorial = () => {
+    setShowTutorialModal(false);
+    markStageTutorialSeen(moduleId, 'conceptualise');
+  };
+
   useEffect(() => {
     const notesKey = getStudentStorageKey('critic_notes', moduleId);
     setAgentPrefs(getStoredAgentPreferences());
@@ -75,6 +93,8 @@ export default function ConceptualiseStagePage() {
     if (!hasSeenModuleDisclosure(moduleId)) {
       setShowHelpModal(true);
       markModuleDisclosureSeen(moduleId);
+    } else if (!hasSeenStageTutorial(moduleId, 'conceptualise')) {
+      setShowTutorialModal(true);
     }
 
     // Inform teacher portal this student is on the Conceptualise stage
@@ -277,6 +297,7 @@ export default function ConceptualiseStagePage() {
           className={`${styles.leftSourcePanel} ${
             isSourcePanelCollapsed ? styles.leftSourcePanelCollapsed : ''
           }`}
+          data-tour="sources-sidebar"
         >
           <div className={styles.topHeaderRow}>
             {!isSourcePanelCollapsed && (
@@ -301,6 +322,7 @@ export default function ConceptualiseStagePage() {
             <button
               onClick={() => setIsSourcePanelCollapsed(!isSourcePanelCollapsed)}
               className={styles.collapseToggleBtn}
+              data-tour="collapse-btn"
               title={
                 isSourcePanelCollapsed
                   ? 'Expand Evidence Sources Panel'
@@ -529,6 +551,8 @@ export default function ConceptualiseStagePage() {
               type="button"
               onClick={() => setShowTutorialModal(true)}
               className={styles.tutorialBtn}
+              data-tour="tutorial-btn"
+              title="View Stage Tutorial"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                 <circle cx="12" cy="12" r="9.5" stroke="#EAF6FF" strokeWidth="1.8" />
@@ -539,9 +563,11 @@ export default function ConceptualiseStagePage() {
 
             <button
               type="button"
+              onClick={() => setShowOverviewModal(true)}
               className={styles.helpCircleBtn}
+              data-tour="help-btn"
               aria-label="Help"
-              title="Help"
+              title="Stage Overview: Why Mind Mapping Matters"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                 <circle cx="12" cy="12" r="9.5" stroke="#EAF6FF" strokeWidth="1.8" />
@@ -561,7 +587,7 @@ export default function ConceptualiseStagePage() {
       </div>
 
       {/* Floating Stage Navigation Dock (matching Familiarise) */}
-      <div className={styles.stageNavWrapper}>
+      <div className={styles.stageNavWrapper} data-tour="stage-dock">
         <nav className={styles.stageNavBar} aria-label="Module stages">
           <button
             type="button"
@@ -602,53 +628,28 @@ export default function ConceptualiseStagePage() {
         </nav>
       </div>
 
-      {/* Tutorial Modal */}
-      {showTutorialModal && (
-        <div className={styles.modalBackdrop} onClick={() => setShowTutorialModal(false)}>
-          <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
-            <button
-              onClick={() => setShowTutorialModal(false)}
-              className={styles.modalCloseBtn}
-              aria-label="Close tutorial"
-            >
-              ✕
-            </button>
-            <h2 className={styles.modalTitle}>Stage 02: Mind Map Connections</h2>
-            <p className={styles.modalLead}>
-              Create nodes with the concepts you identified and link these concepts together to map
-              out the argument structure.
-            </p>
-            <ol className={styles.tutorialStepsList}>
-              <li>
-                <strong>Review Your Highlights:</strong> Use the left card carousel (`◀` / `▶`) to
-                browse sources and hover or click any purple highlight to view your saved notes.
-              </li>
-              <li>
-                <strong>Create Concept Nodes (`◯`):</strong> Click the circle icon on the right
-                toolbar to add a new concept node to the mind map canvas.
-              </li>
-              <li>
-                <strong>Connect Concepts (`╱`):</strong> Select the diagonal line tool on the right
-                toolbar, then click two nodes to link them with a glowing connection line.
-              </li>
-              <li>
-                <strong>Edit (`TT`) or Delete (`🗑️`):</strong> Click a node to select it, then use
-                the `TT` or Trash icons (or double-click any node) to refine your map.
-              </li>
-            </ol>
-            <button onClick={() => setShowTutorialModal(false)} className={styles.modalPrimaryBtn}>
-              Got it
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Interactive Tooltip Onboarding Tutorial */}
+      <TooltipTutorial
+        stageName="Mind Map"
+        steps={STAGE_TUTORIAL_STEPS.conceptualise}
+        isOpen={showTutorialModal}
+        onClose={handleCloseTutorial}
+        onComplete={handleCloseTutorial}
+      />
+
+      {/* Stage Overview Modal (? Button) */}
+      <StageOverviewModal
+        stage="conceptualise"
+        isOpen={showOverviewModal}
+        onClose={() => setShowOverviewModal(false)}
+      />
 
       {/* Mandatory AI Disclosure Modal */}
       {showHelpModal && (
-        <div className={styles.modalBackdrop} onClick={() => setShowHelpModal(false)}>
+        <div className={styles.modalBackdrop} onClick={handleCloseHelpModal}>
           <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
             <button
-              onClick={() => setShowHelpModal(false)}
+              onClick={handleCloseHelpModal}
               className={styles.modalCloseBtn}
               aria-label="Close disclosure"
             >
@@ -676,7 +677,7 @@ export default function ConceptualiseStagePage() {
                 </li>
               </ol>
             </div>
-            <button onClick={() => setShowHelpModal(false)} className={styles.modalPrimaryBtn}>
+            <button onClick={handleCloseHelpModal} className={styles.modalPrimaryBtn}>
               Understood
             </button>
           </div>

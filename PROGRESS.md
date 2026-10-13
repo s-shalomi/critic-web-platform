@@ -1094,3 +1094,44 @@
   - `npm test` (39/39 tests passing across 8 test suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
 - **Immediate Next Step**: Commit changes to `feature/iteration-2`.
+
+---
+
+### [2026-10-13] - Feature: Step-by-Step Tooltip Onboarding Tutorial & Stage Overviews (? Button)
+
+- **Role**: Full Stack Developer
+- **User Instructions**:
+  - *"create a tooltip onboarding tutorial for the app described in requirements.md. make sure to treat requirements.md as the single source of truth. progress.md has all the progress and changes made so far. make to to regularly commit changes for each feature. also make sure to update progress.md and any other relevant documentation."*
+  - *"only the annotate stage needs to mention the dock for navigation and the '?' button for seeing breif overview"*
+- **Code Built & Updated**:
+  - **Requirements & Documentation ([`requirements.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/requirements.md))**:
+    - Updated Section 10 specifying the complete Onboarding Tutorial behavior, button controls, and stage-specific tour steps.
+  - **Student-Scoped Storage Utilities ([`src/shared/utils/storage.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/utils/storage.ts))**:
+    - Added `hasSeenStageTutorial(moduleId, stage)`, `markStageTutorialSeen(moduleId, stage)`, and `resetStageTutorial(moduleId, stage)`.
+    - Protected with SSR-safe checks supporting Next.js App Router and node test environments.
+  - **Shared UI Components ([`src/shared/components/TooltipTutorial/TooltipTutorial.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/TooltipTutorial/TooltipTutorial.tsx) & [`src/shared/components/StageOverviewModal/StageOverviewModal.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/StageOverviewModal/StageOverviewModal.tsx))**:
+    - Built accessible, animated `TooltipTutorial` component with spotlight target cutout ring, directional arrow pointer, step progress dots and badge counter, Back/Next/Skip action buttons, viewport edge auto-clamping, and keyboard navigation (`Escape`, `ArrowRight`/`Enter`, `ArrowLeft`).
+    - Built accessible `StageOverviewModal` triggered by the '?' button on each stage explaining "Why This Stage Matters" and providing concise actionable checklists.
+  - **Tutorial & Overview Configurations ([`src/shared/config/tutorials.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/config/tutorials.ts) & [`src/shared/config/stageOverviews.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/config/stageOverviews.ts))**:
+    - Configured stage-specific tutorial tours with exact selectors and concise, readable copy:
+      - **Annotate (`familiarise`)**: Navigation Dock (`data-tour="stage-dock"`), Stage Overview ? button (`data-tour="help-btn"`), Evidence Sources sidebar (`data-tour="sidebar-sources"`), Source reading & highlight (`data-tour="source-reading"`), AI agent hints (`data-tour="agent-dock"`). Only Annotate mentions the dock and '?' button.
+      - **Mind Map (`conceptualise`)**: Sources sidebar with highlight hover notes (`data-tour="sources-sidebar"`), Pan & select hand tool (`data-tour="tool-pan"`), Create node circle tool (`data-tour="tool-node"`), Link nodes line tool (`data-tour="tool-link"`), Zoom controls (`data-tour="tool-zoom"`), Collapse sidebar toggle (`data-tour="collapse-btn"`).
+      - **Challenge (`inquire`)**: AI agent inquiry & evaluation chat (`data-tour="chat-panel"`).
+      - **Conclude (`synthesise`)**: Final conclusion reflection editor (`data-tour="conclusion-box"`), AI reasoning audit button (`data-tour="audit-btn"`), Complete module submit button (`data-tour="submit-btn"`).
+  - **Stage Page Integrations**:
+    - Integrated `TooltipTutorial` and `StageOverviewModal` with `data-tour` attributes into:
+      - `src/app/module/[moduleId]/familiarise/page.tsx`
+      - `src/app/module/[moduleId]/conceptualise/page.tsx`
+      - `src/app/module/[moduleId]/inquire/page.tsx`
+      - `src/app/module/[moduleId]/synthesise/page.tsx`
+      - `src/shared/components/ConceptMapCanvas/ConceptMapCanvas.tsx`
+    - Sequenced modal presentation on first module entry: AI disclosure modal is presented first, and upon dismissal automatically launches the stage tutorial if unseen.
+    - Added always-accessible 'Tutorial' and '?' action buttons in the top header bar across all 4 stages.
+  - **Test Suite ([`tests/tutorial.test.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/tests/tutorial.test.ts))**:
+    - Created test suite verifying storage scoping, tutorial step requirements (confirming only Annotate mentions dock and '?'), and stage overview configurations.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (47/47 tests passing across 9 test suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+  - `npm run build` (Next.js production build succeeded across all 12 routes).
+- **Immediate Next Step**: Commit feature to `feature/iteration-2`.

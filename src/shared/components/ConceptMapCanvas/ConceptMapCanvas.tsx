@@ -487,6 +487,7 @@ export default function ConceptMapCanvas({
   return (
     <main
       ref={canvasStageRef}
+      data-tour="concept-canvas"
       className={`${styles.canvasArea} ${className || ''}`}
       style={{
         ...style,
@@ -670,6 +671,7 @@ export default function ConceptMapCanvas({
       <div className={styles.canvasToolbar}>
         <button
           type="button"
+          data-tour="tool-pan"
           onClick={() => {
             setActiveTool('pan');
             setLinkSourceNodeId(null);
@@ -688,6 +690,7 @@ export default function ConceptMapCanvas({
 
         <button
           type="button"
+          data-tour="tool-node"
           onClick={() => setShowAddNodeModal(true)}
           className={`${styles.toolbarBtn} ${showAddNodeModal ? styles.activeToolBtn : ''}`}
           title="Create Concept Node"
@@ -700,6 +703,7 @@ export default function ConceptMapCanvas({
 
         <button
           type="button"
+          data-tour="tool-link"
           onClick={() => {
             setActiveTool('link');
             setLinkSourceNodeId(null);
@@ -748,33 +752,35 @@ export default function ConceptMapCanvas({
 
         <div className={styles.toolbarDivider} />
 
-        <button
-          type="button"
-          onClick={() => setZoomLevel((z) => Math.min(z + 0.15, 2.2))}
-          className={styles.toolbarSubBtn}
-          title="Zoom In (Ctrl + Scroll Up)"
-          aria-label="Zoom In"
-        >
-          +
-        </button>
-        <button
-          type="button"
-          onClick={() => setZoomLevel((z) => Math.max(z - 0.15, 0.4))}
-          className={styles.toolbarSubBtn}
-          title="Zoom Out (Ctrl + Scroll Down)"
-          aria-label="Zoom Out"
-        >
-          −
-        </button>
-        <button
-          type="button"
-          onClick={handleResetView}
-          className={styles.toolbarSubBtn}
-          title="Reset View / Center Mind Map"
-          aria-label="Reset View"
-        >
-          ⌖
-        </button>
+        <div data-tour="tool-zoom" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+          <button
+            type="button"
+            onClick={() => setZoomLevel((z) => Math.min(z + 0.15, 2.2))}
+            className={styles.toolbarSubBtn}
+            title="Zoom In (Ctrl + Scroll Up)"
+            aria-label="Zoom In"
+          >
+            +
+          </button>
+          <button
+            type="button"
+            onClick={() => setZoomLevel((z) => Math.max(z - 0.15, 0.4))}
+            className={styles.toolbarSubBtn}
+            title="Zoom Out (Ctrl + Scroll Down)"
+            aria-label="Zoom Out"
+          >
+            −
+          </button>
+          <button
+            type="button"
+            onClick={handleResetView}
+            className={styles.toolbarSubBtn}
+            title="Reset View / Center Mind Map"
+            aria-label="Reset View"
+          >
+            ⌖
+          </button>
+        </div>
       </div>
 
       {/* Create Node Modal */}
