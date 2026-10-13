@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { generateSocraticResponse, ChatTurn, ModuleSnapshot, AgentMode } from '@/domains/ai/aiService';
+import { generateSocraticResponse, resolveInquireAngle, ChatTurn, ModuleSnapshot, AgentMode } from '@/domains/ai/aiService';
 import { getNotesForModule } from '@/domains/notes/noteService';
 import { getConceptualiseData } from '@/domains/concepts/conceptService';
 import { resolveTopicContextForModule } from '@/domains/topics/topicService';
@@ -58,6 +58,15 @@ export async function POST(
       })
       .filter(Boolean) as Array<{ fromText: string; toText: string }>;
 
+    const resolvedMode: AgentMode =
+      mode === 'DevilsAdvocate'
+        ? 'DevilsAdvocate'
+        : mode === 'Scaffolding'
+        ? 'Scaffolding'
+        : 'Socratic';
+
+    const angle = resolveInquireAngle(resolvedMode, currentHistory.length);
+
     const snapshot: ModuleSnapshot = {
       topicTitle: topicCtx.topicTitle,
       currentStage: 'inquire',
@@ -67,14 +76,8 @@ export async function POST(
       sources: topicCtx.sources,
       agentPersonality: agentPersonality || 'Friendly',
       avatarName: avatarName || 'Aria',
+      angle,
     };
-
-    const resolvedMode: AgentMode =
-      mode === 'DevilsAdvocate'
-        ? 'DevilsAdvocate'
-        : mode === 'Scaffolding'
-        ? 'Scaffolding'
-        : 'Socratic';
 
     const aiResult = await generateSocraticResponse(
       currentHistory,

@@ -311,7 +311,8 @@ export default function FamiliariseStagePage() {
     try {
       const hintKey = getStudentStorageKey('critic_hints', moduleId);
       const current = parseInt(localStorage.getItem(hintKey) || '0', 10);
-      localStorage.setItem(hintKey, String(current + 1));
+      const nextHintCount = current + 1;
+      localStorage.setItem(hintKey, String(nextHintCount));
 
       const nodesKey = getStudentStorageKey('critic_nodes_canvas', moduleId);
       const linksKey = getStudentStorageKey('critic_links_canvas', moduleId);
@@ -345,6 +346,7 @@ export default function FamiliariseStagePage() {
           conceptLinks: localLinks,
           agentPersonality: `${agentPrefs.toneName} (${agentPrefs.toneDesc})`,
           avatarName: agentPrefs.avatarName,
+          hintCount: nextHintCount,
         }),
       });
       const data = await res.json();

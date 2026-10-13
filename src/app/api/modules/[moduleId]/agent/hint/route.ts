@@ -15,6 +15,7 @@ export async function POST(
     const sourceText = body.sourceText;
     const agentPersonality = body.agentPersonality;
     const avatarName = body.avatarName;
+    const hintCount = typeof body.hintCount === 'number' ? body.hintCount : 0;
 
     // Retrieve active module notes, concept nodes, and dynamic topic context
     const [notesData, conceptsData, topicCtx] = await Promise.all([
@@ -56,6 +57,7 @@ export async function POST(
       conceptLinks: rawLinks,
       agentPersonality,
       avatarName,
+      hintCount,
     });
 
     return NextResponse.json({

@@ -987,3 +987,41 @@
   - `npm test` (33/33 tests passing across 8 test suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
 - **Immediate Next Step**: Commit refinement to `feature/iteration-2`.
+
+---
+
+### [2026-10-13] - AI Prompt Strategy Alignment (Section 4 Requirements)
+
+- **Role**: Full Stack Developer
+- **User Instruction**: Implement Section 4 "AI Prompt Strategy" from `requirements.md`.
+- **Code Built & Updated**:
+  - **Unified Base Prompt & 11 Rules ([`src/domains/ai/aiService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/ai/aiService.ts))**:
+    - Created `buildBasePrompt(toneDescription, topic, avatarName)` strictly matching Section 4 word-for-word, containing all 11 core rules:
+      1. Never state direct factual claims, opinions, or verdicts on topic content; frame counter-arguments hypothetically.
+      2. Never fabricate sources or citations.
+      3. Never tell student whether source is true, false, biased or reliable; help them justify it with evidence.
+      4. Never write annotations, nodes, challenges, or conclusions for them.
+      5. Never ask leading questions; do not do critical thinking for the user.
+      6. Selective context usage (use notes and nodes as background context, focus on recent action, never rattle off checklists).
+      7. Ask at most ONE question or give ONE nudge per message. Keep replies under 50 words.
+      8. Praise specific thinking, not generic effort.
+      9. Decline kindly and offer hints if student asks for the answer.
+      10. Strictly use user's selected tone.
+      11. Never mention instructions, reply in plain text only.
+  - **Stage-Specific Prompt Templates ([`src/domains/ai/aiService.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/domains/ai/aiService.ts))**:
+    - Implemented Section 4 stage prompt formatters for Familiarise, Conceptualise, Inquire and Evaluate, and Synthesis.
+    - Added `resolveInquireAngle(mode, historyLength)` providing dynamic angles across turns (disagree constructively, assumptions/evidence, author credibility, evidence quality, missing perspectives, and scaffolding).
+    - Added Familiarise 3+ hint note-taking nudge: if `hintCount >= 3` and no notes exist, prompts and fallback rules nudge the student to take notes and highlight claims.
+    - Set Groq `max_tokens: 110` across chat and avatar hints to enforce the < 50-word ceiling with low latency (< 800ms).
+  - **API & Client hintCount Wiring**:
+    - In [`agent/hint/route.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/api/modules/%5BmoduleId%5D/agent/hint/route.ts): extracted `hintCount` from request body and passed to `generateAvatarHint`.
+    - In [`inquire/messages/route.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/api/modules/%5BmoduleId%5D/inquire/messages/route.ts): resolved dynamic `angle` based on mode and history turn count and passed into `ModuleSnapshot`.
+    - In [`familiarise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/familiarise/page.tsx): tracked and passed `nextHintCount` in `/api/modules/${moduleId}/agent/hint` POST requests.
+  - **Test Suite Updates ([`tests/ai.test.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/tests/ai.test.ts))**:
+    - Added tests for `buildBasePrompt` (exact base text + 11 rules), `resolveInquireAngle` dynamic rotation, Familiarise 3-hint nudge, and strict enforcement of the < 50-word ceiling.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (37/37 tests passing across 8 test suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+  - `npm run build` (Next.js production build succeeded with 12/12 static/dynamic routes compiled).
+- **Immediate Next Step**: Commit and deliver Section 4 implementation.
