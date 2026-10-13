@@ -36,6 +36,97 @@ export const AVATAR_OPTIONS: AvatarOption[] = [
   { id: 'gold', name: 'Sol', accentColor: '#FBBF24' },
 ];
 
+export interface ToneOption {
+  id: string;
+  name: string;
+  desc: string;
+}
+
+export const TONE_OPTIONS: ToneOption[] = [
+  {
+    id: 'friendly',
+    name: 'Friendly',
+    desc: 'Encouraging, warm, and highly engaging without being overly corporate. Uses natural Gen Z phrasing, light humor, and supportive language.',
+  },
+  {
+    id: 'mentor',
+    name: 'Mentor',
+    desc: 'Relatable, calm, and non-judgmental. They ask probing questions that encourage deeper thought and self-discovery.',
+  },
+  {
+    id: 'witty_challenger',
+    name: 'Witty Challenger',
+    desc: 'Playful, sharp, and strategic. Uses wit, light roasts, and clever provocations to sharpen thinking.',
+  },
+  {
+    id: 'curious_explorer',
+    name: 'Curious Explorer',
+    desc: "Gentle and curious. They show interest in the user's ideas and offer encouragement.",
+  },
+  {
+    id: 'devils_advocate',
+    name: "Devil's Advocate",
+    desc: 'Challenges assumptions and beliefs, pushing the user to consider alternative perspectives.',
+  },
+];
+
+export interface ResolvedAgentPreferences {
+  appearance: RobotVariant;
+  avatarName: string;
+  accentColor: string;
+  toneId: string;
+  toneName: string;
+  toneDesc: string;
+}
+
+export const DEFAULT_AGENT_PREFERENCES: ResolvedAgentPreferences = {
+  appearance: 'aria',
+  avatarName: 'Aria',
+  accentColor: '#37F3FF',
+  toneId: 'friendly',
+  toneName: 'Friendly',
+  toneDesc: TONE_OPTIONS[0].desc,
+};
+
+export function getStoredAgentPreferences(): ResolvedAgentPreferences {
+  let appearance: RobotVariant = 'aria';
+  let matchedTone: ToneOption = TONE_OPTIONS[0];
+
+  if (typeof window !== 'undefined') {
+    try {
+      const saved = localStorage.getItem('critic_agent_preferences');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.appearance && AVATAR_OPTIONS.some((a) => a.id === parsed.appearance)) {
+          appearance = parsed.appearance;
+        }
+        if (parsed.tone) {
+          const rawTone = String(parsed.tone).trim().toLowerCase();
+          const foundTone = TONE_OPTIONS.find(
+            (t) => t.id.toLowerCase() === rawTone || t.name.toLowerCase() === rawTone
+          );
+          if (foundTone) {
+            matchedTone = foundTone;
+          }
+        }
+      }
+    } catch (e) {
+      // ignore parse errors
+    }
+  }
+
+  const avatarObj = AVATAR_OPTIONS.find((a) => a.id === appearance) || AVATAR_OPTIONS[2];
+
+  return {
+    appearance: avatarObj.id,
+    avatarName: avatarObj.name,
+    accentColor: avatarObj.accentColor,
+    toneId: matchedTone.id,
+    toneName: matchedTone.name,
+    toneDesc: matchedTone.desc,
+  };
+}
+
 interface RobotAvatarProps {
   size?: number;
   variant?: RobotVariant;

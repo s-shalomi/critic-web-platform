@@ -7,6 +7,12 @@ import styles from './conceptualise.module.css';
 import { getStudentStorageKey } from '@/shared/utils/storage';
 import { reportStudentProgress } from '@/shared/utils/reportProgress';
 import ConceptMapCanvas from '@/shared/components/ConceptMapCanvas/ConceptMapCanvas';
+import {
+  RobotAvatar,
+  getStoredAgentPreferences,
+  DEFAULT_AGENT_PREFERENCES,
+  ResolvedAgentPreferences,
+} from '@/shared/components/RobotAvatar/RobotAvatar';
 
 interface Source {
   id: string;
@@ -36,6 +42,7 @@ export default function ConceptualiseStagePage() {
   const [showIntroModal, setShowIntroModal] = useState<boolean>(true);
   const [agentSpeech, setAgentSpeech] = useState<string | null>(null);
   const [agentLoading, setAgentLoading] = useState<boolean>(false);
+  const [agentPrefs, setAgentPrefs] = useState<ResolvedAgentPreferences>(DEFAULT_AGENT_PREFERENCES);
 
   // Left Sources & Notes State
   const [sources, setSources] = useState<Source[]>([]);
@@ -46,12 +53,14 @@ export default function ConceptualiseStagePage() {
 
   useEffect(() => {
     const notesKey = getStudentStorageKey('critic_notes', moduleId);
+    setAgentPrefs(getStoredAgentPreferences());
 
     // Inform teacher portal this student is on the Conceptualise stage
     reportStudentProgress('conceptualise');
 
     // 1. Fetch Sources with live syncing
     const fetchSources = () => {
+      setAgentPrefs(getStoredAgentPreferences());
       fetch('/api/topics/climate-change/sources')
         .then((res) => res.json())
         .then((data) => {
@@ -119,6 +128,8 @@ export default function ConceptualiseStagePage() {
           sourceText: activeSource?.content?.text,
           conceptNodes: localNodes,
           conceptLinks: localLinks,
+          agentPersonality: `${agentPrefs.toneName} (${agentPrefs.toneDesc})`,
+          avatarName: agentPrefs.avatarName,
         }),
       });
       const data = await res.json();
@@ -291,12 +302,16 @@ export default function ConceptualiseStagePage() {
         {agentLoading && (
           <div className={styles.loadingSpeechBubble}>
             <div className={styles.spinnerSmall} />
-            <span className={styles.loadingBubbleText}>Aria is analyzing your concept map &amp; formulating hint...</span>
+            <span className={styles.loadingBubbleText}>
+              {agentPrefs.avatarName} ({agentPrefs.toneName}) is analyzing your concept map...
+            </span>
           </div>
         )}
         {!agentLoading && agentSpeech && (
           <div className={styles.speechBubble}>
-            <div className={styles.speechHeader}>Aria (Socratic Peer)</div>
+            <div className={styles.speechHeader}>
+              {agentPrefs.avatarName} • Tone: {agentPrefs.toneName}
+            </div>
             <p>{agentSpeech}</p>
             <button onClick={() => setAgentSpeech(null)} className={styles.closeSpeechBtn}>
               ✕
@@ -307,12 +322,27 @@ export default function ConceptualiseStagePage() {
           onClick={handleAgentClick}
           disabled={agentLoading}
           className={`${styles.agentAvatarBtn} ${agentLoading ? styles.agentAvatarBtnLoading : ''}`}
-          title={agentLoading ? 'Aria is analyzing concept map...' : 'Click Aria for Socratic Hints'}
+          title={`Click ${agentPrefs.avatarName} (${agentPrefs.toneName} tone) for Socratic Hints`}
         >
-          <div className={styles.robotHead}>
-            <div className={styles.robotEyes} />
-          </div>
+          <RobotAvatar variant={agentPrefs.appearance} size={78} />
         </button>
+        <div
+          onClick={handleAgentClick}
+          style={{
+            marginTop: '6px',
+            background: 'rgba(15, 23, 46, 0.88)',
+            border: '1px solid rgba(55, 243, 255, 0.35)',
+            borderRadius: '9999px',
+            padding: '3px 10px',
+            fontFamily: 'var(--font-display)',
+            fontSize: '0.76rem',
+            color: '#EAF6FF',
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          <strong style={{ color: '#37F3FF' }}>{agentPrefs.avatarName}</strong> • Tone: {agentPrefs.toneName}
+        </div>
       </div>
 
       {/* Bottom Stage Navigation Bar */}

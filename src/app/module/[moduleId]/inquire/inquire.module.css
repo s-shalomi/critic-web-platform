@@ -121,9 +121,8 @@
 .agentAvatarIcon {
   width: 36px;
   height: 36px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #0F172E 0%, #37F3FF 100%);
-  border: 1px solid var(--color-accent-cyan);
+  background: transparent;
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;

@@ -7,6 +7,12 @@ import styles from './synthesise.module.css';
 import { getStudentStorageKey } from '@/shared/utils/storage';
 import { reportStudentProgress } from '@/shared/utils/reportProgress';
 import ConceptMapCanvas from '@/shared/components/ConceptMapCanvas/ConceptMapCanvas';
+import {
+  RobotAvatar,
+  getStoredAgentPreferences,
+  DEFAULT_AGENT_PREFERENCES,
+  ResolvedAgentPreferences,
+} from '@/shared/components/RobotAvatar/RobotAvatar';
 
 export default function SynthesiseStagePage() {
   const router = useRouter();
@@ -17,6 +23,7 @@ export default function SynthesiseStagePage() {
   const [aiFeedback, setAiFeedback] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [showIntroModal, setShowIntroModal] = useState<boolean>(true);
+  const [agentPrefs, setAgentPrefs] = useState<ResolvedAgentPreferences>(DEFAULT_AGENT_PREFERENCES);
 
   // Evidence notes count for non-blocking AI nudge
   const [notesCount, setNotesCount] = useState<number>(0);
@@ -25,8 +32,12 @@ export default function SynthesiseStagePage() {
   useEffect(() => {
     const synthKey = getStudentStorageKey('critic_synthesis', moduleId);
     const notesKey = getStudentStorageKey('critic_notes', moduleId);
+    setAgentPrefs(getStoredAgentPreferences());
 
     reportStudentProgress('synthesise');
+
+    const handleFocus = () => setAgentPrefs(getStoredAgentPreferences());
+    window.addEventListener('focus', handleFocus);
 
     // 0. Load notes count for AI nudge
     const localNotesStr = localStorage.getItem(notesKey);
@@ -57,6 +68,8 @@ export default function SynthesiseStagePage() {
           if (data.synthesisDraft) setSynthesisText(data.synthesisDraft);
         });
     }
+
+    return () => window.removeEventListener('focus', handleFocus);
   }, [moduleId]);
 
   const handleSynthesisTextChange = (text: string) => {
@@ -74,7 +87,11 @@ export default function SynthesiseStagePage() {
       const res = await fetch(`/api/modules/${moduleId}/synthesis`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ synthesisText }),
+        body: JSON.stringify({
+          synthesisText,
+          agentPersonality: `${agentPrefs.toneName} (${agentPrefs.toneDesc})`,
+          avatarName: agentPrefs.avatarName,
+        }),
       });
 
       const data = await res.json();
@@ -121,7 +138,7 @@ export default function SynthesiseStagePage() {
         >
           <span>
             💡 <strong>AI Learning Nudge:</strong> You haven&apos;t gathered evidence notes in the{' '}
-            <strong>Familiarise</strong> stage yet! Gathering notes helps Aria cross-reference your reasoning.
+            <strong>Familiarise</strong> stage yet! Gathering notes helps {agentPrefs.avatarName} cross-reference your reasoning.
             You can continue exploring here or return to Familiarise anytime.
           </span>
           <button
@@ -146,9 +163,27 @@ export default function SynthesiseStagePage() {
         {/* Left Interactive Synthesis Editor Panel */}
         <aside className={styles.leftEditorPanel}>
           <div className={styles.editorHeader}>
-            <h2 className="cyan-neon-text" style={{ fontFamily: 'var(--font-orbitron)', fontSize: '1.2rem' }}>
-              FINAL CASEFILE SYNTHESIS
-            </h2>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+              <h2 className="cyan-neon-text" style={{ fontFamily: 'var(--font-orbitron)', fontSize: '1.15rem', margin: 0 }}>
+                FINAL CASEFILE SYNTHESIS
+              </h2>
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  background: 'rgba(15, 23, 46, 0.85)',
+                  border: '1px solid rgba(55, 243, 255, 0.35)',
+                  borderRadius: '9999px',
+                  padding: '4px 10px 4px 6px',
+                }}
+              >
+                <RobotAvatar variant={agentPrefs.appearance} size={24} />
+                <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.76rem', color: '#D9DFF7' }}>
+                  <strong style={{ color: '#37F3FF' }}>{agentPrefs.avatarName}</strong> • Tone: {agentPrefs.toneName}
+                </span>
+              </div>
+            </div>
             <p className={styles.editorSubtitle}>
               Synthesise your evidence, arguments, and evaluate opposing views into your final case.
             </p>
@@ -168,9 +203,11 @@ export default function SynthesiseStagePage() {
             <div className={styles.feedbackCard}>
               <div className={styles.feedbackHeader}>
                 <div className={styles.feedbackAvatarIcon}>
-                  <div className={styles.robotHeadSmall} />
+                  <RobotAvatar variant={agentPrefs.appearance} size={32} />
                 </div>
-                <strong className="cyan-neon-text">ARIA&apos;S REASONING AUDIT:</strong>
+                <strong className="cyan-neon-text">
+                  {agentPrefs.avatarName.toUpperCase()} ({agentPrefs.toneName.toUpperCase()} TONE) REASONING AUDIT:
+                </strong>
               </div>
               <p className={styles.feedbackText}>{aiFeedback}</p>
             </div>
@@ -182,7 +219,9 @@ export default function SynthesiseStagePage() {
               className={`btn-primary-cyan ${styles.auditBtn}`}
               disabled={loading || !synthesisText.trim()}
             >
-              {loading ? 'ANALYZING CASEFILE...' : '🔍 AUDIT REASONING (SOCRATIC CROSS-CHECK)'}
+              {loading
+                ? `${agentPrefs.avatarName.toUpperCase()} IS ANALYZING CASEFILE...`
+                : `🔍 AUDIT REASONING WITH ${agentPrefs.avatarName.toUpperCase()} (${agentPrefs.toneName.toUpperCase()})`}
             </button>
 
             <button onClick={handleCompleteModule} className={`btn-primary-pink ${styles.completeBtn}`}>

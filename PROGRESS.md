@@ -767,3 +767,28 @@
   - `npm test` (31/31 tests passing across 8 test suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
 - **Immediate Next Step**: Await user feedback or next screen instruction.
+
+---
+
+### [2026-10-13] - UI Iteration 2: Familiarise Screen (`screens_v2/familiarise.png`) & Cross-Stage Agent Appearance/Tone Display
+
+- **Role**: Full Stack Developer
+- **Code Built & Updated**:
+  - **Shared Agent Preferences Resolver ([`src/shared/components/RobotAvatar/RobotAvatar.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/RobotAvatar/RobotAvatar.tsx))**:
+    - Exported `TONE_OPTIONS`, `DEFAULT_AGENT_PREFERENCES`, and `getStoredAgentPreferences()` to resolve the student's selected `appearance` (`RobotVariant`), `avatarName`, `toneName`, and `toneDesc` across all module stages.
+  - **Agent Appearance & Tone Displayed Across All Module Stages**:
+    - **Familiarise ([`src/app/module/[moduleId]/familiarise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/familiarise/page.tsx))**: Renders `<RobotAvatar variant={agentPrefs.appearance} size={146} />` in the bottom-left sidebar dock alongside an interactive `{agentPrefs.avatarName} • Tone: {agentPrefs.toneName}` badge and forwards the selected persona/tone to `/api/modules/:moduleId/agent/hint`.
+    - **Conceptualise ([`src/app/module/[moduleId]/conceptualise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/conceptualise/page.tsx))**: Replaced placeholder CSS box with `<RobotAvatar variant={agentPrefs.appearance} size={78} />` and `{agentPrefs.avatarName} • Tone: {agentPrefs.toneName}` badge, forwarding preferences to the hint API.
+    - **Inquire + Evaluate ([`src/app/module/[moduleId]/inquire/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/inquire/page.tsx))**: Displays `<RobotAvatar variant={agentPrefs.appearance} />` and `{agentPrefs.avatarName} • Tone: {agentPrefs.toneName}` in the chat header and on every agent message turn, forwarding preferences to `/api/modules/:moduleId/inquire/messages`.
+    - **Synthesise ([`src/app/module/[moduleId]/synthesise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/synthesise/page.tsx) & [`src/app/api/modules/[moduleId]/synthesis/route.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/api/modules/%5BmoduleId%5D/synthesis/route.ts))**: Displays `<RobotAvatar variant={agentPrefs.appearance} />` and `{agentPrefs.avatarName} • Tone: {agentPrefs.toneName}` in the synthesis header and reasoning audit card, forwarding preferences to the synthesis cross-check API.
+  - **Familiarise Screen Redesign ([`src/app/module/[moduleId]/familiarise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/familiarise/page.tsx) & [`familiarise.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/familiarise/familiarise.module.css))**:
+    - Built full-height split layout matching [`screens_v2/familiarise.png`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/screens_v2/familiarise.png) and Section 9 tokens (`#37F3FF`, `#0F172E`, `#EAF6FF`, `#D9DFF7`, `Space Grotesk`, `Exo 2`):
+      - Left `#0F172E` sidebar with purple vertical divider, `← Climate Change` back button, `Read + Annotate` heading, rounded source pills (`Social Media Post`, etc.) with cyan active state, and bottom-left companion robot dock.
+      - Top-right `Tutorial` pill button and `?` help circle button with purple borders opening the interactive tutorial and mandatory Socratic AI disclosure modals.
+      - Centered dark slate source card (`#232B3E`) with author initials avatar circle (`DT` for `Donald Trump`), author name heading, and selectable body text supporting inline highlights, hover/pinned note tooltips, note editing/deletion, and `+ Convert to node`.
+      - Floating frosted bottom stage dock (`01 Annotate`, `02 Mind Map`, `03 Challenge`, `04 Conclude`) with glowing cyan active circle badge.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (31/31 tests passing across 8 test suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+- **Immediate Next Step**: Await user feedback or next screen instruction.

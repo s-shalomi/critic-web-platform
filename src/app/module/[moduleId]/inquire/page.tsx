@@ -7,6 +7,12 @@ import styles from './inquire.module.css';
 import { getStudentStorageKey } from '@/shared/utils/storage';
 import { reportStudentProgress } from '@/shared/utils/reportProgress';
 import ConceptMapCanvas from '@/shared/components/ConceptMapCanvas/ConceptMapCanvas';
+import {
+  RobotAvatar,
+  getStoredAgentPreferences,
+  DEFAULT_AGENT_PREFERENCES,
+  ResolvedAgentPreferences,
+} from '@/shared/components/RobotAvatar/RobotAvatar';
 
 interface ChatMessage {
   id: string;
@@ -25,6 +31,7 @@ export default function InquireEvaluateStagePage() {
   const [loading, setLoading] = useState<boolean>(false);
   const [isDevilsAdvocate, setIsDevilsAdvocate] = useState<boolean>(false);
   const [showIntroModal, setShowIntroModal] = useState<boolean>(true);
+  const [agentPrefs, setAgentPrefs] = useState<ResolvedAgentPreferences>(DEFAULT_AGENT_PREFERENCES);
 
   // Evidence notes count for non-blocking AI nudge
   const [notesCount, setNotesCount] = useState<number>(0);
@@ -35,8 +42,12 @@ export default function InquireEvaluateStagePage() {
   useEffect(() => {
     const chatKey = getStudentStorageKey('critic_chat', moduleId);
     const notesKey = getStudentStorageKey('critic_notes', moduleId);
+    setAgentPrefs(getStoredAgentPreferences());
 
     reportStudentProgress('inquire');
+
+    const handleFocus = () => setAgentPrefs(getStoredAgentPreferences());
+    window.addEventListener('focus', handleFocus);
 
     // 0. Load notes count for AI nudge
     const localNotesStr = localStorage.getItem(notesKey);
@@ -71,6 +82,8 @@ export default function InquireEvaluateStagePage() {
           if (data.messages) setMessages(data.messages);
         });
     }
+
+    return () => window.removeEventListener('focus', handleFocus);
   }, [moduleId]);
 
   // Persist chat history
@@ -107,7 +120,12 @@ export default function InquireEvaluateStagePage() {
       const isHighConfidence = highConfidenceRegex.test(userText);
       const shouldTriggerRandomly = Math.random() < 0.3;
       const effectiveMode =
-        isDevilsAdvocate || isHighConfidence || shouldTriggerRandomly ? 'DevilsAdvocate' : 'Socratic';
+        isDevilsAdvocate ||
+        agentPrefs.toneId === 'devils_advocate' ||
+        isHighConfidence ||
+        shouldTriggerRandomly
+          ? 'DevilsAdvocate'
+          : 'Socratic';
 
       const res = await fetch(`/api/modules/${moduleId}/inquire/messages`, {
         method: 'POST',
@@ -116,6 +134,8 @@ export default function InquireEvaluateStagePage() {
           history: messages,
           userMessage: userText,
           mode: effectiveMode,
+          agentPersonality: `${agentPrefs.toneName} (${agentPrefs.toneDesc})`,
+          avatarName: agentPrefs.avatarName,
         }),
       });
 
@@ -170,7 +190,7 @@ export default function InquireEvaluateStagePage() {
         >
           <span>
             💡 <strong>AI Learning Nudge:</strong> You haven&apos;t gathered evidence notes in the{' '}
-            <strong>Familiarise</strong> stage yet! Gathering notes helps Aria cross-reference your reasoning.
+            <strong>Familiarise</strong> stage yet! Gathering notes helps {agentPrefs.avatarName} cross-reference your reasoning.
             You can continue exploring here or return to Familiarise anytime.
           </span>
           <button
@@ -196,12 +216,28 @@ export default function InquireEvaluateStagePage() {
         <aside className={styles.chatPanel}>
           <div className={styles.chatHeader}>
             <div className={styles.chatTitleGroup}>
-              <h2
-                className="cyan-neon-text"
-                style={{ fontFamily: 'var(--font-orbitron)', fontSize: '1.2rem' }}
-              >
-                SOCRATIC INQUIRY
-              </h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <RobotAvatar variant={agentPrefs.appearance} size={36} />
+                <div>
+                  <h2
+                    className="cyan-neon-text"
+                    style={{ fontFamily: 'var(--font-orbitron)', fontSize: '1.1rem', margin: 0 }}
+                  >
+                    SOCRATIC INQUIRY
+                  </h2>
+                  <div
+                    style={{
+                      fontFamily: 'var(--font-display)',
+                      fontSize: '0.78rem',
+                      color: '#D9DFF7',
+                      marginTop: '2px',
+                    }}
+                  >
+                    <strong style={{ color: '#37F3FF' }}>{agentPrefs.avatarName}</strong> • Tone:{' '}
+                    <span style={{ color: '#EAF6FF', fontWeight: 600 }}>{agentPrefs.toneName}</span>
+                  </div>
+                </div>
+              </div>
               <button
                 onClick={() => setIsDevilsAdvocate(!isDevilsAdvocate)}
                 className={`${styles.devilsBtn} ${isDevilsAdvocate ? styles.devilsBtnActive : ''}`}
@@ -222,7 +258,7 @@ export default function InquireEvaluateStagePage() {
               >
                 {m.sender === 'agent' && (
                   <div className={styles.agentAvatarIcon}>
-                    <div className={styles.robotHeadSmall} />
+                    <RobotAvatar variant={agentPrefs.appearance} size={34} />
                   </div>
                 )}
 
@@ -235,6 +271,19 @@ export default function InquireEvaluateStagePage() {
                       : styles.agentBubble
                   }`}
                 >
+                  {m.sender === 'agent' && (
+                    <div
+                      style={{
+                        fontFamily: 'var(--font-display)',
+                        fontSize: '0.74rem',
+                        fontWeight: 700,
+                        color: '#37F3FF',
+                        marginBottom: '4px',
+                      }}
+                    >
+                      {agentPrefs.avatarName} ({agentPrefs.toneName})
+                    </div>
+                  )}
                   {m.messageType === 'devils_advocate' && (
                     <div className={styles.devilsTag}>DEVIL&apos;S ADVOCATE COUNTER-CLAIM</div>
                   )}
@@ -246,13 +295,15 @@ export default function InquireEvaluateStagePage() {
             {loading && (
               <div className={`${styles.messageRow} ${styles.agentRow}`}>
                 <div className={styles.agentAvatarIcon}>
-                  <div className={styles.robotHeadSmall} />
+                  <RobotAvatar variant={agentPrefs.appearance} size={34} />
                 </div>
                 <div className={styles.loadingBubble}>
                   <span className={styles.dot} />
                   <span className={styles.dot} />
                   <span className={styles.dot} />
-                  <span className={styles.loadingText}>Aria is analyzing reasoning...</span>
+                  <span className={styles.loadingText}>
+                    {agentPrefs.avatarName} ({agentPrefs.toneName}) is analyzing reasoning...
+                  </span>
                 </div>
               </div>
             )}

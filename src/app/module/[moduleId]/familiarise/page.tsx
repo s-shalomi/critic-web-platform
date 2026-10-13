@@ -6,6 +6,12 @@ import styles from './familiarise.module.css';
 
 import { getStudentStorageKey } from '@/shared/utils/storage';
 import { reportStudentProgress } from '@/shared/utils/reportProgress';
+import {
+  RobotAvatar,
+  getStoredAgentPreferences,
+  DEFAULT_AGENT_PREFERENCES,
+  ResolvedAgentPreferences,
+} from '@/shared/components/RobotAvatar/RobotAvatar';
 
 interface Source {
   id: string;
@@ -28,6 +34,15 @@ interface Note {
   convertedToNode: boolean;
 }
 
+function getAuthorInitials(name?: string): string {
+  if (!name) return 'SR';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) {
+    return parts[0].slice(0, 2).toUpperCase();
+  }
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
 export default function FamiliariseStagePage() {
   const router = useRouter();
   const params = useParams();
@@ -36,9 +51,11 @@ export default function FamiliariseStagePage() {
   const [sources, setSources] = useState<Source[]>([]);
   const [selectedSourceId, setSelectedSourceId] = useState<string>('');
   const [notes, setNotes] = useState<Note[]>([]);
-  const [showIntroModal, setShowIntroModal] = useState<boolean>(true);
+  const [showIntroModal, setShowIntroModal] = useState<boolean>(false);
+  const [showTutorialModal, setShowTutorialModal] = useState<boolean>(false);
   const [agentSpeech, setAgentSpeech] = useState<string | null>(null);
   const [agentLoading, setAgentLoading] = useState<boolean>(false);
+  const [agentPrefs, setAgentPrefs] = useState<ResolvedAgentPreferences>(DEFAULT_AGENT_PREFERENCES);
 
   // Highlighting creation state
   const [selectedText, setSelectedText] = useState<string>('');
@@ -55,6 +72,7 @@ export default function FamiliariseStagePage() {
 
   useEffect(() => {
     setLoading(true);
+    setAgentPrefs(getStoredAgentPreferences());
     const notesKey = getStudentStorageKey('critic_notes', moduleId);
 
     // Inform teacher portal this student is on the Familiarise stage
@@ -78,22 +96,27 @@ export default function FamiliariseStagePage() {
 
     fetchSources();
     const sourcesInterval = setInterval(fetchSources, 4000);
+
     // Cross-validate convertedToNode against actual existing canvas nodes
     const syncNotesWithCanvas = (loadedNotes: Note[]) => {
       const canvasKey = getStudentStorageKey('critic_nodes_canvas', moduleId);
       const canvasStr = localStorage.getItem(canvasKey);
       let canvasNodes: Array<{ id: string; text: string; sourceNoteId?: string }> = [];
       if (canvasStr) {
-        try { canvasNodes = JSON.parse(canvasStr); } catch (e) { /* ignore */ }
+        try {
+          canvasNodes = JSON.parse(canvasStr);
+        } catch (e) {
+          /* ignore */
+        }
       }
 
       return loadedNotes.map((note) => {
         if (!note.convertedToNode) return note;
-        // Verify if a node actually exists for this note
         const hasNode = canvasNodes.some(
-          (cn) => (cn.sourceNoteId && cn.sourceNoteId === note.id) ||
-                  cn.text === note.noteText ||
-                  cn.text === note.highlightedText
+          (cn) =>
+            (cn.sourceNoteId && cn.sourceNoteId === note.id) ||
+            cn.text === note.noteText ||
+            cn.text === note.highlightedText
         );
         return hasNode ? note : { ...note, convertedToNode: false };
       });
@@ -125,6 +148,7 @@ export default function FamiliariseStagePage() {
 
     const handleFocusSync = () => {
       fetchSources();
+      setAgentPrefs(getStoredAgentPreferences());
       const currentNotes = localStorage.getItem(notesKey);
       if (currentNotes) {
         try {
@@ -132,7 +156,9 @@ export default function FamiliariseStagePage() {
           const verified = syncNotesWithCanvas(parsed);
           setNotes(verified);
           localStorage.setItem(notesKey, JSON.stringify(verified));
-        } catch (e) { /* ignore */ }
+        } catch (e) {
+          /* ignore */
+        }
       }
     };
 
@@ -140,7 +166,6 @@ export default function FamiliariseStagePage() {
 
     return () => {
       clearInterval(sourcesInterval);
-      window.removeEventListener('focus', fetchSources);
       window.removeEventListener('focus', handleFocusSync);
     };
   }, [moduleId]);
@@ -197,7 +222,6 @@ export default function FamiliariseStagePage() {
     if (!editText.trim()) return;
     const targetNote = notes.find((n) => n.id === noteId);
 
-    // Optimistically update local state immediately
     updateNotesState((prev) =>
       prev.map((n) => (n.id === noteId ? { ...n, noteText: editText } : n))
     );
@@ -235,35 +259,30 @@ export default function FamiliariseStagePage() {
   };
 
   const handleConvertToNode = async (noteId: string) => {
-    // 1. Instantly update local notes state to show '✓ Converted to Concept Node'
     const targetNote = notes.find((n) => n.id === noteId);
     updateNotesState((prev) =>
       prev.map((n) => (n.id === noteId ? { ...n, convertedToNode: true } : n))
     );
 
-    // 2. Generate concept node object
     const conceptNodeToSave = {
       id: `node_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
       moduleId,
-      text: targetNote ? (targetNote.noteText || targetNote.highlightedText) : 'Key Concept',
+      text: targetNote ? targetNote.noteText || targetNote.highlightedText : 'Key Concept',
       positionX: 180 + Math.random() * 220,
       positionY: 140 + Math.random() * 180,
       sourceNoteId: noteId,
       linkCount: 0,
     };
 
-    // 3. Save into canvas localStorage store immediately
     const canvasNodesKey = getStudentStorageKey('critic_nodes_canvas', moduleId);
     const savedCanvasNodesStr = localStorage.getItem(canvasNodesKey);
     const canvasNodes = savedCanvasNodesStr ? JSON.parse(savedCanvasNodesStr) : [];
     canvasNodes.push(conceptNodeToSave);
     localStorage.setItem(canvasNodesKey, JSON.stringify(canvasNodes));
 
-    // 4. Show visual feedback toast banner
-    setToastMsg('✨ Note converted to Concept Node! Added to Visual Map.');
+    setToastMsg('✨ Note converted to Concept Node! Added to Mind Map.');
     setTimeout(() => setToastMsg(null), 3500);
 
-    // 5. Sync with server API
     try {
       await fetch(`/api/notes/${noteId}/convert-to-node`, {
         method: 'POST',
@@ -290,13 +309,17 @@ export default function FamiliariseStagePage() {
           stage: 'familiarise',
           sourceTitle: currentSource?.title,
           sourceText: currentSource?.content?.text,
+          agentPersonality: `${agentPrefs.toneName} (${agentPrefs.toneDesc})`,
+          avatarName: agentPrefs.avatarName,
         }),
       });
       const data = await res.json();
       if (data.hint) {
         setAgentSpeech(data.hint);
       } else if (data.error) {
-        setAgentSpeech('⚠️ AI service is experiencing high demand. Please try clicking again in a few moments.');
+        setAgentSpeech(
+          '⚠️ AI service is experiencing high demand. Please try clicking again in a few moments.'
+        );
       }
     } catch (err) {
       setAgentSpeech('What underlying assumptions might the author be making in this claim?');
@@ -313,7 +336,6 @@ export default function FamiliariseStagePage() {
       return fullText;
     }
 
-    // Build regex pattern matching all highlighted snippets for current source
     let parts: Array<{ text: string; note?: Note }> = [{ text: fullText }];
 
     sourceNotes.forEach((note) => {
@@ -363,12 +385,8 @@ export default function FamiliariseStagePage() {
         >
           {part.text}
 
-          {/* Hover / Pinned Tooltip Popup */}
           {isVisible && (
-            <span
-              className={styles.hoverTooltip}
-              onClick={(e) => e.stopPropagation()}
-            >
+            <span className={styles.hoverTooltip} onClick={(e) => e.stopPropagation()}>
               {isEditing ? (
                 <div className={styles.editForm}>
                   <textarea
@@ -450,19 +468,30 @@ export default function FamiliariseStagePage() {
 
   return (
     <div className={styles.container}>
-      {/* Top Header */}
-      <header className={styles.header}>
-        <button onClick={() => router.push('/dashboard')} className={styles.backBtn}>
-          ← Climate Change
-        </button>
-      </header>
-
-      {/* Main Workspace split */}
+      {/* Main Split Workspace matching screens_v2/familiarise.png */}
       <div className={styles.workspace}>
         {/* Left Sidebar */}
         <aside className={styles.sidebar}>
-          <h2 className={styles.stageHeading}>Familiarise + explore</h2>
-          <nav className={styles.sourceNav}>
+          <button onClick={() => router.push('/dashboard')} className={styles.backBtn}>
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="19" y1="12" x2="5" y2="12" />
+              <polyline points="12 19 5 12 12 5" />
+            </svg>
+            <span>Climate Change</span>
+          </button>
+
+          <h1 className={styles.stageHeading}>Read + Annotate</h1>
+
+          <nav className={styles.sourceNav} aria-label="Evidence sources">
             {sources.map((s) => (
               <button
                 key={s.id}
@@ -475,79 +504,144 @@ export default function FamiliariseStagePage() {
               </button>
             ))}
           </nav>
+
+          {/* Bottom-Left Selected Agent Avatar & Tone Display */}
+          <div className={styles.agentSidebarDock}>
+            {agentLoading && (
+              <div className={styles.loadingSpeechBubble}>
+                <div className={styles.spinnerSmall} />
+                <span className={styles.loadingBubbleText}>
+                  {agentPrefs.avatarName} ({agentPrefs.toneName}) is analyzing evidence...
+                </span>
+              </div>
+            )}
+
+            {!agentLoading && agentSpeech && (
+              <div className={styles.speechBubble}>
+                <div className={styles.speechHeader}>
+                  <span>{agentPrefs.avatarName}</span>
+                  <span className={styles.speechToneBadge}>{agentPrefs.toneName}</span>
+                </div>
+                <p>{agentSpeech}</p>
+                <button
+                  onClick={() => setAgentSpeech(null)}
+                  className={styles.closeSpeechBtn}
+                  aria-label="Close agent hint"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={handleAgentClick}
+              disabled={agentLoading}
+              className={`${styles.agentAvatarBtn} ${
+                agentLoading ? styles.agentAvatarBtnLoading : ''
+              }`}
+              title={`Click ${agentPrefs.avatarName} (${agentPrefs.toneName} tone) for a Socratic hint`}
+            >
+              <RobotAvatar variant={agentPrefs.appearance} size={146} />
+            </button>
+
+            <div className={styles.agentMetaPill} onClick={handleAgentClick}>
+              <span className={styles.agentMetaName}>{agentPrefs.avatarName}</span>
+              <span className={styles.agentMetaDivider}>•</span>
+              <span className={styles.agentMetaTone}>Tone: {agentPrefs.toneName}</span>
+            </div>
+          </div>
         </aside>
 
-        {/* Center Content Area */}
+        {/* Right Main Content Stage */}
         <main className={styles.contentArea}>
-          {loading && (!currentSource || sources.length === 0) ? (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '360px', gap: '16px' }}>
-              <div style={{ width: '40px', height: '40px', border: '3px solid rgba(55, 243, 255, 0.2)', borderTopColor: '#37F3FF', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
-              <div className="cyan-neon-text" style={{ fontFamily: 'var(--font-orbitron)', fontSize: '1.1rem', letterSpacing: '1px' }}>
-                LOADING EVIDENCE SOURCES...
+          {/* Top-Right Tutorial & Help Buttons per screens_v2/familiarise.png */}
+          <div className={styles.topRightActions}>
+            <button
+              type="button"
+              onClick={() => setShowTutorialModal(true)}
+              className={styles.tutorialBtn}
+            >
+              <span className={styles.iconSquare}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="8 5 19 12 8 19 8 5" />
+                </svg>
+              </span>
+              <span>Tutorial</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowIntroModal(true)}
+              className={styles.helpCircleBtn}
+              aria-label="Investigation Briefing and AI Disclosure"
+              title="Investigation Briefing & AI Disclosure"
+            >
+              <span className={styles.iconSquare}>?</span>
+            </button>
+          </div>
+
+          {/* Center Source Reading Card */}
+          <div className={styles.centerStageWrapper}>
+            {loading && (!currentSource || sources.length === 0) ? (
+              <div className={styles.loadingStateBox}>
+                <div className={styles.loadingSpinner} />
+                <div className={styles.loadingStateText}>Loading evidence sources...</div>
               </div>
-            </div>
-          ) : currentSource ? (
-            <div className={styles.sourceCardContainer}>
-              <div className="glass-card" style={{ padding: '40px', width: '100%', maxWidth: '800px', position: 'relative' }}>
-                {currentSource.content.authorName && (
+            ) : currentSource ? (
+              <div className={styles.sourceCardContainer}>
+                <article className={styles.sourceCard}>
                   <div className={styles.authorHeader}>
-                    <div className={styles.authorAvatar} />
-                    <span className={styles.authorName}>{currentSource.content.authorName}</span>
-                  </div>
-                )}
-
-                <div
-                  className={styles.sourceBodyText}
-                  onMouseUp={handleMouseUp}
-                >
-                  {renderHighlightedText(currentSource.content.text)}
-
-                  {currentSource.content.comments && (
-                    <div className={styles.commentsList}>
-                      <h4 style={{ fontFamily: 'var(--font-orbitron)', marginTop: '28px', marginBottom: '16px' }}>
-                        Comments
-                      </h4>
-                      {currentSource.content.comments.map((c, i) => (
-                        <div key={i} className={styles.commentItem}>
-                          <strong className="cyan-neon-text">{c.author}:</strong>{' '}
-                          {renderHighlightedText(c.text)}
-                        </div>
-                      ))}
+                    <div className={styles.authorAvatar}>
+                      {getAuthorInitials(currentSource.content.authorName || currentSource.title)}
                     </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          ) : null}
+                    <h2 className={styles.authorName}>
+                      {currentSource.content.authorName || currentSource.title}
+                    </h2>
+                  </div>
 
-          {/* Note Creation Modal / Popover */}
+                  <div className={styles.sourceBodyText} onMouseUp={handleMouseUp}>
+                    {renderHighlightedText(currentSource.content.text)}
+
+                    {currentSource.content.comments &&
+                      currentSource.content.comments.length > 0 && (
+                        <div className={styles.commentsList}>
+                          <h4 className={styles.commentsHeading}>Comments</h4>
+                          {currentSource.content.comments.map((c, i) => (
+                            <div key={i} className={styles.commentItem}>
+                              <strong className={styles.commentAuthor}>{c.author}:</strong>{' '}
+                              {renderHighlightedText(c.text)}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                  </div>
+                </article>
+              </div>
+            ) : null}
+          </div>
+
+          {/* Note Creation Popover */}
           {isHighlighting && (
             <div className={styles.highlightPopover}>
-              <h4 className="cyan-neon-text" style={{ fontFamily: 'var(--font-orbitron)' }}>
-                CREATE NOTE ON HIGHLIGHT
-              </h4>
-              <blockquote className={styles.highlightQuote}>
-                &quot;{selectedText}&quot;
-              </blockquote>
+              <h4 className={styles.popoverTitle}>Annotate Highlighted Text</h4>
+              <blockquote className={styles.highlightQuote}>&quot;{selectedText}&quot;</blockquote>
               <textarea
                 className={styles.noteTextArea}
-                placeholder="What assumptions, biases, or thoughts does this trigger?"
+                placeholder="What assumptions, biases, or questions does this trigger?"
                 value={noteInput}
                 onChange={(e) => setNoteInput(e.target.value)}
               />
-              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '12px' }}>
-                <button
-                  onClick={() => setIsHighlighting(false)}
-                  className={styles.cancelBtn}
-                >
+              <div className={styles.popoverActions}>
+                <button onClick={() => setIsHighlighting(false)} className={styles.cancelBtn}>
                   Cancel
                 </button>
                 <button
                   onClick={handleSaveNote}
-                  className="btn-primary-cyan"
+                  className={styles.saveNoteBtn}
                   disabled={loading}
                 >
-                  {loading ? 'SAVING...' : 'SAVE NOTE'}
+                  {loading ? 'Saving...' : 'Save Note'}
                 </button>
               </div>
             </div>
@@ -555,80 +649,127 @@ export default function FamiliariseStagePage() {
         </main>
       </div>
 
-      {/* Socratic Agent Avatar */}
-      <div className={styles.agentContainer}>
-        {agentLoading && (
-          <div className={styles.loadingSpeechBubble}>
-            <div className={styles.spinnerSmall} />
-            <span className={styles.loadingBubbleText}>Aria is analyzing evidence &amp; formulating hint...</span>
-          </div>
-        )}
-        {!agentLoading && agentSpeech && (
-          <div className={styles.speechBubble}>
-            <div className={styles.speechHeader}>Aria (Socratic Peer)</div>
-            <p>{agentSpeech}</p>
-            <button onClick={() => setAgentSpeech(null)} className={styles.closeSpeechBtn}>✕</button>
-          </div>
-        )}
+      {/* Bottom Floating Stage Navigation Dock matching screens_v2/familiarise.png */}
+      <footer className={styles.stageNavBar} aria-label="Module stages">
         <button
-          onClick={handleAgentClick}
-          disabled={agentLoading}
-          className={`${styles.agentAvatarBtn} ${agentLoading ? styles.agentAvatarBtnLoading : ''}`}
-          title={agentLoading ? 'Aria is analyzing evidence...' : 'Click Aria for Socratic Hints'}
+          type="button"
+          onClick={() => router.push(`/module/${moduleId}/familiarise`)}
+          className={`${styles.stageStep} ${styles.stageStepActive}`}
         >
-          <div className={styles.robotHead}>
-            <div className={styles.robotEyes} />
-          </div>
+          <span className={`${styles.stageCircle} ${styles.stageCircleActive}`}>01</span>
+          <span className={styles.stageLabel}>Annotate</span>
         </button>
-      </div>
 
-      {/* Bottom Stage Navigation Bar */}
-      <footer className={styles.stageNavBar}>
-        <button onClick={() => router.push(`/module/${moduleId}/familiarise`)} className={`${styles.stageStep} ${styles.stageStepActive}`}>
-          01 familiarise
+        <button
+          type="button"
+          onClick={() => router.push(`/module/${moduleId}/conceptualise`)}
+          className={styles.stageStep}
+        >
+          <span className={styles.stageCircle}>02</span>
+          <span className={styles.stageLabel}>Mind Map</span>
         </button>
-        <button onClick={() => router.push(`/module/${moduleId}/conceptualise`)} className={styles.stageStep}>
-          02 conceptualise
+
+        <button
+          type="button"
+          onClick={() => router.push(`/module/${moduleId}/inquire`)}
+          className={styles.stageStep}
+        >
+          <span className={styles.stageCircle}>03</span>
+          <span className={styles.stageLabel}>Challenge</span>
         </button>
-        <button onClick={() => router.push(`/module/${moduleId}/inquire`)} className={styles.stageStep}>
-          03 inquire + evaluate
-        </button>
-        <button onClick={() => router.push(`/module/${moduleId}/synthesise`)} className={styles.stageStep}>
-          04 synthesise
+
+        <button
+          type="button"
+          onClick={() => router.push(`/module/${moduleId}/synthesise`)}
+          className={styles.stageStep}
+        >
+          <span className={styles.stageCircle}>04</span>
+          <span className={styles.stageLabel}>Conclude</span>
         </button>
       </footer>
 
       {/* Toast Notification Banner */}
-      {toastMsg && (
-        <div className={styles.toastBanner}>
-          {toastMsg}
+      {toastMsg && <div className={styles.toastBanner}>{toastMsg}</div>}
+
+      {/* Tutorial Modal */}
+      {showTutorialModal && (
+        <div className={styles.modalBackdrop} onClick={() => setShowTutorialModal(false)}>
+          <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => setShowTutorialModal(false)}
+              className={styles.modalCloseBtn}
+              aria-label="Close tutorial"
+            >
+              ✕
+            </button>
+            <h3 className={styles.modalTitle}>How to Read + Annotate</h3>
+            <ol className={styles.tutorialStepsList}>
+              <li>
+                <strong>Select a Source:</strong> Use the pills on the left sidebar to switch
+                between the Social Media Post, comments, articles, and video transcripts.
+              </li>
+              <li>
+                <strong>Highlight Claims:</strong> Click and drag your cursor across any sentence or
+                phrase inside the source card to highlight it and attach an annotation note.
+              </li>
+              <li>
+                <strong>Manage &amp; Convert Notes:</strong> Hover over or click any highlighted
+                text to edit your note, delete it, or click <strong>+ Convert to node</strong> to
+                send it directly to your Mind Map.
+              </li>
+              <li>
+                <strong>Ask {agentPrefs.avatarName}:</strong> Click your companion avatar in the
+                bottom-left corner anytime for a Socratic question tailored to your active{' '}
+                <strong>{agentPrefs.toneName}</strong> tone.
+              </li>
+            </ol>
+            <button onClick={() => setShowTutorialModal(false)} className={styles.modalPrimaryBtn}>
+              Got it
+            </button>
+          </div>
         </div>
       )}
 
-      {/* Stage Intro & AI Disclosure Modal */}
+      {/* Stage Intro & Mandatory AI Disclosure Modal */}
       {showIntroModal && (
-        <div className={styles.modalBackdrop}>
-          <div className="glass-card-glow" style={{ padding: '36px', maxWidth: '540px', width: '90%', textAlign: 'center' }}>
-            <h3 className="cyan-neon-text" style={{ fontFamily: 'var(--font-orbitron)', marginBottom: '16px', fontSize: '1.2rem' }}>
-              🔍 INVESTIGATION BRIEFING & AI DISCLOSURE
-            </h3>
-            <p className={styles.introModalText} style={{ marginBottom: '16px' }}>
-              Read through the climate sources. Highlight text and capture your thoughts, biases, or assumptions. Hover over highlighted snippets to edit, delete, or convert them into concept map nodes.
-            </p>
-            <div style={{ background: 'rgba(7, 11, 26, 0.7)', border: '1px solid var(--accent-magenta)', borderRadius: '10px', padding: '16px', textAlign: 'left', fontSize: '0.88rem', color: '#D9DFF7', lineHeight: '1.5' }}>
-              <strong style={{ color: 'var(--accent-magenta)', display: 'block', marginBottom: '8px' }}>⚠️ Mandatory Socratic Peer Disclosure:</strong>
-              <ul style={{ paddingLeft: '18px', margin: 0 }}>
-                <li style={{ marginBottom: '6px' }}><strong>Socratic Questioning & Devil&apos;s Advocate:</strong> The AI agent (Aria) will guide you through questioning and may challenge your claims with counter-arguments.</li>
-                <li style={{ marginBottom: '6px' }}><strong>Reasoning Test:</strong> Aria may present arguments or claims it does not &quot;believe&quot; solely to test your analytical reasoning.</li>
-                <li><strong>No Verified Facts:</strong> Do not treat statements from the AI agent as absolute verified facts—evaluate all evidence critically yourself.</li>
-              </ul>
-            </div>
+        <div className={styles.modalBackdrop} onClick={() => setShowIntroModal(false)}>
+          <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
             <button
               onClick={() => setShowIntroModal(false)}
-              className="btn-primary-cyan"
-              style={{ marginTop: '24px', padding: '12px 36px', fontWeight: 'bold' }}
+              className={styles.modalCloseBtn}
+              aria-label="Close briefing"
             >
-              UNDERSTOOD & START
+              ✕
+            </button>
+            <h3 className={styles.modalTitle}>Investigation Briefing &amp; AI Disclosure</h3>
+            <p className={styles.introModalText}>
+              Read through the climate sources. Highlight text to capture your thoughts, biases, or
+              assumptions. Hover over highlighted snippets to edit, delete, or convert them into
+              concept map nodes.
+            </p>
+            <div className={styles.disclosureBox}>
+              <strong className={styles.disclosureTitle}>
+                ⚠️ Mandatory Socratic Peer Disclosure ({agentPrefs.avatarName} •{' '}
+                {agentPrefs.toneName} Tone):
+              </strong>
+              <ul className={styles.disclosureList}>
+                <li>
+                  <strong>Socratic Questioning &amp; Devil&apos;s Advocate:</strong> Your AI
+                  companion ({agentPrefs.avatarName}) will guide you through questioning and may
+                  challenge your claims with counter-arguments.
+                </li>
+                <li>
+                  <strong>Reasoning Test:</strong> {agentPrefs.avatarName} may present arguments or
+                  claims it does not &quot;believe&quot; solely to test your analytical reasoning.
+                </li>
+                <li>
+                  <strong>No Verified Facts:</strong> Do not treat statements from the AI agent as
+                  absolute verified facts—evaluate all evidence critically yourself.
+                </li>
+              </ul>
+            </div>
+            <button onClick={() => setShowIntroModal(false)} className={styles.modalPrimaryBtn}>
+              Understood
             </button>
           </div>
         </div>

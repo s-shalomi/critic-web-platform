@@ -23,7 +23,7 @@ export async function POST(
 ) {
   try {
     const body = await request.json();
-    const { synthesisText } = body;
+    const { synthesisText, agentPersonality, avatarName } = body;
 
     if (!synthesisText || !synthesisText.trim()) {
       return NextResponse.json({ error: 'synthesisText is required' }, { status: 400 });
@@ -41,6 +41,8 @@ export async function POST(
       notes: notesData.map((n) => ({ highlightedText: n.highlightedText, noteText: n.noteText })),
       conceptNodes: conceptsData.nodes.map((n) => ({ text: n.text })),
       synthesisDraft: synthesisText,
+      agentPersonality: agentPersonality || 'Socratic Peer',
+      avatarName: avatarName || 'Aria',
     };
 
     const crossCheckHistory = [
