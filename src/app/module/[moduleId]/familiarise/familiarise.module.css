@@ -1,5 +1,10 @@
 .container {
-  min-height: 100vh;
+  --scrollbar-thumb: rgba(143, 166, 201, 0.38);
+  --scrollbar-track: rgba(10, 15, 32, 0.35);
+
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100dvh;
   background: #0A0F20;
   display: flex;
   flex-direction: column;
@@ -9,18 +14,22 @@
 
 .workspace {
   flex: 1;
+  min-height: 0;
+  height: 100%;
   display: flex;
-  min-height: 100vh;
   width: 100%;
+  overflow: hidden;
 }
 
-/* Left Sidebar matching screens_v2/familiarise.png */
+/* Left Sidebar matching screens_v2/familiarise.png with independent scroll region */
 .sidebar {
-  width: 340px;
+  width: clamp(256px, 21vw, 304px);
   flex-shrink: 0;
+  height: 100%;
+  min-height: 0;
   background: #0F172E;
-  border-right: 2px solid rgba(139, 92, 246, 0.48);
-  padding: 40px 28px 28px;
+  border-right: 1.5px solid rgba(139, 92, 246, 0.45);
+  padding: clamp(20px, 2.6vh, 30px) clamp(18px, 1.8vw, 26px) clamp(16px, 2vh, 22px);
   display: flex;
   flex-direction: column;
   position: relative;
@@ -30,17 +39,18 @@
 .backBtn {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   background: transparent;
   border: none;
   color: #EAF6FF;
   font-family: var(--font-display);
-  font-size: 1.45rem;
+  font-size: clamp(0.98rem, 0.88rem + 0.25vw, 1.12rem);
   font-weight: 700;
   cursor: pointer;
   padding: 4px 0;
   transition: color 0.2s ease, transform 0.2s ease;
   width: fit-content;
+  flex-shrink: 0;
 }
 
 .backBtn:hover {
@@ -50,56 +60,69 @@
 
 .stageHeading {
   font-family: var(--font-display);
-  font-size: 2.25rem;
+  font-size: clamp(1.42rem, 1.15rem + 0.75vw, 1.8rem);
   font-weight: 700;
   color: #EAF6FF;
-  margin: 46px 0 28px;
-  letter-spacing: -0.4px;
-  line-height: 1.15;
+  margin: clamp(18px, 2.6vh, 28px) 0 clamp(14px, 2vh, 20px);
+  letter-spacing: -0.3px;
+  line-height: 1.18;
+  flex-shrink: 0;
 }
 
 .sourceNav {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 10px;
+  padding-right: 4px;
+  padding-bottom: 8px;
 }
 
 .sourceNavItem {
-  background: rgba(24, 35, 62, 0.45);
-  border: 1px solid rgba(143, 166, 201, 0.25);
+  background: rgba(24, 35, 62, 0.48);
+  border: 1px solid rgba(143, 166, 201, 0.26);
   color: #D9DFF7;
   font-family: var(--font-display);
-  font-size: 1.2rem;
-  font-weight: 700;
+  font-size: clamp(0.9rem, 0.84rem + 0.2vw, 1rem);
+  font-weight: 600;
   text-align: left;
   cursor: pointer;
-  padding: 11px 22px;
+  padding: 9px 18px;
   border-radius: 9999px;
   transition: all 0.2s ease;
   width: 100%;
-  max-width: 288px;
+  flex-shrink: 0;
+  line-height: 1.3;
 }
 
 .sourceNavItem:hover:not(.activeSourceNavItem) {
   border-color: rgba(217, 223, 247, 0.55);
   color: #EAF6FF;
-  background: rgba(24, 35, 62, 0.72);
+  background: rgba(24, 35, 62, 0.75);
 }
 
 .activeSourceNavItem {
   background: rgba(55, 243, 255, 0.14);
-  border: 1.5px solid #37F3FF;
+  border: 1.25px solid #37F3FF;
   color: #37F3FF;
-  box-shadow: 0 0 18px rgba(55, 243, 255, 0.15);
+  font-weight: 700;
+  box-shadow: 0 0 14px rgba(55, 243, 255, 0.14);
 }
 
 /* Bottom-Left Selected Agent Avatar & Tone Dock */
 .agentSidebarDock {
-  margin-top: auto;
-  padding-top: 24px;
+  flex-shrink: 0;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(143, 166, 201, 0.14);
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   position: relative;
 }
 
@@ -115,13 +138,13 @@
   align-items: center;
   justify-content: center;
   transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), filter 0.25s ease;
-  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.5));
+  filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.48));
 }
 
 .agentAvatarBtn:hover {
-  transform: translateY(-4px) scale(1.04);
-  filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.6))
-    drop-shadow(0 0 18px rgba(55, 243, 255, 0.28));
+  transform: translateY(-3px) scale(1.04);
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.58))
+    drop-shadow(0 0 16px rgba(55, 243, 255, 0.26));
 }
 
 .agentAvatarBtnLoading {
@@ -140,15 +163,14 @@
 }
 
 .agentMetaPill {
-  margin-top: 6px;
-  margin-left: 8px;
+  margin-top: 4px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   background: rgba(24, 35, 62, 0.78);
   border: 1px solid rgba(55, 243, 255, 0.32);
   border-radius: 9999px;
-  padding: 4px 12px;
+  padding: 3px 11px;
   cursor: pointer;
   transition: border-color 0.2s ease, background 0.2s ease;
 }
@@ -160,42 +182,42 @@
 
 .agentMetaName {
   font-family: var(--font-display);
-  font-size: 0.8rem;
+  font-size: 0.76rem;
   font-weight: 700;
   color: #37F3FF;
 }
 
 .agentMetaDivider {
   color: rgba(217, 223, 247, 0.45);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
 }
 
 .agentMetaTone {
   font-family: var(--font-body);
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 500;
   color: #D9DFF7;
 }
 
 .loadingSpeechBubble {
   position: absolute;
-  bottom: 185px;
-  left: 6px;
-  width: 300px;
+  bottom: calc(100% + 8px);
+  left: 0;
+  width: 280px;
   background: #0F172E;
   border: 1.25px solid #37F3FF;
   box-shadow: 0 14px 32px rgba(0, 0, 0, 0.65), 0 0 20px rgba(55, 243, 255, 0.22);
-  padding: 14px 16px;
-  border-radius: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   z-index: 80;
 }
 
 .spinnerSmall {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   border: 2px solid rgba(55, 243, 255, 0.25);
   border-top-color: #37F3FF;
   border-radius: 50%;
@@ -205,26 +227,28 @@
 
 .loadingBubbleText {
   font-family: var(--font-body);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: #EAF6FF;
   line-height: 1.4;
 }
 
 .speechBubble {
   position: absolute;
-  bottom: 185px;
-  left: 6px;
-  width: 310px;
-  max-height: 320px;
+  bottom: calc(100% + 8px);
+  left: 0;
+  width: 296px;
+  max-height: 260px;
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
   background: #0F172E;
   border: 1.25px solid #37F3FF;
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.7), 0 0 22px rgba(55, 243, 255, 0.22);
-  padding: 16px 32px 16px 16px;
-  border-radius: 14px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.72), 0 0 22px rgba(55, 243, 255, 0.22);
+  padding: 14px 30px 14px 14px;
+  border-radius: 12px;
   font-family: var(--font-body);
-  font-size: 0.9rem;
-  line-height: 1.5;
+  font-size: 0.86rem;
+  line-height: 1.48;
   color: #EAF6FF;
   z-index: 80;
 }
@@ -235,30 +259,30 @@
   gap: 8px;
   font-family: var(--font-display);
   color: #37F3FF;
-  font-size: 0.88rem;
+  font-size: 0.84rem;
   font-weight: 700;
-  margin-bottom: 6px;
+  margin-bottom: 5px;
 }
 
 .speechToneBadge {
   font-family: var(--font-body);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 600;
   color: #D9DFF7;
   background: rgba(55, 243, 255, 0.14);
   border: 1px solid rgba(55, 243, 255, 0.35);
   border-radius: 9999px;
-  padding: 1px 8px;
+  padding: 1px 7px;
 }
 
 .closeSpeechBtn {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 8px;
+  right: 8px;
   background: transparent;
   border: none;
   color: #D9DFF7;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   cursor: pointer;
 }
 
@@ -266,38 +290,41 @@
   color: #37F3FF;
 }
 
-/* Right Main Content Area */
+/* Right Main Content Area: 3 non-overlapping flex rows (Top Bar, Scrollable Stage, Bottom Dock) */
 .contentArea {
   flex: 1;
+  min-width: 0;
+  height: 100%;
+  min-height: 0;
   background: radial-gradient(circle at 50% 44%, #111A36 0%, #090E1D 76%);
   display: flex;
   flex-direction: column;
   position: relative;
-  padding: 28px 44px 140px;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 /* Top-Right Tutorial & Help Buttons */
 .topRightActions {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 14px;
+  gap: 10px;
   width: 100%;
-  margin-bottom: 24px;
+  padding: clamp(16px, 2.2vh, 24px) clamp(24px, 3.2vw, 42px) 8px;
 }
 
 .tutorialBtn {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   background: rgba(24, 35, 62, 0.72);
   border: 1.25px solid rgba(168, 85, 247, 0.68);
   border-radius: 9999px;
-  padding: 8px 24px 8px 18px;
+  padding: 6px 18px 6px 13px;
   color: #EAF6FF;
   font-family: var(--font-display);
-  font-size: 1.22rem;
+  font-size: 0.95rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -305,13 +332,13 @@
 
 .tutorialBtn:hover {
   border-color: #37F3FF;
-  box-shadow: 0 0 16px rgba(55, 243, 255, 0.2);
+  box-shadow: 0 0 14px rgba(55, 243, 255, 0.2);
   transform: translateY(-1px);
 }
 
 .helpCircleBtn {
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: rgba(24, 35, 62, 0.72);
   border: 1.25px solid rgba(168, 85, 247, 0.68);
@@ -326,73 +353,80 @@
 
 .helpCircleBtn:hover {
   border-color: #37F3FF;
-  box-shadow: 0 0 16px rgba(55, 243, 255, 0.2);
+  box-shadow: 0 0 14px rgba(55, 243, 255, 0.2);
   transform: translateY(-1px);
 }
 
 .iconSquare {
-  width: 22px;
-  height: 22px;
-  border: 1.5px solid rgba(192, 132, 252, 0.8);
-  border-radius: 5px;
+  width: 18px;
+  height: 18px;
+  border: 1.4px solid rgba(192, 132, 252, 0.85);
+  border-radius: 4px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-display);
-  font-size: 0.85rem;
+  font-size: 0.76rem;
   font-weight: 700;
   color: #EAF6FF;
 }
 
-/* Center Source Reading Card */
+/* Scrollable Center Source Reading Viewport */
 .centerStageWrapper {
   flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  min-height: 0;
   width: 100%;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  padding: clamp(16px, 2.5vh, 28px) clamp(24px, 4vw, 48px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .sourceCardContainer {
   width: 100%;
   max-width: 660px;
+  margin: auto 0;
 }
 
 .sourceCard {
   background: #232B3E;
   border: 1px solid rgba(143, 166, 201, 0.16);
-  border-radius: 22px;
-  padding: 38px 44px 42px;
-  box-shadow: 0 22px 55px rgba(0, 0, 0, 0.48);
+  border-radius: 20px;
+  padding: clamp(24px, 3vw, 36px) clamp(26px, 3.6vw, 42px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
   position: relative;
 }
 
 .authorHeader {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 14px;
+  margin-bottom: 18px;
 }
 
 .authorAvatar {
-  width: 46px;
-  height: 46px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: #D9DFF7;
   color: #1B2338;
   font-family: var(--font-display);
-  font-size: 1.25rem;
+  font-size: 1.02rem;
   font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.4px;
 }
 
 .authorName {
   font-family: var(--font-display);
-  font-size: 1.55rem;
+  font-size: clamp(1.15rem, 1rem + 0.45vw, 1.38rem);
   font-weight: 700;
   color: #EAF6FF;
   margin: 0;
@@ -400,8 +434,8 @@
 
 .sourceBodyText {
   font-family: var(--font-body);
-  font-size: 1.22rem;
-  line-height: 1.58;
+  font-size: clamp(1rem, 0.94rem + 0.25vw, 1.12rem);
+  line-height: 1.68;
   color: #EAF6FF;
   user-select: text;
 }
@@ -431,14 +465,14 @@
 
 .hoverTooltip {
   position: absolute;
-  bottom: 125%;
+  bottom: calc(100% + 6px);
   left: 50%;
   transform: translateX(-50%);
-  width: 300px;
+  width: 288px;
   background: #0F172E;
   border: 1px solid #37F3FF;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.65), 0 0 20px rgba(55, 243, 255, 0.25);
-  padding: 16px;
+  padding: 14px;
   border-radius: 12px;
   z-index: 100;
   cursor: default;
@@ -455,12 +489,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .tooltipLabel {
   font-family: var(--font-display);
-  font-size: 0.78rem;
+  font-size: 0.74rem;
   font-weight: 700;
   color: #37F3FF;
 }
@@ -475,7 +509,7 @@
   background: transparent;
   border: none;
   font-family: var(--font-body);
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   cursor: pointer;
   color: #D9DFF7;
   transition: color 0.2s ease;
@@ -491,10 +525,10 @@
 
 .tooltipNoteText {
   font-family: var(--font-body);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   line-height: 1.45;
   color: #EAF6FF;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .tooltipFooter {
@@ -508,8 +542,8 @@
   color: #37F3FF;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 0.8rem;
-  padding: 5px 12px;
+  font-size: 0.76rem;
+  padding: 4px 11px;
   border-radius: 9999px;
   cursor: pointer;
   transition: background 0.2s ease;
@@ -521,7 +555,7 @@
 
 .convertedBadge {
   font-family: var(--font-display);
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: #37F3FF;
 }
@@ -533,7 +567,7 @@
 
 .editTextArea {
   width: 100%;
-  height: 70px;
+  height: 66px;
   background: rgba(10, 15, 32, 0.9);
   border: 1px solid #37F3FF;
   color: #EAF6FF;
@@ -556,7 +590,7 @@
   color: #D9DFF7;
   padding: 4px 10px;
   border-radius: 6px;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   cursor: pointer;
 }
 
@@ -568,26 +602,27 @@
   font-weight: 700;
   padding: 4px 12px;
   border-radius: 6px;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   cursor: pointer;
 }
 
 .commentsList {
-  margin-top: 28px;
+  margin-top: 22px;
   border-top: 1px solid rgba(143, 166, 201, 0.22);
-  padding-top: 18px;
+  padding-top: 16px;
 }
 
 .commentsHeading {
   font-family: var(--font-display);
-  font-size: 1.05rem;
+  font-size: 0.98rem;
   color: #37F3FF;
-  margin: 0 0 12px;
+  margin: 0 0 10px;
 }
 
 .commentItem {
   font-family: var(--font-body);
-  font-size: 1rem;
+  font-size: 0.95rem;
+  line-height: 1.55;
   margin-bottom: 10px;
   color: #D9DFF7;
 }
@@ -598,48 +633,50 @@
 
 /* Note Creation Popover */
 .highlightPopover {
-  position: fixed;
-  bottom: 135px;
-  left: 56%;
+  position: absolute;
+  bottom: 105px;
+  left: 50%;
   transform: translateX(-50%);
   background: #0F172E;
   border: 1.25px solid #37F3FF;
-  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.7), 0 0 25px rgba(55, 243, 255, 0.22);
-  padding: 24px;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.72), 0 0 25px rgba(55, 243, 255, 0.22);
+  padding: 20px 22px;
   border-radius: 16px;
   width: 90%;
-  max-width: 500px;
+  max-width: 480px;
   z-index: 90;
 }
 
 .popoverTitle {
   font-family: var(--font-display);
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: #37F3FF;
-  margin: 0 0 10px;
+  margin: 0 0 8px;
 }
 
 .highlightQuote {
   font-family: var(--font-body);
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   color: #EAF6FF;
   background: rgba(55, 243, 255, 0.1);
   border-left: 3px solid #37F3FF;
-  padding: 10px 12px;
+  padding: 8px 12px;
   border-radius: 6px;
-  margin: 0 0 12px;
+  margin: 0 0 10px;
+  max-height: 72px;
+  overflow-y: auto;
 }
 
 .noteTextArea {
   width: 100%;
-  height: 82px;
+  height: 76px;
   background: rgba(10, 15, 32, 0.9);
   border: 1px solid rgba(143, 166, 201, 0.35);
   color: #EAF6FF;
   font-family: var(--font-body);
-  font-size: 0.95rem;
-  padding: 10px 12px;
+  font-size: 0.92rem;
+  padding: 9px 11px;
   border-radius: 8px;
   outline: none;
 }
@@ -650,9 +687,9 @@
 
 .popoverActions {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   justify-content: flex-end;
-  margin-top: 14px;
+  margin-top: 12px;
 }
 
 .cancelBtn {
@@ -660,8 +697,9 @@
   border: 1px solid rgba(143, 166, 201, 0.35);
   color: #D9DFF7;
   font-family: var(--font-display);
+  font-size: 0.88rem;
   font-weight: 600;
-  padding: 8px 18px;
+  padding: 7px 16px;
   border-radius: 9999px;
   cursor: pointer;
 }
@@ -671,30 +709,36 @@
   color: #0F172E;
   border: none;
   font-family: var(--font-display);
+  font-size: 0.88rem;
   font-weight: 700;
-  padding: 8px 22px;
+  padding: 7px 20px;
   border-radius: 9999px;
   cursor: pointer;
   box-shadow: 0 0 14px rgba(55, 243, 255, 0.35);
 }
 
-/* Bottom Floating Stage Navigation Dock matching screens_v2/familiarise.png */
+/* Dedicated Bottom Stage Dock Zone */
+.stageNavWrapper {
+  flex-shrink: 0;
+  width: 100%;
+  padding: 8px 24px clamp(14px, 2vh, 22px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 40;
+}
+
 .stageNavBar {
-  position: fixed;
-  bottom: 22px;
-  left: 54%;
-  transform: translateX(-50%);
-  background: rgba(74, 88, 114, 0.82);
+  background: rgba(68, 82, 108, 0.8);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(143, 166, 201, 0.35);
-  border-radius: 18px;
-  padding: 14px 48px 12px;
+  border: 1px solid rgba(143, 166, 201, 0.32);
+  border-radius: 16px;
+  padding: 10px 36px 9px;
   display: flex;
   align-items: center;
-  gap: 64px;
-  z-index: 50;
-  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.5);
+  gap: clamp(28px, 4vw, 52px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
 }
 
 .stageStep {
@@ -704,7 +748,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 5px;
   cursor: pointer;
   transition: transform 0.2s ease;
 }
@@ -714,14 +758,14 @@
 }
 
 .stageCircle {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: rgba(56, 195, 216, 0.78);
   border: 1.5px solid rgba(168, 85, 247, 0.65);
   color: #0F172E;
   font-family: var(--font-display);
-  font-size: 1.15rem;
+  font-size: 0.95rem;
   font-weight: 600;
   display: flex;
   align-items: center;
@@ -732,13 +776,13 @@
 .stageCircleActive {
   background: #37F3FF;
   border: 2px solid rgba(168, 85, 247, 0.8);
-  box-shadow: 0 0 20px rgba(55, 243, 255, 0.85);
+  box-shadow: 0 0 16px rgba(55, 243, 255, 0.8);
   font-weight: 700;
 }
 
 .stageLabel {
   font-family: var(--font-body);
-  font-size: 1.05rem;
+  font-size: 0.86rem;
   font-weight: 500;
   color: rgba(217, 223, 247, 0.78);
   transition: color 0.2s ease;
@@ -755,13 +799,13 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  min-height: 280px;
+  gap: 14px;
+  margin: auto 0;
 }
 
 .loadingSpinner {
-  width: 38px;
-  height: 38px;
+  width: 34px;
+  height: 34px;
   border: 3px solid rgba(55, 243, 255, 0.2);
   border-top-color: #37F3FF;
   border-radius: 50%;
@@ -770,7 +814,7 @@
 
 .loadingStateText {
   font-family: var(--font-display);
-  font-size: 1.05rem;
+  font-size: 0.98rem;
   color: #37F3FF;
 }
 
@@ -783,7 +827,7 @@
 /* Toast Notification Banner */
 .toastBanner {
   position: fixed;
-  top: 28px;
+  top: 22px;
   left: 50%;
   transform: translateX(-50%);
   background: #0F172E;
@@ -791,9 +835,9 @@
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 22px rgba(55, 243, 255, 0.35);
   color: #37F3FF;
   font-family: var(--font-display);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 600;
-  padding: 12px 24px;
+  padding: 10px 22px;
   border-radius: 9999px;
   z-index: 1000;
 }
@@ -816,8 +860,8 @@
   background: #0F172E;
   border: 1px solid rgba(55, 243, 255, 0.3);
   border-radius: 20px;
-  padding: 34px 36px;
-  max-width: 540px;
+  padding: 30px 32px;
+  max-width: 520px;
   width: 100%;
   position: relative;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75);
@@ -825,12 +869,12 @@
 
 .modalCloseBtn {
   position: absolute;
-  top: 20px;
-  right: 22px;
+  top: 18px;
+  right: 20px;
   background: transparent;
   border: none;
   color: #D9DFF7;
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   cursor: pointer;
 }
 
@@ -840,27 +884,27 @@
 
 .modalTitle {
   font-family: var(--font-display);
-  font-size: 1.55rem;
+  font-size: 1.4rem;
   font-weight: 700;
   color: #EAF6FF;
-  margin: 0 0 16px;
+  margin: 0 0 14px;
 }
 
 .introModalText {
   font-family: var(--font-body);
-  font-size: 1rem;
-  line-height: 1.58;
+  font-size: 0.96rem;
+  line-height: 1.56;
   color: #D9DFF7;
-  margin: 0 0 18px;
+  margin: 0 0 16px;
 }
 
 .tutorialStepsList {
   font-family: var(--font-body);
-  font-size: 0.96rem;
+  font-size: 0.94rem;
   line-height: 1.55;
   color: #D9DFF7;
   padding-left: 20px;
-  margin: 0 0 22px;
+  margin: 0 0 20px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -874,21 +918,21 @@
   background: rgba(10, 15, 32, 0.75);
   border: 1px solid rgba(168, 85, 247, 0.55);
   border-radius: 12px;
-  padding: 16px 18px;
+  padding: 14px 16px;
   text-align: left;
   font-family: var(--font-body);
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   color: #D9DFF7;
   line-height: 1.5;
-  margin-bottom: 22px;
+  margin-bottom: 20px;
 }
 
 .disclosureTitle {
   font-family: var(--font-display);
   color: #C084FC;
   display: block;
-  margin-bottom: 8px;
-  font-size: 0.94rem;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
 }
 
 .disclosureList {
@@ -904,9 +948,9 @@
   color: #0F172E;
   border: none;
   font-family: var(--font-display);
-  font-size: 0.98rem;
+  font-size: 0.92rem;
   font-weight: 700;
-  padding: 10px 28px;
+  padding: 9px 26px;
   border-radius: 9999px;
   cursor: pointer;
   display: block;
@@ -919,19 +963,53 @@
   box-shadow: 0 0 16px rgba(55, 243, 255, 0.45);
 }
 
+/* Legacy fallback for WebKit/Blink browsers that do not support standard scrollbar-color */
+@supports not (scrollbar-color: auto) {
+  .sourceNav::-webkit-scrollbar,
+  .centerStageWrapper::-webkit-scrollbar,
+  .speechBubble::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .sourceNav::-webkit-scrollbar-thumb,
+  .centerStageWrapper::-webkit-scrollbar-thumb,
+  .speechBubble::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 9999px;
+  }
+
+  .sourceNav::-webkit-scrollbar-track,
+  .centerStageWrapper::-webkit-scrollbar-track,
+  .speechBubble::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+    border-radius: 9999px;
+  }
+}
+
 /* Responsive */
-@media (max-width: 960px) {
+@media (max-width: 900px) {
+  .container {
+    height: auto;
+    min-height: 100dvh;
+    max-height: none;
+    overflow-y: auto;
+  }
   .workspace {
     flex-direction: column;
+    overflow: visible;
   }
   .sidebar {
     width: 100%;
+    height: auto;
     border-right: none;
-    border-bottom: 2px solid rgba(139, 92, 246, 0.48);
+    border-bottom: 1.5px solid rgba(139, 92, 246, 0.45);
+  }
+  .sourceNav {
+    max-height: 180px;
   }
   .stageNavBar {
-    left: 50%;
-    gap: 28px;
-    padding: 12px 24px;
+    gap: 24px;
+    padding: 10px 22px;
   }
 }

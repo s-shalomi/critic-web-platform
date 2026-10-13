@@ -474,8 +474,8 @@ export default function FamiliariseStagePage() {
         <aside className={styles.sidebar}>
           <button onClick={() => router.push('/dashboard')} className={styles.backBtn}>
             <svg
-              width="22"
-              height="22"
+              width="18"
+              height="18"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -542,7 +542,7 @@ export default function FamiliariseStagePage() {
               }`}
               title={`Click ${agentPrefs.avatarName} (${agentPrefs.toneName} tone) for a Socratic hint`}
             >
-              <RobotAvatar variant={agentPrefs.appearance} size={146} />
+              <RobotAvatar variant={agentPrefs.appearance} size={112} />
             </button>
 
             <div className={styles.agentMetaPill} onClick={handleAgentClick}>
@@ -563,7 +563,7 @@ export default function FamiliariseStagePage() {
               className={styles.tutorialBtn}
             >
               <span className={styles.iconSquare}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                   <polygon points="8 5 19 12 8 19 8 5" />
                 </svg>
               </span>
@@ -581,7 +581,7 @@ export default function FamiliariseStagePage() {
             </button>
           </div>
 
-          {/* Center Source Reading Card */}
+          {/* Scrollable Center Source Reading Viewport */}
           <div className={styles.centerStageWrapper}>
             {loading && (!currentSource || sources.length === 0) ? (
               <div className={styles.loadingStateBox}>
@@ -646,47 +646,49 @@ export default function FamiliariseStagePage() {
               </div>
             </div>
           )}
+
+          {/* Dedicated Bottom Dock Zone inside Right Workspace */}
+          <div className={styles.stageNavWrapper}>
+            <footer className={styles.stageNavBar} aria-label="Module stages">
+              <button
+                type="button"
+                onClick={() => router.push(`/module/${moduleId}/familiarise`)}
+                className={`${styles.stageStep} ${styles.stageStepActive}`}
+              >
+                <span className={`${styles.stageCircle} ${styles.stageCircleActive}`}>01</span>
+                <span className={styles.stageLabel}>Annotate</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => router.push(`/module/${moduleId}/conceptualise`)}
+                className={styles.stageStep}
+              >
+                <span className={styles.stageCircle}>02</span>
+                <span className={styles.stageLabel}>Mind Map</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => router.push(`/module/${moduleId}/inquire`)}
+                className={styles.stageStep}
+              >
+                <span className={styles.stageCircle}>03</span>
+                <span className={styles.stageLabel}>Challenge</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => router.push(`/module/${moduleId}/synthesise`)}
+                className={styles.stageStep}
+              >
+                <span className={styles.stageCircle}>04</span>
+                <span className={styles.stageLabel}>Conclude</span>
+              </button>
+            </footer>
+          </div>
         </main>
       </div>
-
-      {/* Bottom Floating Stage Navigation Dock matching screens_v2/familiarise.png */}
-      <footer className={styles.stageNavBar} aria-label="Module stages">
-        <button
-          type="button"
-          onClick={() => router.push(`/module/${moduleId}/familiarise`)}
-          className={`${styles.stageStep} ${styles.stageStepActive}`}
-        >
-          <span className={`${styles.stageCircle} ${styles.stageCircleActive}`}>01</span>
-          <span className={styles.stageLabel}>Annotate</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => router.push(`/module/${moduleId}/conceptualise`)}
-          className={styles.stageStep}
-        >
-          <span className={styles.stageCircle}>02</span>
-          <span className={styles.stageLabel}>Mind Map</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => router.push(`/module/${moduleId}/inquire`)}
-          className={styles.stageStep}
-        >
-          <span className={styles.stageCircle}>03</span>
-          <span className={styles.stageLabel}>Challenge</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => router.push(`/module/${moduleId}/synthesise`)}
-          className={styles.stageStep}
-        >
-          <span className={styles.stageCircle}>04</span>
-          <span className={styles.stageLabel}>Conclude</span>
-        </button>
-      </footer>
 
       {/* Toast Notification Banner */}
       {toastMsg && <div className={styles.toastBanner}>{toastMsg}</div>}
