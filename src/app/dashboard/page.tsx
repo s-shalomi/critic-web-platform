@@ -7,6 +7,8 @@ import {
   AVATAR_OPTIONS,
   RobotAvatar,
   RobotVariant,
+  getAgentPreferencesStorageKey,
+  getStoredAgentPreferences,
 } from '@/shared/components/RobotAvatar/RobotAvatar';
 import { CriticLogo } from '@/shared/components/CriticLogo/CriticLogo';
 
@@ -109,17 +111,35 @@ export default function DashboardPage() {
       })
       .finally(() => setLoading(false));
 
-    // Hydrate student preferences if present
+    // Hydrate student preferences from student-scoped localStorage first, then sync with server if needed
     try {
-      const stored = localStorage.getItem('critic_agent_preferences');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed.appearance && AVATAR_OPTIONS.some((a) => a.id === parsed.appearance)) {
-          setSelectedAppearance(parsed.appearance);
+      const resolved = getStoredAgentPreferences();
+      setSelectedAppearance(resolved.appearance);
+      setSelectedTone(resolved.toneName);
+
+      const scopedKey = getAgentPreferencesStorageKey();
+      if (!localStorage.getItem(scopedKey)) {
+        let studentId = 'student_demo';
+        const userStr = localStorage.getItem('critic_user');
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          studentId = user.id || user.email || user.accessCode || 'student_demo';
         }
-        if (parsed.tone && TONE_OPTIONS.some((t) => t.name === parsed.tone)) {
-          setSelectedTone(parsed.tone);
-        }
+        fetch(`/api/students/${studentId}/agent-preferences`)
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success && data.preferences) {
+              const srvApp = data.preferences.agentAppearance as RobotVariant;
+              const srvTone = data.preferences.agentPersonality as string;
+              if (srvApp && AVATAR_OPTIONS.some((a) => a.id === srvApp)) {
+                setSelectedAppearance(srvApp);
+              }
+              if (srvTone && TONE_OPTIONS.some((t) => t.name === srvTone)) {
+                setSelectedTone(srvTone);
+              }
+            }
+          })
+          .catch(() => {});
       }
     } catch {
       // Ignored
@@ -163,10 +183,10 @@ export default function DashboardPage() {
     const avatarName = avatarMeta ? avatarMeta.name : 'Aria';
 
     try {
-      localStorage.setItem(
-        'critic_agent_preferences',
-        JSON.stringify({ appearance, tone, avatarName })
-      );
+      const scopedKey = getAgentPreferencesStorageKey();
+      const payloadStr = JSON.stringify({ appearance, tone, avatarName });
+      localStorage.setItem(scopedKey, payloadStr);
+      localStorage.setItem('critic_agent_preferences', payloadStr);
 
       let studentId = 'student_demo';
       const userStr = localStorage.getItem('critic_user');

@@ -934,3 +934,20 @@
   - `npm test` (32/32 tests passing across 8 test suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
 - **Immediate Next Step**: Proceed to Stage 6 (Student-Scoped & Server-Persisted Agent Preferences).
+
+---
+
+### [2026-10-13] - AI Agent Alignment Stage 6: Student-Scoped & Server-Persisted Agent Preferences
+
+- **Role**: Full Stack Developer
+- **Code Built & Updated**:
+  - **Server-Side Agent Preference Persistence ([`src/shared/db/sessionStore.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/db/sessionStore.ts) & [`src/app/api/students/[studentId]/agent-preferences/route.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/api/students/%5BstudentId%5D/agent-preferences/route.ts))**:
+    - Added `agentPreferencesStore` to the singleton session store with automatic disk serialization (`saveStoreToDisk` / `loadStoreFromDisk`).
+    - Implemented `GET` and `PUT` handlers in `/api/students/:studentId/agent-preferences` to persist and return each student's chosen `agentPersonality` (tone), `agentAppearance`, and `avatarName`.
+  - **Student-Scoped Client Preference Resolution ([`src/shared/components/RobotAvatar/RobotAvatar.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/RobotAvatar/RobotAvatar.tsx) & [`src/app/dashboard/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/page.tsx))**:
+    - Added `getAgentPreferencesStorageKey()` (`critic_agent_preferences_${studentId}`) so different students sharing a browser maintain independent agent appearance and tone settings, with automatic server hydration on dashboard load.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (32/32 tests passing across 8 test suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+- **Immediate Next Step**: Proceed to Stage 7 (End-of-Module AI Review Stats, MBTI Summary & Review Screen).

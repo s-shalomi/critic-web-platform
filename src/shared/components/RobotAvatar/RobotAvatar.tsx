@@ -88,13 +88,32 @@ export const DEFAULT_AGENT_PREFERENCES: ResolvedAgentPreferences = {
   toneDesc: TONE_OPTIONS[0].desc,
 };
 
+export function getAgentPreferencesStorageKey(): string {
+  if (typeof window === 'undefined') return 'critic_agent_preferences';
+  try {
+    const userStr = localStorage.getItem('critic_user');
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      const studentId = user.id || user.email || user.accessCode;
+      if (studentId) {
+        return `critic_agent_preferences_${studentId}`;
+      }
+    }
+  } catch (e) {
+    // ignore
+  }
+  return 'critic_agent_preferences';
+}
+
 export function getStoredAgentPreferences(): ResolvedAgentPreferences {
   let appearance: RobotVariant = 'aria';
   let matchedTone: ToneOption = TONE_OPTIONS[0];
 
   if (typeof window !== 'undefined') {
     try {
-      const saved = localStorage.getItem('critic_agent_preferences');
+      const scopedKey = getAgentPreferencesStorageKey();
+      const saved =
+        localStorage.getItem(scopedKey) || localStorage.getItem('critic_agent_preferences');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed.appearance && AVATAR_OPTIONS.some((a) => a.id === parsed.appearance)) {

@@ -32,6 +32,14 @@ export interface AccessCodeEntry {
   expiresAt?: string;
 }
 
+export interface AgentPreferenceEntry {
+  studentId: string;
+  agentPersonality: string;
+  agentAppearance: string;
+  avatarName: string;
+  updatedAt: string;
+}
+
 // Global container to persist state across Next.js webpack/turbopack bundles & hot-reloads
 interface CriticGlobalStore {
   dynamicSourcesStore?: Map<string, Source[]>;
@@ -41,6 +49,7 @@ interface CriticGlobalStore {
   conceptNodesStore?: Map<string, any[]>;
   conceptLinksStore?: Map<string, any[]>;
   notesStore?: Map<string, any[]>;
+  agentPreferencesStore?: Map<string, AgentPreferenceEntry>;
 }
 
 const criticGlobal = globalThis as unknown as CriticGlobalStore;
@@ -57,6 +66,7 @@ export function saveStoreToDisk(): void {
       conceptNodes: Array.from(criticGlobal.conceptNodesStore?.entries() || []),
       conceptLinks: Array.from(criticGlobal.conceptLinksStore?.entries() || []),
       reviewStats: Array.from(criticGlobal.reviewStatsStore?.entries() || []),
+      agentPreferences: Array.from(criticGlobal.agentPreferencesStore?.entries() || []),
     };
     fs.writeFileSync(CACHE_FILE, JSON.stringify(data, null, 2), 'utf-8');
   } catch (err) {
@@ -104,6 +114,11 @@ function loadStoreFromDisk(): void {
           criticGlobal.reviewStatsStore?.set(k, v);
         });
       }
+      if (Array.isArray(data.agentPreferences)) {
+        data.agentPreferences.forEach(([k, v]: [string, AgentPreferenceEntry]) => {
+          criticGlobal.agentPreferencesStore?.set(k, v);
+        });
+      }
     }
   } catch (err) {
     // Silent fallback
@@ -148,6 +163,9 @@ if (!criticGlobal.accessCodeStore) {
 if (!criticGlobal.reviewStatsStore) {
   criticGlobal.reviewStatsStore = new Map<string, any>();
 }
+if (!criticGlobal.agentPreferencesStore) {
+  criticGlobal.agentPreferencesStore = new Map<string, AgentPreferenceEntry>();
+}
 
 // Hydrate from disk on initial boot
 loadStoreFromDisk();
@@ -159,6 +177,7 @@ export const reviewStatsStore = criticGlobal.reviewStatsStore!;
 export const conceptNodesStore = criticGlobal.conceptNodesStore!;
 export const conceptLinksStore = criticGlobal.conceptLinksStore!;
 export const notesStore = criticGlobal.notesStore!;
+export const agentPreferencesStore = criticGlobal.agentPreferencesStore!;
 
 /**
  * Records or updates a student's current stage progress.
