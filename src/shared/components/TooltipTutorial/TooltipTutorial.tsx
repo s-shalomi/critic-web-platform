@@ -61,7 +61,11 @@ export function TooltipTutorial({
   const updatePosition = useCallback(() => {
     if (!isOpen || !currentStep) return;
 
-    const el = document.querySelector(currentStep.targetSelector);
+    let el = document.querySelector(currentStep.targetSelector);
+    if (!el && currentStep.targetSelector === '[data-tour="concept-node"]') {
+      el = document.querySelector('[data-tour="concept-canvas"]');
+    }
+
     if (!el) {
       setTargetRect(null);
       setComputedPosition({

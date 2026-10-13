@@ -53,10 +53,15 @@ export const STAGE_TUTORIAL_STEPS: Record<StageKey, TutorialStep[]> = {
     },
     {
       targetSelector: '[data-tour="tool-pan"]',
-      title: 'Pan & Select (✋)',
-      content:
-        'Use the hand tool to pan the canvas. Select a node to edit and delete it (selected nodes glow blue).',
+      title: 'Pan Canvas (✋)',
+      content: 'Use the hand tool to pan and move around your canvas workspace.',
       placement: 'left',
+    },
+    {
+      targetSelector: '[data-tour="concept-node"]',
+      title: 'Edit & Delete Nodes',
+      content: 'Select a node to edit and delete it (selected nodes glow blue).',
+      placement: 'auto',
     },
     {
       targetSelector: '[data-tour="tool-node"]',

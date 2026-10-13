@@ -1178,8 +1178,31 @@
   - **Test Suite Updates ([`tests/tutorial.test.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/tests/tutorial.test.ts))**:
     - Added unit test asserting `conceptualise` tutorial instructs the user that they can select a node to edit and delete.
 - **Dependencies Introduced**: None.
+- **Immediate Next Step**: Commit changes to `feature/iteration-2`.
+
+---
+
+### [2026-10-13] - Refinement: Point Mind Map Tutorial Directly to Concept Nodes for Edit/Delete
+
+- **Role**: Full Stack Developer
+- **User Instructions**:
+  - *"make the tutorial point to the nodes when telling users they can select a node to edit or delete it"*
+- **Code Built & Updated**:
+  - **Node Tour Target ([`src/shared/components/ConceptMapCanvas/ConceptMapCanvas.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/ConceptMapCanvas/ConceptMapCanvas.tsx))**:
+    - Added `data-tour="concept-node"` to interactive concept node circles on the canvas.
+    - Added a centered dashed placeholder node with `data-tour="concept-node"` when `nodes.length === 0` so the tutorial spotlight always points directly to the node position on the canvas.
+  - **Fallback Selector Handling ([`src/shared/components/TooltipTutorial/TooltipTutorial.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/TooltipTutorial/TooltipTutorial.tsx))**:
+    - Added graceful fallback targeting `[data-tour="concept-canvas"]` if `[data-tour="concept-node"]` is ever absent.
+  - **Tutorial Configuration ([`src/shared/config/tutorials.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/config/tutorials.ts))**:
+    - Split Pan tool and Node Selection into separate, dedicated steps:
+      - `[data-tour="tool-pan"]`: *"Use the hand tool to pan and move around your canvas workspace."*
+      - `[data-tour="concept-node"]`: *"Select a node to edit and delete it (selected nodes glow blue)."*
+  - **Requirements ([`requirements.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/requirements.md))**:
+    - Updated Section 10 Stage 2 to document that the tutorial points directly to concept nodes on the canvas.
+  - **Test Suite Updates ([`tests/tutorial.test.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/tests/tutorial.test.ts))**:
+    - Added assertions verifying that `conceptualise` contains `[data-tour="concept-node"]` and that this step instructs users to select a node to edit and delete it.
+- **Dependencies Introduced**: None.
 - **Tests Passing**:
   - `npm test` (47/47 tests passing across 9 test suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
-  - `npm run build` (Next.js production build succeeded across all 12 routes).
 - **Immediate Next Step**: Commit changes to `feature/iteration-2`.

@@ -109,6 +109,7 @@ describe('Tooltip Onboarding Tutorial & Stage Overviews', () => {
       const conSelectors = conceptualiseSteps.map((s) => s.targetSelector);
       expect(conSelectors).toContain('[data-tour="sources-sidebar"]');
       expect(conSelectors).toContain('[data-tour="tool-pan"]');
+      expect(conSelectors).toContain('[data-tour="concept-node"]');
       expect(conSelectors).toContain('[data-tour="tool-node"]');
       expect(conSelectors).toContain('[data-tour="tool-link"]');
       expect(conSelectors).toContain('[data-tour="tool-zoom"]');
@@ -117,7 +118,9 @@ describe('Tooltip Onboarding Tutorial & Stage Overviews', () => {
       expect(conSelectors).not.toContain('[data-tour="help-btn"]');
       expect(
         conceptualiseSteps.some(
-          (s) => s.content.toLowerCase().includes('select a node to edit and delete')
+          (s) =>
+            s.targetSelector === '[data-tour="concept-node"]' &&
+            s.content.toLowerCase().includes('select a node to edit and delete')
         )
       ).toBe(true);
 

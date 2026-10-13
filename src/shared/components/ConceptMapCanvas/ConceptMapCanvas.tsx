@@ -547,6 +547,33 @@ export default function ConceptMapCanvas({
           </svg>
 
           {/* Interactive Concept Nodes */}
+          {nodes.length === 0 && (
+            <div
+              data-tour="concept-node"
+              style={{
+                position: 'absolute',
+                left: '50%',
+                top: '50%',
+                transform: 'translate(-50%, -50%)',
+                width: '120px',
+                height: '120px',
+                borderRadius: '50%',
+                border: '2px dashed rgba(55, 243, 255, 0.45)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                textAlign: 'center',
+                color: 'rgba(234, 246, 255, 0.7)',
+                fontSize: '0.8rem',
+                fontFamily: 'var(--font-exo2), sans-serif',
+                pointerEvents: 'none',
+                userSelect: 'none',
+                padding: '10px',
+              }}
+            >
+              Concept Node
+            </div>
+          )}
           {nodes.map((node) => {
             const isSelected = selectedNodeId === node.id;
             const isLinkSource = linkSourceNodeId === node.id;
@@ -556,6 +583,7 @@ export default function ConceptMapCanvas({
             return (
               <div
                 key={node.id}
+                data-tour="concept-node"
                 className={`${styles.conceptNodeCircle} ${isSelected ? styles.selectedNode : ''} ${
                   activeTool === 'link' && isLinkSource ? styles.linkSourceNode : ''
                 }`}
