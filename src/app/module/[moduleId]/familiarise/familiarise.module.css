@@ -303,7 +303,7 @@
   overflow: hidden;
 }
 
-/* Top-Right Tutorial & Help Buttons */
+/* Top-Right AI Disclosure, Tutorial & Help Buttons */
 .topRightActions {
   flex-shrink: 0;
   display: flex;
@@ -312,6 +312,29 @@
   gap: 10px;
   width: 100%;
   padding: clamp(16px, 2.2vh, 24px) clamp(24px, 3.2vw, 42px) 8px;
+}
+
+.disclosureBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(24, 35, 62, 0.72);
+  border: 1.25px solid rgba(55, 243, 255, 0.55);
+  border-radius: 9999px;
+  padding: 6px 15px 6px 13px;
+  color: #37F3FF;
+  font-family: var(--font-display);
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.disclosureBtn:hover {
+  border-color: #37F3FF;
+  background: rgba(55, 243, 255, 0.14);
+  box-shadow: 0 0 14px rgba(55, 243, 255, 0.25);
+  transform: translateY(-1px);
 }
 
 .tutorialBtn {

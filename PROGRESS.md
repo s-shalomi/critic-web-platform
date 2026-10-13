@@ -853,6 +853,28 @@
 - **Tests Passing**:
   - `npm test` (31/31 tests passing across 8 test suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
-- **Immediate Next Step**: Await user feedback or next screen instruction.
+- **Immediate Next Step**: Audit AI agent behaviour against `requirements.md`, document alignment plan in `ALIGNMENT_PLAN.md`, and implement Stage 1.
+
+---
+
+### [2026-10-13] - AI Agent Alignment Stage 1: Mandatory First-Entry AI Disclosure & Dedicated `AI Disclosure` Button
+
+- **Role**: Full Stack Developer
+- **Code Built & Updated**:
+  - **Alignment Plan Documentation ([`ALIGNMENT_PLAN.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/ALIGNMENT_PLAN.md))**:
+    - Documented the 7-stage implementation plan aligning the application's AI agent behaviour, cross-stage tone enforcement, context window management, and end-of-module review with the updated [`requirements.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/requirements.md).
+  - **First-Entry Disclosure Tracking ([`src/shared/utils/storage.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/utils/storage.ts))**:
+    - Added `hasSeenModuleDisclosure(moduleId)` and `markModuleDisclosureSeen(moduleId)` using student-scoped `localStorage` keys (`critic_disclosure_seen_${studentId}_${moduleId}`).
+  - **Dedicated `AI Disclosure` Button & One-Time Auto-Popup Across All Stages**:
+    - Updated [`src/app/module/[moduleId]/familiarise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/familiarise/page.tsx), [`conceptualise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/conceptualise/page.tsx), [`inquire/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/inquire/page.tsx), and [`synthesise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/synthesise/page.tsx) (along with their `.module.css` files):
+      - Automatically displays the 3-point AI Agent Disclosure modal **once** when a student first enters the module (`!hasSeenModuleDisclosure(moduleId)`).
+      - Added a dedicated `AI Disclosure` pill button (`.disclosureBtn`) in the top-right action bar across all 4 stages so the disclosure remains accessible at any time.
+      - Reserved the top-right `?` button (`.helpCircleBtn`) for future functionality per user specification.
+      - Standardized the 3 disclosure items to match [`requirements.md` L38–40](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/requirements.md#L38-L40).
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (31/31 tests passing across 8 test suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+- **Immediate Next Step**: Wait for user approval before proceeding to Stage 2.
 
 

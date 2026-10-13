@@ -4,7 +4,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import styles from './inquire.module.css';
 
-import { getStudentStorageKey } from '@/shared/utils/storage';
+import {
+  getStudentStorageKey,
+  hasSeenModuleDisclosure,
+  markModuleDisclosureSeen,
+} from '@/shared/utils/storage';
 import { reportStudentProgress } from '@/shared/utils/reportProgress';
 import ConceptMapCanvas from '@/shared/components/ConceptMapCanvas/ConceptMapCanvas';
 import {
@@ -44,6 +48,12 @@ export default function InquireEvaluateStagePage() {
     const chatKey = getStudentStorageKey('critic_chat', moduleId);
     const notesKey = getStudentStorageKey('critic_notes', moduleId);
     setAgentPrefs(getStoredAgentPreferences());
+
+    // Show mandatory AI disclosure automatically once when the student first enters the module
+    if (!hasSeenModuleDisclosure(moduleId)) {
+      setShowHelpModal(true);
+      markModuleDisclosureSeen(moduleId);
+    }
 
     reportStudentProgress('inquire');
 
@@ -334,8 +344,32 @@ export default function InquireEvaluateStagePage() {
 
         {/* Right Interactive Concept Map Canvas Area */}
         <div className={styles.rightCanvasWrapper}>
-          {/* Top-Right Action Bar (Tutorial & Help) */}
+          {/* Top-Right Action Bar (AI Disclosure, Tutorial & Help) */}
           <div className={styles.topRightActions}>
+            <button
+              type="button"
+              onClick={() => setShowHelpModal(true)}
+              className={styles.disclosureBtn}
+              aria-label="AI Disclosure"
+              title="View AI Agent Disclosure"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              <span>AI Disclosure</span>
+            </button>
+
             <button
               type="button"
               onClick={() => setShowTutorialModal(true)}
@@ -350,10 +384,9 @@ export default function InquireEvaluateStagePage() {
 
             <button
               type="button"
-              onClick={() => setShowHelpModal(true)}
               className={styles.helpCircleBtn}
-              aria-label="About Socratic AI Peer & Disclosure"
-              title="About Socratic AI Peer & Disclosure"
+              aria-label="Help"
+              title="Help"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                 <circle cx="12" cy="12" r="9.5" stroke="#EAF6FF" strokeWidth="1.8" />
@@ -451,41 +484,38 @@ export default function InquireEvaluateStagePage() {
         </div>
       )}
 
-      {/* Help / Socratic AI Disclosure Modal */}
+      {/* Mandatory AI Disclosure Modal */}
       {showHelpModal && (
         <div className={styles.modalBackdrop} onClick={() => setShowHelpModal(false)}>
           <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
             <button
               onClick={() => setShowHelpModal(false)}
               className={styles.modalCloseBtn}
-              aria-label="Close help"
+              aria-label="Close disclosure"
             >
               ✕
             </button>
-            <h2 className={styles.modalTitle}>Inquire &amp; Evaluate Disclosure</h2>
+            <h2 className={styles.modalTitle}>AI Agent Disclosure</h2>
             <p className={styles.modalLead}>
-              You are chatting with <strong>{agentPrefs.avatarName}</strong> using your selected{' '}
-              <strong>{agentPrefs.toneName}</strong> tone.
+              Before interacting with <strong>{agentPrefs.avatarName}</strong> ({agentPrefs.toneName}{' '}
+              tone) in this module, please note how the AI peer operates:
             </p>
             <div className={styles.disclosureBox}>
               <strong className={styles.disclosureHeading}>
-                ⚠️ Mandatory Socratic Peer Disclosure:
+                ⚠️ Important Notice ({agentPrefs.avatarName} • {agentPrefs.toneName} Tone):
               </strong>
-              <ul className={styles.disclosureList}>
+              <ol className={styles.disclosureList}>
                 <li>
-                  <strong>Socratic Questioning &amp; Devil&apos;s Advocate:</strong>{' '}
-                  {agentPrefs.avatarName} acts as a Socratic peer and will challenge your assumptions
-                  with counter-perspectives.
+                  The agent will use <strong>Socratic questioning</strong>.
                 </li>
                 <li>
-                  <strong>Reasoning Test:</strong> {agentPrefs.avatarName} may take positions it does
-                  not &ldquo;believe&rdquo; to test your evidence evaluation.
+                  The agent may present arguments it does not itself &lsquo;believe&rsquo; in order
+                  to test reasoning.
                 </li>
                 <li>
-                  <strong>No Verified Facts:</strong> Do not treat agent statements as verified
-                  facts.
+                  You should <strong>not treat the agent&apos;s statements as verified fact</strong>.
                 </li>
-              </ul>
+              </ol>
             </div>
             <button onClick={() => setShowHelpModal(false)} className={styles.modalPrimaryBtn}>
               Understood

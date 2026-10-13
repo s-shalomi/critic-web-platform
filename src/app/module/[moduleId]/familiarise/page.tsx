@@ -4,7 +4,11 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import styles from './familiarise.module.css';
 
-import { getStudentStorageKey } from '@/shared/utils/storage';
+import {
+  getStudentStorageKey,
+  hasSeenModuleDisclosure,
+  markModuleDisclosureSeen,
+} from '@/shared/utils/storage';
 import { reportStudentProgress } from '@/shared/utils/reportProgress';
 import {
   RobotAvatar,
@@ -74,6 +78,12 @@ export default function FamiliariseStagePage() {
     setLoading(true);
     setAgentPrefs(getStoredAgentPreferences());
     const notesKey = getStudentStorageKey('critic_notes', moduleId);
+
+    // Show mandatory AI disclosure automatically once when the student first enters the module
+    if (!hasSeenModuleDisclosure(moduleId)) {
+      setShowIntroModal(true);
+      markModuleDisclosureSeen(moduleId);
+    }
 
     // Inform teacher portal this student is on the Familiarise stage
     reportStudentProgress('familiarise');
@@ -555,8 +565,32 @@ export default function FamiliariseStagePage() {
 
         {/* Right Main Content Stage */}
         <main className={styles.contentArea}>
-          {/* Top-Right Tutorial & Help Buttons per screens_v2/familiarise.png */}
+          {/* Top-Right AI Disclosure, Tutorial & Help Buttons */}
           <div className={styles.topRightActions}>
+            <button
+              type="button"
+              onClick={() => setShowIntroModal(true)}
+              className={styles.disclosureBtn}
+              aria-label="AI Disclosure"
+              title="View AI Agent Disclosure"
+            >
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              <span>AI Disclosure</span>
+            </button>
+
             <button
               type="button"
               onClick={() => setShowTutorialModal(true)}
@@ -572,10 +606,9 @@ export default function FamiliariseStagePage() {
 
             <button
               type="button"
-              onClick={() => setShowIntroModal(true)}
               className={styles.helpCircleBtn}
-              aria-label="Investigation Briefing and AI Disclosure"
-              title="Investigation Briefing & AI Disclosure"
+              aria-label="Help"
+              title="Help"
             >
               <span className={styles.iconSquare}>?</span>
             </button>
@@ -733,43 +766,38 @@ export default function FamiliariseStagePage() {
         </div>
       )}
 
-      {/* Stage Intro & Mandatory AI Disclosure Modal */}
+      {/* Mandatory AI Disclosure Modal */}
       {showIntroModal && (
         <div className={styles.modalBackdrop} onClick={() => setShowIntroModal(false)}>
           <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
             <button
               onClick={() => setShowIntroModal(false)}
               className={styles.modalCloseBtn}
-              aria-label="Close briefing"
+              aria-label="Close disclosure"
             >
               ✕
             </button>
-            <h3 className={styles.modalTitle}>Investigation Briefing &amp; AI Disclosure</h3>
+            <h3 className={styles.modalTitle}>AI Agent Disclosure</h3>
             <p className={styles.introModalText}>
-              Read through the climate sources. Highlight text to capture your thoughts, biases, or
-              assumptions. Hover over highlighted snippets to edit, delete, or convert them into
-              concept map nodes.
+              Before interacting with <strong>{agentPrefs.avatarName}</strong> ({agentPrefs.toneName}{' '}
+              tone) in this module, please note how the AI peer operates:
             </p>
             <div className={styles.disclosureBox}>
               <strong className={styles.disclosureTitle}>
-                ⚠️ Mandatory Socratic Peer Disclosure ({agentPrefs.avatarName} •{' '}
-                {agentPrefs.toneName} Tone):
+                ⚠️ Important Notice ({agentPrefs.avatarName} • {agentPrefs.toneName} Tone):
               </strong>
-              <ul className={styles.disclosureList}>
+              <ol className={styles.disclosureList}>
                 <li>
-                  <strong>Socratic Questioning &amp; Devil&apos;s Advocate:</strong> Your AI
-                  companion ({agentPrefs.avatarName}) will guide you through questioning and may
-                  challenge your claims with counter-arguments.
+                  The agent will use <strong>Socratic questioning</strong>.
                 </li>
                 <li>
-                  <strong>Reasoning Test:</strong> {agentPrefs.avatarName} may present arguments or
-                  claims it does not &quot;believe&quot; solely to test your analytical reasoning.
+                  The agent may present arguments it does not itself &lsquo;believe&rsquo; in order
+                  to test reasoning.
                 </li>
                 <li>
-                  <strong>No Verified Facts:</strong> Do not treat statements from the AI agent as
-                  absolute verified facts—evaluate all evidence critically yourself.
+                  You should <strong>not treat the agent&apos;s statements as verified fact</strong>.
                 </li>
-              </ul>
+              </ol>
             </div>
             <button onClick={() => setShowIntroModal(false)} className={styles.modalPrimaryBtn}>
               Understood

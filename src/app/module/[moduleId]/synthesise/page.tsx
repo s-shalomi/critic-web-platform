@@ -4,7 +4,11 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import styles from './synthesise.module.css';
 
-import { getStudentStorageKey } from '@/shared/utils/storage';
+import {
+  getStudentStorageKey,
+  hasSeenModuleDisclosure,
+  markModuleDisclosureSeen,
+} from '@/shared/utils/storage';
 import { reportStudentProgress } from '@/shared/utils/reportProgress';
 import ConceptMapCanvas from '@/shared/components/ConceptMapCanvas/ConceptMapCanvas';
 import {
@@ -34,6 +38,12 @@ export default function SynthesiseStagePage() {
     const synthKey = getStudentStorageKey('critic_synthesis', moduleId);
     const notesKey = getStudentStorageKey('critic_notes', moduleId);
     setAgentPrefs(getStoredAgentPreferences());
+
+    // Show mandatory AI disclosure automatically once when the student first enters the module
+    if (!hasSeenModuleDisclosure(moduleId)) {
+      setShowHelpModal(true);
+      markModuleDisclosureSeen(moduleId);
+    }
 
     reportStudentProgress('synthesise');
 
@@ -236,9 +246,33 @@ export default function SynthesiseStagePage() {
           </div>
         </aside>
 
-        {/* Right Interactive Concept Map Canvas with Top-Right Tutorial & Help Buttons */}
+        {/* Right Interactive Concept Map Canvas with Top-Right AI Disclosure, Tutorial & Help Buttons */}
         <div className={styles.rightCanvasWrapper}>
           <div className={styles.topRightActions}>
+            <button
+              type="button"
+              onClick={() => setShowHelpModal(true)}
+              className={styles.disclosureBtn}
+              aria-label="AI Disclosure"
+              title="View AI Agent Disclosure"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              <span>AI Disclosure</span>
+            </button>
+
             <button
               type="button"
               onClick={() => setShowTutorialModal(true)}
@@ -252,10 +286,9 @@ export default function SynthesiseStagePage() {
             </button>
             <button
               type="button"
-              onClick={() => setShowHelpModal(true)}
               className={styles.helpCircleBtn}
-              aria-label="Conclude Stage Guide & AI Disclosure"
-              title="Conclude Stage Guide & AI Disclosure"
+              aria-label="Help"
+              title="Help"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />
@@ -342,7 +375,7 @@ export default function SynthesiseStagePage() {
         </div>
       )}
 
-      {/* Help / Socratic AI Peer Disclosure Modal */}
+      {/* Mandatory AI Disclosure Modal */}
       {showHelpModal && (
         <div className={styles.modalBackdrop} onClick={() => setShowHelpModal(false)}>
           <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
@@ -350,29 +383,31 @@ export default function SynthesiseStagePage() {
               type="button"
               onClick={() => setShowHelpModal(false)}
               className={styles.modalCloseBtn}
-              aria-label="Close help"
+              aria-label="Close disclosure"
             >
               ✕
             </button>
-            <h3 className={styles.modalTitle}>Conclude &amp; Socratic AI Disclosure</h3>
+            <h3 className={styles.modalTitle}>AI Agent Disclosure</h3>
             <p className={styles.modalLead}>
-              Reflect on everything you learnt. Write your synthesis, and optionally trigger the AI cross-check to evaluate missing links or unaddressed arguments.
+              Before interacting with <strong>{agentPrefs.avatarName}</strong> ({agentPrefs.toneName}{' '}
+              tone) in this module, please note how the AI peer operates:
             </p>
             <div className={styles.disclosureBox}>
               <strong className={styles.disclosureHeading}>
-                ⚠️ Mandatory Socratic Peer Disclosure:
+                ⚠️ Important Notice ({agentPrefs.avatarName} • {agentPrefs.toneName} Tone):
               </strong>
-              <ul className={styles.disclosureList}>
+              <ol className={styles.disclosureList}>
                 <li>
-                  <strong>Socratic Cross-Checking:</strong> The AI agent ({agentPrefs.avatarName}, {agentPrefs.toneName} tone) checks your conclusion against earlier evidence and concept nodes to question unaddressed arguments.
+                  The agent will use <strong>Socratic questioning</strong>.
                 </li>
                 <li>
-                  <strong>Reasoning Test:</strong> {agentPrefs.avatarName} presents probing questions rather than factual corrections.
+                  The agent may present arguments it does not itself &lsquo;believe&rsquo; in order
+                  to test reasoning.
                 </li>
                 <li>
-                  <strong>No Verified Facts:</strong> Do not treat agent questions or statements as verified facts.
+                  You should <strong>not treat the agent&apos;s statements as verified fact</strong>.
                 </li>
-              </ul>
+              </ol>
             </div>
             <button
               type="button"
