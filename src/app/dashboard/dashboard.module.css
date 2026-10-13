@@ -631,6 +631,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
   transition:
     transform 0.48s cubic-bezier(0.22, 1, 0.36, 1),
     opacity 0.42s ease,
