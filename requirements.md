@@ -515,7 +515,7 @@ The platform provides a step-by-step tooltip onboarding tutorial for each stage 
 
 ### Stage 2: Mind Map (Conceptualise)
 - **Sources & Notes**: The sidebar contains the sources. The user can scroll through these and hover on highlights to see the notes they made.
-- **Hand Icon (Pan & Select)**: The hand icon can be used to pan or select a node. Selected nodes glow blue and can be edited or deleted.
+- **Hand Icon (Pan & Select)**: The hand icon can be used to pan or select a node. Selected nodes glow blue and display edit and delete controls directly on the node.
 - **Circle Icon (Create Node)**: The circle icon can be used to create a node. These are key concepts identified from the text.
 - **Line Icon (Link Nodes)**: The line icon can be used to create links between nodes. After selecting the line, select a node and then another node to link it with.
 - **Zoom Controls**: The plus and minus allow for zooming in and out.

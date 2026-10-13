@@ -1155,7 +1155,29 @@
     - Verified `familiarise` includes note management content (hover/click to edit, delete, or convert to node).
     - Verified `inquire` includes chat panel, concept map canvas, and stage navigation dock while excluding '?'.
 - **Dependencies Introduced**: None.
+- **Immediate Next Step**: Commit changes to `feature/iteration-2`.
+
+---
+
+### [2026-10-13] - Refinement: Mind Map Toolbar UI Simplification & Tutorial Alignment
+
+- **Role**: Full Stack Developer
+- **User Instructions**:
+  - *"now your task is to edit the UI. remove the bin and text on the toolbar of the mind map since these already exist on the nodes. update the tutorial as necessary"*
+- **Code Built & Updated**:
+  - **Canvas Toolbar UI ([`src/shared/components/ConceptMapCanvas/ConceptMapCanvas.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/ConceptMapCanvas/ConceptMapCanvas.tsx))**:
+    - Removed redundant Edit Text (`TT`) and Delete (`🗑️` bin) buttons from the canvas toolbar dock.
+    - Removed unused `handleToolbarEditNode` and `handleToolbarDeleteNode` helper functions.
+    - Preserved essential canvas tools: Pan Tool (`✋`), Create Node Tool (`◯`), Link Nodes Tool (`╱`), Divider, and Zoom Controls (`+ / −`).
+    - Inline node edit (`✏️`, double-click) and delete (`🗑️`) controls remain fully operational on the node itself when selected.
+  - **Tutorial & Overview Configurations ([`src/shared/config/tutorials.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/config/tutorials.ts) & [`src/shared/config/stageOverviews.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/config/stageOverviews.ts))**:
+    - Updated `conceptualise` tutorial step: *"Use the hand tool to pan the canvas or select a node. Selected nodes glow blue and show buttons to edit or delete directly on the node."*
+    - Updated Stage Overview item for `conceptualise`: Changed `Pan & Organize (✋ / TT / 🗑️)` to `Pan & Select (✋)` and updated description to specify edit and delete buttons appear directly on the node.
+  - **Requirements ([`requirements.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/requirements.md))**:
+    - Updated Section 10 Stage 2 Hand Icon item: *"The hand icon can be used to pan or select a node. Selected nodes glow blue and display edit and delete controls directly on the node."*
+- **Dependencies Introduced**: None.
 - **Tests Passing**:
   - `npm test` (47/47 tests passing across 9 test suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
+  - `npm run build` (Next.js production build succeeded across all 12 routes).
 - **Immediate Next Step**: Commit changes to `feature/iteration-2`.

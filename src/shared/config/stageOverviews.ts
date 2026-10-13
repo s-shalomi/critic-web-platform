@@ -65,9 +65,9 @@ export const STAGE_OVERVIEWS: Record<
           'Select the line tool, then click two nodes in sequence to draw relationships between evidence and claims.',
       },
       {
-        title: 'Pan & Organize (✋ / TT / 🗑️)',
+        title: 'Pan & Select (✋)',
         description:
-          'Use the hand tool to pan or select nodes (which glow blue), edit node labels, or delete links and nodes.',
+          'Use the hand tool to pan the canvas or select nodes. Selected nodes glow blue and display buttons to edit or delete them directly on the node.',
       },
     ],
   },

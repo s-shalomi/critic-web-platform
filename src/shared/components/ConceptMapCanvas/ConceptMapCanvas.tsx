@@ -459,30 +459,6 @@ export default function ConceptMapCanvas({
     setZoomLevel(1);
   };
 
-  const handleToolbarEditNode = () => {
-    if (selectedNodeId) {
-      const target = nodes.find((n) => n.id === selectedNodeId);
-      if (target) {
-        setEditingNodeId(target.id);
-        setEditNodeText(target.text);
-        return;
-      }
-    }
-    if (nodes.length > 0) {
-      const lastNode = nodes[nodes.length - 1];
-      setSelectedNodeId(lastNode.id);
-      setEditingNodeId(lastNode.id);
-      setEditNodeText(lastNode.text);
-    } else {
-      setShowAddNodeModal(true);
-    }
-  };
-
-  const handleToolbarDeleteNode = () => {
-    if (selectedNodeId) {
-      handleDeleteNode(selectedNodeId);
-    }
-  };
 
   return (
     <main
@@ -714,39 +690,6 @@ export default function ConceptMapCanvas({
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
             <line x1="5" y1="19" x2="19" y2="5" />
-          </svg>
-        </button>
-
-        <button
-          type="button"
-          onClick={handleToolbarEditNode}
-          className={`${styles.toolbarBtn} ${editingNodeId ? styles.activeToolBtn : ''}`}
-          title="Edit Selected Node Text (or double-click any node)"
-          aria-label="Edit Node Text"
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M4 7V5h12v2" />
-            <path d="M10 5v14" />
-            <path d="M8 19h4" />
-            <path d="M14 11h6" />
-            <path d="M17 11v8" />
-            <path d="M15.5 19h3" />
-          </svg>
-        </button>
-
-        <button
-          type="button"
-          onClick={handleToolbarDeleteNode}
-          className={styles.toolbarBtn}
-          title={selectedNodeId ? 'Delete Selected Node' : 'Select a node first to delete it'}
-          aria-label="Delete Selected Node"
-          style={{ opacity: selectedNodeId ? 1 : 0.65 }}
-        >
-          <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="3 6 5 6 21 6" />
-            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-            <line x1="10" y1="11" x2="10" y2="17" />
-            <line x1="14" y1="11" x2="14" y2="17" />
           </svg>
         </button>
 
