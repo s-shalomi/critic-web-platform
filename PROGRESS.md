@@ -786,7 +786,8 @@
       - Left `#0F172E` sidebar with purple vertical divider, `← Climate Change` back button, `Read + Annotate` heading, rounded source pills (`Social Media Post`, etc.) with cyan active state, and bottom-left companion robot dock.
       - Top-right `Tutorial` pill button and `?` help circle button with purple borders opening the interactive tutorial and mandatory Socratic AI disclosure modals.
       - Centered dark slate source card (`#232B3E`) with author initials avatar circle (`DT` for `Donald Trump`), author name heading, and selectable body text supporting inline highlights, hover/pinned note tooltips, note editing/deletion, and `+ Convert to node`.
-      - Floating frosted bottom stage dock (`01 Annotate`, `02 Mind Map`, `03 Challenge`, `04 Conclude`) with glowing cyan active circle badge.
+      - Floating frosted bottom stage dock (`01 Annotate`, `02 Mind Map`, `03 Challenge`, `04 Conclude`) using color, surface contrast, and hover illumination (`#37F3FF` active pill & bottom glow bar vs. deep navy/purple interactive pills that light up cyan on hover) to indicate navigation cleanly without redundant text labels.
+      - Enlarged left sidebar (`clamp(320px, 26vw, 370px)`) with fluid typography, `100dvh` viewport locking, independent scroll areas, and modern `scrollbar-color` styling.
 - **Dependencies Introduced**: None.
 - **Tests Passing**:
   - `npm test` (31/31 tests passing across 8 test suites).
