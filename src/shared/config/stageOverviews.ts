@@ -67,7 +67,7 @@ export const STAGE_OVERVIEWS: Record<
       {
         title: 'Pan & Select (✋)',
         description:
-          'Use the hand tool to pan the canvas or select nodes. Selected nodes glow blue and display buttons to edit or delete them directly on the node.',
+          'Use the hand tool to pan the canvas. Select a node to edit and delete it (selected nodes glow blue).',
       },
     ],
   },

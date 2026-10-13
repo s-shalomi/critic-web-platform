@@ -1171,10 +1171,12 @@
     - Preserved essential canvas tools: Pan Tool (`✋`), Create Node Tool (`◯`), Link Nodes Tool (`╱`), Divider, and Zoom Controls (`+ / −`).
     - Inline node edit (`✏️`, double-click) and delete (`🗑️`) controls remain fully operational on the node itself when selected.
   - **Tutorial & Overview Configurations ([`src/shared/config/tutorials.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/config/tutorials.ts) & [`src/shared/config/stageOverviews.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/config/stageOverviews.ts))**:
-    - Updated `conceptualise` tutorial step: *"Use the hand tool to pan the canvas or select a node. Selected nodes glow blue and show buttons to edit or delete directly on the node."*
-    - Updated Stage Overview item for `conceptualise`: Changed `Pan & Organize (✋ / TT / 🗑️)` to `Pan & Select (✋)` and updated description to specify edit and delete buttons appear directly on the node.
+    - Updated `conceptualise` tutorial step: *"Use the hand tool to pan the canvas. Select a node to edit and delete it (selected nodes glow blue)."*
+    - Updated Stage Overview item for `conceptualise`: Changed `Pan & Organize (✋ / TT / 🗑️)` to `Pan & Select (✋)` and updated description to specify selecting a node to edit and delete it.
   - **Requirements ([`requirements.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/requirements.md))**:
-    - Updated Section 10 Stage 2 Hand Icon item: *"The hand icon can be used to pan or select a node. Selected nodes glow blue and display edit and delete controls directly on the node."*
+    - Updated Section 10 Stage 2 Hand Icon item: *"The hand icon can be used to pan or select a node. Users can select a node to edit and delete it (selected nodes glow blue)."*
+  - **Test Suite Updates ([`tests/tutorial.test.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/tests/tutorial.test.ts))**:
+    - Added unit test asserting `conceptualise` tutorial instructs the user that they can select a node to edit and delete.
 - **Dependencies Introduced**: None.
 - **Tests Passing**:
   - `npm test` (47/47 tests passing across 9 test suites).

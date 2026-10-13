@@ -115,6 +115,11 @@ describe('Tooltip Onboarding Tutorial & Stage Overviews', () => {
       expect(conSelectors).toContain('[data-tour="collapse-btn"]');
       expect(conSelectors).not.toContain('[data-tour="stage-dock"]');
       expect(conSelectors).not.toContain('[data-tour="help-btn"]');
+      expect(
+        conceptualiseSteps.some(
+          (s) => s.content.toLowerCase().includes('select a node to edit and delete')
+        )
+      ).toBe(true);
 
       // Challenge stage requirements (chat, concept canvas reference, navigation dock; no ? button)
       const inquireSteps = STAGE_TUTORIAL_STEPS.inquire;
