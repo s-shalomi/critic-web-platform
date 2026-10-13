@@ -90,7 +90,7 @@ describe('Tooltip Onboarding Tutorial & Stage Overviews', () => {
     });
 
     it('satisfies specific stage feature requirements', () => {
-      // Annotate stage requirements (only annotate mentions dock and ? button)
+      // Annotate stage requirements (dock, ?, sources, highlight, note management, hints)
       const familiariseSteps = STAGE_TUTORIAL_STEPS.familiarise;
       const famSelectors = familiariseSteps.map((s) => s.targetSelector);
       expect(famSelectors).toContain('[data-tour="stage-dock"]');
@@ -98,6 +98,11 @@ describe('Tooltip Onboarding Tutorial & Stage Overviews', () => {
       expect(famSelectors).toContain('[data-tour="sidebar-sources"]');
       expect(famSelectors).toContain('[data-tour="source-reading"]');
       expect(famSelectors).toContain('[data-tour="agent-dock"]');
+      expect(
+        familiariseSteps.some(
+          (s) => s.content.toLowerCase().includes('edit or delete') && s.content.toLowerCase().includes('convert')
+        )
+      ).toBe(true);
 
       // Mind Map stage requirements (no dock or ? button)
       const conceptualiseSteps = STAGE_TUTORIAL_STEPS.conceptualise;
@@ -111,14 +116,15 @@ describe('Tooltip Onboarding Tutorial & Stage Overviews', () => {
       expect(conSelectors).not.toContain('[data-tour="stage-dock"]');
       expect(conSelectors).not.toContain('[data-tour="help-btn"]');
 
-      // Challenge stage requirements (only chat inquiry, no dock or ? button)
+      // Challenge stage requirements (chat, concept canvas reference, navigation dock; no ? button)
       const inquireSteps = STAGE_TUTORIAL_STEPS.inquire;
       const inqSelectors = inquireSteps.map((s) => s.targetSelector);
       expect(inqSelectors).toContain('[data-tour="chat-panel"]');
-      expect(inqSelectors).not.toContain('[data-tour="stage-dock"]');
+      expect(inqSelectors).toContain('[data-tour="concept-canvas"]');
+      expect(inqSelectors).toContain('[data-tour="stage-dock"]');
       expect(inqSelectors).not.toContain('[data-tour="help-btn"]');
 
-      // Conclude stage requirements (conclusion, audit, submit, no dock or ? button)
+      // Conclude stage requirements (conclusion, audit, submit; no dock or ? button)
       const synthesiseSteps = STAGE_TUTORIAL_STEPS.synthesise;
       const synSelectors = synthesiseSteps.map((s) => s.targetSelector);
       expect(synSelectors).toContain('[data-tour="conclusion-box"]');

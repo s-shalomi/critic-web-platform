@@ -6,33 +6,39 @@ export const STAGE_TUTORIAL_STEPS: Record<StageKey, TutorialStep[]> = {
   familiarise: [
     {
       targetSelector: '[data-tour="stage-dock"]',
-      title: 'Navigation Dock',
-      content: 'The dock is to be used for navigation and moving back and forth between stages.',
+      title: 'Stage Navigation',
+      content: 'Use the bottom dock to move freely between stages as your thinking develops.',
       placement: 'top',
     },
     {
       targetSelector: '[data-tour="help-btn"]',
       title: 'Stage Overview (?)',
-      content:
-        "The '?' button explains why each stage is important and gives a brief overview of what to do in the stage.",
+      content: "Click '?' anytime for a quick summary of why this stage matters and what to do.",
       placement: 'bottom',
     },
     {
       targetSelector: '[data-tour="sidebar-sources"]',
       title: 'Evidence Sources',
-      content: 'The sidebar on the side contains sources to be explored.',
+      content: 'Explore the sources in this sidebar to investigate different claims and perspectives.',
       placement: 'right',
     },
     {
       targetSelector: '[data-tour="source-reading"]',
       title: 'Highlight & Annotate',
-      content: 'Text on a source can be highlighted and an annotation can be made.',
+      content: 'Select text in the source to highlight key claims and write your notes.',
+      placement: 'left',
+    },
+    {
+      targetSelector: '[data-tour="source-reading"]',
+      title: 'Manage Notes & Nodes',
+      content:
+        'Hover over or click highlighted text to edit or delete your note, or convert it to a concept node.',
       placement: 'left',
     },
     {
       targetSelector: '[data-tour="agent-dock"]',
       title: 'AI Agent Hints',
-      content: 'The AI agent can be used for hints when the user is stuck.',
+      content: 'Click your AI agent companion in the dock whenever you need a helpful hint.',
       placement: 'top',
     },
   ],
@@ -42,40 +48,40 @@ export const STAGE_TUTORIAL_STEPS: Record<StageKey, TutorialStep[]> = {
       targetSelector: '[data-tour="sources-sidebar"]',
       title: 'Sources & Notes',
       content:
-        'The sidebar contains the sources. The user can scroll through these and hover on highlights to see the notes they made.',
+        'Scroll through your sources here and hover over highlights to review your saved notes.',
       placement: 'right',
     },
     {
       targetSelector: '[data-tour="tool-pan"]',
       title: 'Pan & Select (✋)',
       content:
-        'The hand icon can be used to pan or select a node. Selected nodes glow blue and can be edited or deleted.',
+        'Use the hand tool to pan the canvas or select a node. Selected nodes glow blue and can be edited or deleted.',
       placement: 'left',
     },
     {
       targetSelector: '[data-tour="tool-node"]',
       title: 'Create Node (◯)',
       content:
-        'The circle icon can be used to create a node. These are key concepts identified from the text.',
+        'Click the circle icon to add a new node for key concepts identified in the text.',
       placement: 'left',
     },
     {
       targetSelector: '[data-tour="tool-link"]',
       title: 'Link Nodes (╱)',
       content:
-        'The line icon can be used to create links between nodes. After selecting the line, select a node and then another node to link it with.',
+        'Click the line icon, then select two nodes in sequence to draw a connection between them.',
       placement: 'left',
     },
     {
       targetSelector: '[data-tour="tool-zoom"]',
-      title: 'Zoom Controls (+ / −)',
-      content: 'The plus and minus allow for zooming in and out.',
+      title: 'Zoom (+ / −)',
+      content: 'Use the plus and minus buttons to zoom in and out of your map.',
       placement: 'left',
     },
     {
       targetSelector: '[data-tour="collapse-btn"]',
       title: 'Collapse Sidebar',
-      content: 'The sidebar can be collapsed.',
+      content: 'Collapse this sidebar to give yourself more canvas workspace.',
       placement: 'right',
     },
   ],
@@ -85,8 +91,21 @@ export const STAGE_TUTORIAL_STEPS: Record<StageKey, TutorialStep[]> = {
       targetSelector: '[data-tour="chat-panel"]',
       title: 'Inquire & Evaluate',
       content:
-        'Users can chat with the AI agent to inquire about and evaluate the sources: question assumptions, seek alternative viewpoints, and assess evidence credibility, reliability and validity.',
+        'Chat with the AI agent to question assumptions, explore alternative viewpoints, and assess evidence credibility.',
       placement: 'right',
+    },
+    {
+      targetSelector: '[data-tour="concept-canvas"]',
+      title: 'Concept Map Reference',
+      content:
+        'Interact with and reference your concept nodes on the canvas while questioning assumptions.',
+      placement: 'left',
+    },
+    {
+      targetSelector: '[data-tour="stage-dock"]',
+      title: 'Stage Navigation',
+      content: 'Navigate back to earlier stages to gather more evidence, or proceed when ready.',
+      placement: 'top',
     },
   ],
 
@@ -95,20 +114,21 @@ export const STAGE_TUTORIAL_STEPS: Record<StageKey, TutorialStep[]> = {
       targetSelector: '[data-tour="conclusion-box"]',
       title: 'Final Conclusion',
       content:
-        'Users create a final conclusion after reflecting on the process. It is based on their annotations, concept map and understanding of the topic.',
+        'Write your final conclusion reflecting on your notes, concept map, and overall topic understanding.',
       placement: 'right',
     },
     {
       targetSelector: '[data-tour="audit-btn"]',
       title: 'AI Reasoning Audit',
       content:
-        "The 'audit' button lets the AI agent cross check the conclusion to see if there's anything else the user can consider.",
+        "Click 'Audit' to have the AI agent review your conclusion and suggest anything else to consider.",
       placement: 'top',
     },
     {
       targetSelector: '[data-tour="submit-btn"]',
       title: 'Complete Module',
-      content: "The 'submit' button lets the user complete the module.",
+      content:
+        "Click 'Submit Module' when you're finished to complete the module and review your stats.",
       placement: 'top',
     },
   ],

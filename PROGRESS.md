@@ -1135,3 +1135,27 @@
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
   - `npm run build` (Next.js production build succeeded across all 12 routes).
 - **Immediate Next Step**: Commit feature to `feature/iteration-2`.
+
+---
+
+### [2026-10-13] - Refinement: Direct User Instructions, Note Hover/Click Actions & Inquire Stage Tutorial Scope
+
+- **Role**: Full Stack Developer
+- **User Instructions**:
+  - *"in the familiarise stage, mention that text can be hovered over and clicked to edit/delete a note or convert it to a node. also add this to the onboarding section in requirements.md. keep '**Concept Map Reference**: Reference and interact with concept nodes on the canvas while questioning assumptions. - **Navigation Dock**: Navigate back to earlier stages or proceed when ready.' in requirements.md and tutorial. Don't use the exact language used in requirements.md in the tutorial text. Direct it as concise, readable instructions to the user"*
+- **Code Built & Updated**:
+  - **Requirements ([`requirements.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/requirements.md))**:
+    - Updated Section 10 Stage 1 with: *"Manage Notes & Convert to Node: Highlighted text can be hovered over and clicked to edit or delete a note, or convert it to a node."*
+    - Maintained in Stage 3: Concept Map Reference (*"Reference and interact with concept nodes on the canvas while questioning assumptions"*) and Navigation Dock (*"Navigate back to earlier stages or proceed when ready"*).
+  - **Tutorial Copy & Direct Instructions ([`src/shared/config/tutorials.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/config/tutorials.ts))**:
+    - Rephrased all tutorial copy across all 4 stages into active, direct, and concise instructions directed to the student (e.g. *"Use the bottom dock...", "Click '?'...", "Hover over or click highlighted text to edit or delete your note, or convert it to a concept node"*).
+    - In Familiarise: Added Manage Notes & Nodes step (`data-tour="source-reading"`).
+    - In Inquire: Included Inquire & Evaluate (`data-tour="chat-panel"`), Concept Map Reference (`data-tour="concept-canvas"`), and Stage Navigation (`data-tour="stage-dock"`). Retained '?' button exclusivity to Annotate stage.
+  - **Test Suite Updates ([`tests/tutorial.test.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/tests/tutorial.test.ts))**:
+    - Verified `familiarise` includes note management content (hover/click to edit, delete, or convert to node).
+    - Verified `inquire` includes chat panel, concept map canvas, and stage navigation dock while excluding '?'.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (47/47 tests passing across 9 test suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+- **Immediate Next Step**: Commit changes to `feature/iteration-2`.

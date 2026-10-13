@@ -510,6 +510,7 @@ The platform provides a step-by-step tooltip onboarding tutorial for each stage 
 - **Stage Overview ('?' Button)**: The '?' button explains why each stage is important and gives a brief overview of what to do in the stage.
 - **Evidence Sidebar**: The sidebar on the side contains sources to be explored.
 - **Highlight & Annotate**: Text on a source can be highlighted and an annotation can be made.
+- **Manage Notes & Convert to Node**: Highlighted text can be hovered over and clicked to edit or delete a note, or convert it to a node.
 - **AI Agent Hints**: The AI agent can be used for hints when the user is stuck.
 
 ### Stage 2: Mind Map (Conceptualise)
@@ -521,7 +522,9 @@ The platform provides a step-by-step tooltip onboarding tutorial for each stage 
 - **Collapse Sidebar**: The sidebar can be collapsed to maximize canvas space.
 
 ### Stage 3: Challenge (Inquire + Evaluate)
-- **Chat with AI Agent**: Users can chat with the AI agent to inquire about and evaluate the sources: question assumptions, seek alternative viewpoints, and assess evidence credibility, reliability and validity. (Note: Only the Annotate stage tutorial mentions the navigation dock and the '?' button).
+- **Chat with AI Agent**: Users can chat with the AI agent to inquire about and evaluate the sources: question assumptions, seek alternative viewpoints, and assess evidence credibility, reliability and validity.
+- **Concept Map Reference**: Reference and interact with concept nodes on the canvas while questioning assumptions.
+- **Navigation Dock**: Navigate back to earlier stages or proceed when ready.
 
 ### Stage 4: Conclude (Synthesise)
 - **Final Conclusion Editor**: Users create a final conclusion after reflecting on the process. It is based on their annotations, concept map and understanding of the topic.
