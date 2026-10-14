@@ -23,6 +23,7 @@ import {
 import { TooltipTutorial } from '@/shared/components/TooltipTutorial/TooltipTutorial';
 import { StageOverviewModal } from '@/shared/components/StageOverviewModal/StageOverviewModal';
 import { STAGE_TUTORIAL_STEPS } from '@/shared/config/tutorials';
+import { StageNavigationDock } from '@/shared/components/StageNavigationDock/StageNavigationDock';
 
 interface Source {
   id: string;
@@ -586,47 +587,8 @@ export default function ConceptualiseStagePage() {
         </div>
       </div>
 
-      {/* Floating Stage Navigation Dock (matching Familiarise) */}
-      <div className={styles.stageNavWrapper} data-tour="stage-dock">
-        <nav className={styles.stageNavBar} aria-label="Module stages">
-          <button
-            type="button"
-            onClick={() => router.push(`/module/${moduleId}/familiarise`)}
-            className={styles.stageStep}
-          >
-            <span className={styles.stageCircle}>01</span>
-            <span className={styles.stageLabel}>Annotate</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => router.push(`/module/${moduleId}/conceptualise`)}
-            className={`${styles.stageStep} ${styles.stageStepActive}`}
-            aria-current="step"
-          >
-            <span className={`${styles.stageCircle} ${styles.stageCircleActive}`}>02</span>
-            <span className={styles.stageLabel}>Mind Map</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => router.push(`/module/${moduleId}/inquire`)}
-            className={styles.stageStep}
-          >
-            <span className={styles.stageCircle}>03</span>
-            <span className={styles.stageLabel}>Challenge</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => router.push(`/module/${moduleId}/synthesise`)}
-            className={styles.stageStep}
-          >
-            <span className={styles.stageCircle}>04</span>
-            <span className={styles.stageLabel}>Conclude</span>
-          </button>
-        </nav>
-      </div>
+      {/* Floating Stage Navigation Dock with Dynamic Stage Transition Indicators */}
+      <StageNavigationDock currentStage="conceptualise" moduleId={moduleId} />
 
       {/* Interactive Tooltip Onboarding Tutorial */}
       <TooltipTutorial

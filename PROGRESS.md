@@ -1240,5 +1240,104 @@
   - `npm test` (47/47 tests passing across 9 test suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
   - `npm run build` (Next.js production build succeeded across all 12 routes).
-- **Immediate Next Step**: Commit changes to `feature/iteration-2`.
+- **Immediate Next Step**: Proceed to UI/UX fixes.
 
+---
+
+### [2026-10-14] - Fix 1: Loading on Login, Especially While Page Compiling
+
+- **Role**: Full Stack Developer
+- **User Instructions**:
+  - *"loading on login, especially while page compiling"*
+  - *"ensure all loading indicators are visually coherent with the current design"*
+  - *"make sure to seek approval after each fix."*
+- **Code Built & Updated**:
+  - **Shared Cyberpunk LoadingOverlay Component ([`src/shared/components/LoadingOverlay/LoadingOverlay.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/LoadingOverlay/LoadingOverlay.tsx) & [`LoadingOverlay.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/LoadingOverlay/LoadingOverlay.module.css))**:
+    - Created reusable loading overlay styled strictly to Section 9 design tokens (`#0F172E`, `#070B1A`, `#37F3FF`, `#A855F7`, `#EAF6FF`, `#D9DFF7`, `Space Grotesk`, `Exo 2`).
+    - Features dual counter-rotating neon cyan and purple glowing rings, pulsating core dot, animated gradient scanline beam, accessible ARIA live attributes, and customizable title, subtitle, and progress bar.
+  - **Next.js App Router Instant Suspense Loading Handlers**:
+    - Built [`src/app/dashboard/loading.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/loading.tsx) which Next.js App Router mounts immediately during route navigation while the `/dashboard` page segment and server components are compiling.
+    - Built [`src/app/loading.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/loading.tsx) as the global root suspense fallback for route compilation across the entire application.
+  - **Student Login Page ([`src/app/login/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/login/page.tsx) & [`login.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/login/login.module.css))**:
+    - Added route pre-fetching (`router.prefetch('/dashboard')`) on mount to warm up chunk downloads in advance.
+    - Added `isRedirecting` state: upon access code verification, `loading` and `isRedirecting` remain active (instead of resetting prematurely in `finally`), rendering `<LoadingOverlay title="ACCESS CODE VERIFIED" subtitle="Compiling workspace, briefing Aria, and loading your investigation dashboard..." fullScreen />`.
+    - Added inline animated spinner (`.spinnerSmall`) and status text ("AUTHENTICATING..." -> "ENTERING DASHBOARD...") inside the submit button.
+  - **Landing Page Modals ([`src/app/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/page.tsx) & [`page.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/page.module.css))**:
+    - Added pre-fetching for `/dashboard`, `/teacher`, and `/login`.
+    - Integrated inline button spinners (`.spinnerSmall`, `.spinnerSmallLight`) for student and teacher submit buttons.
+    - Added fullscreen `<LoadingOverlay>` during credentials verification and page compilation for both student and teacher portals.
+  - **Documentation ([`src/shared/README.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/README.md))**:
+    - Documented `components/LoadingOverlay/` component features and design tokens.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (47/47 tests passing across 9 test suites).
+  - `npm run build` (100% clean Next.js App Router build with 0 errors across all routes).
+- **Immediate Next Step**: Approved. Proceed to Fix 2 and Fix 3.
+
+---
+
+### [2026-10-14] - Fix 2 & Fix 3: Bigger Loading While Topics Load & Removal of "Casefile" Overlay for Faster Module Entry
+
+- **Role**: Full Stack Developer
+- **User Instructions**:
+  - *"remove the initialising casefile module. its no longer a casefile"*
+  - *"bigger loading while topics load"*
+  - *"loading when entering module: change the style and make it load faster"*
+  - *"ensure all loading indicators are visually coherent with the current design"*
+  - *"make sure to seek approval after each fix."*
+- **Code Built & Updated**:
+  - **Removal of Obsolete "Casefile" References & Overlay**:
+    - Completely removed the intrusive `.loadingOverlay` modal (`INITIALIZING CASEFILE MODULE...`) in [`src/app/dashboard/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/page.tsx).
+    - Purged "casefile" / "case" labels in [`src/app/layout.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/layout.tsx), [`src/app/teacher/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/teacher/page.tsx), and [`src/app/dashboard/loading.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/loading.tsx).
+  - **Fix 2 — Prominent ("Bigger") Topics Loading State ([`src/app/dashboard/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/page.tsx) & [`dashboard.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/dashboard.module.css))**:
+    - Replaced the tiny single-line text with `.topicsLoadingWrapper` containing `.topicsLoadingCard`:
+      - Centered dual-ring cyberpunk rotating spinner (`.spinnerDualOuter` in cyan `#37F3FF` and `.spinnerDualInner` in purple `#A855F7`).
+      - High-impact header: `"LOADING AVAILABLE TOPICS..."` (`Space Grotesk`, cyan glow).
+      - Informative subtitle: `"Retrieving critical thinking curriculum and active learning modules..."` (`Exo 2`).
+      - Animated gradient progress bar track (`.progressBarTrack` & `.progressBarFill`) and animated top scanline.
+  - **Fix 3 — Fast, Inline Module Entry Loading State ([`src/app/dashboard/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/page.tsx) & [`familiarise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/familiarise/page.tsx))**:
+    - Replaced the full-screen modal with sleek inline card feedback: when clicking an available topic, the card glows with `.topicCardEntering` (pulsing cyan glow) and the card footer immediately shows an animated cyan spinner (`.spinnerSmallCyan`) and `"Entering Module..."`.
+    - Added prefetching on mount and hover (`onMouseEnter={() => handlePrefetchModule(topic.id)}`) for instant route compilation and chunk loading.
+    - Added source caching in `localStorage` in `familiarise/page.tsx`, eliminating empty-state delays so sources display immediately on frame 1.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (47/47 tests passing across 9 test suites).
+  - `npm run build` (100% clean Next.js App Router build with 0 compilation errors across all routes).
+- **Immediate Next Step**: Approved. Proceed to Fix 4 ("loading indicators when jumping between stages").
+
+---
+
+### [2026-10-14] - Fix 4: Loading Indicators When Jumping Between Stages & Enhanced Loading Aesthetics
+
+- **Role**: Full Stack Developer
+- **User Instructions**:
+  - *"loading indicators when jumping between stages"*
+  - *"making the loading look nicer. proceed to the next fix"*
+  - *"ensure all loading indicators are visually coherent with the current design"*
+  - *"make sure to seek approval after each fix."*
+- **Code Built & Updated**:
+  - **Shared Component: `StageNavigationDock` ([`src/shared/components/StageNavigationDock/StageNavigationDock.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/StageNavigationDock/StageNavigationDock.tsx) & [`StageNavigationDock.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/StageNavigationDock/StageNavigationDock.module.css))**:
+    - Created unified, reusable stage navigation dock replacing duplicated static implementations across all 4 stages.
+    - Pre-fetches all other stages on component mount (`router.prefetch`) for instantaneous chunk resolution.
+    - Provides instant visual transition feedback when any stage is clicked:
+      - The clicked stage circle replaces the number with a high-contrast dual-color spinning mini-ring (`.circleSpinner` with `#37F3FF` cyan and `#C084FC` purple).
+      - The stage circle pulses with an ambient cyan glow (`.stageCircleLoading`).
+      - The stage label updates to `${label}...` and pulses with a glowing cyan text shadow (`.stageStepLoading`).
+      - An animated laser scanline progress beam runs across the top edge of the navigation dock (`.dockProgressBar` with `.dockProgressFill`).
+      - Non-target buttons are temporarily disabled (`disabled={Boolean(navigatingStage) && !isTargetLoading}`) to prevent accidental rapid double-clicks.
+    - Preserves `data-tour="stage-dock"` on the wrapper element for 100% compatibility with interactive tooltip tutorials and test suites.
+  - **Next.js App Router Stage Loading Boundary ([`src/app/module/[moduleId]/loading.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/loading.tsx))**:
+    - Created module-level loading boundary using `<LoadingOverlay title="PREPARING MODULE STAGE..." subtitle="Loading stage artifacts, canvas state, and Socratic peer..." fullScreen />`.
+    - Guarantees seamless suspense fallback during Next.js chunk compilation and route transitions.
+  - **Integrated Unified Dock Across All 4 Module Stages**:
+    - Stage 1 Familiarise: [`src/app/module/[moduleId]/familiarise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/familiarise/page.tsx)
+    - Stage 2 Conceptualise: [`src/app/module/[moduleId]/conceptualise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/conceptualise/page.tsx)
+    - Stage 3 Inquire: [`src/app/module/[moduleId]/inquire/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/inquire/page.tsx)
+    - Stage 4 Synthesise: [`src/app/module/[moduleId]/synthesise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/synthesise/page.tsx)
+  - **Enhanced Loading Aesthetics ([`LoadingOverlay.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/LoadingOverlay/LoadingOverlay.module.css))**:
+    - Polished backdrop blur (`blur(16px)` with `saturate(180%)`), ambient cyan/purple glow aura, refined glassmorphic card borders, and dual-orbiting spinner tracks.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (47/47 tests passing across 9 test suites).
+  - `npm run build` (100% clean Next.js App Router build with 0 compilation errors across all 12 routes).
+- **Immediate Next Step**: Seek user approval for Fix 4 before proceeding to Fix 5 ("loading on create node").
