@@ -18,6 +18,7 @@ export default function LandingPage() {
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [redirectTarget, setRedirectTarget] = useState<'dashboard' | 'teacher'>('dashboard');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isNavigatingLogin, setIsNavigatingLogin] = useState<boolean>(false);
 
   // Pre-fetch route chunks on mount to accelerate Next.js compilation and transitions
   useEffect(() => {
@@ -104,10 +105,22 @@ export default function LandingPage() {
       <header className={styles.header}>
         <CriticLogo href="/" />
         <button
-          onClick={() => router.push('/login')}
-          className={styles.loginPillBtn}
+          onClick={() => {
+            setIsNavigatingLogin(true);
+            router.push('/login');
+          }}
+          disabled={isNavigatingLogin}
+          className={`${styles.loginPillBtn} ${isNavigatingLogin ? styles.loginPillBtnLoading : ''}`}
+          aria-label="Login"
         >
-          Login
+          {isNavigatingLogin ? (
+            <>
+              <span className={styles.spinnerSmallCyan} />
+              <span>Loading...</span>
+            </>
+          ) : (
+            'Login'
+          )}
         </button>
       </header>
 
@@ -327,10 +340,21 @@ export default function LandingPage() {
             Train your critical thinking and challenge misinformation through evidence-based Socratic inquiry.
           </p>
           <button
-            onClick={() => router.push('/login')}
-            className={styles.primaryCtaBtn}
+            onClick={() => {
+              setIsNavigatingLogin(true);
+              router.push('/login');
+            }}
+            disabled={isNavigatingLogin}
+            className={`${styles.primaryCtaBtn} ${isNavigatingLogin ? styles.primaryCtaBtnLoading : ''}`}
           >
-            Start with Access Code →
+            {isNavigatingLogin ? (
+              <>
+                <span className={styles.spinnerSmallDark} />
+                <span>Opening Login...</span>
+              </>
+            ) : (
+              'Start with Access Code →'
+            )}
           </button>
           <button
             onClick={() => {
@@ -521,6 +545,13 @@ export default function LandingPage() {
       )}
 
       {/* Fullscreen Loading Overlay during page compilation & route transition */}
+      {isNavigatingLogin && (
+        <LoadingOverlay
+          title="OPENING LOGIN..."
+          subtitle="Loading student login and access code verification..."
+          fullScreen
+        />
+      )}
       {isRedirecting && (
         <LoadingOverlay
           title={redirectTarget === 'dashboard' ? 'ACCESS CODE VERIFIED' : 'CREDENTIALS VERIFIED'}

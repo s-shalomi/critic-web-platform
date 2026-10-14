@@ -65,8 +65,8 @@
 
 .conceptNodeCircle {
   position: absolute;
-  min-width: 120px;
-  min-height: 120px;
+  min-width: 130px;
+  min-height: 130px;
   border-radius: 50%;
   background: radial-gradient(circle at 50% 35%, #16203D 0%, #0C1328 100%);
   border: 2px solid #7C4DFF;
@@ -77,12 +77,13 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 16px 18px;
+  padding: clamp(14px, 12%, 24px);
   box-sizing: border-box;
   cursor: grab;
   user-select: none;
   z-index: 20;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+  overflow: hidden;
 }
 
 .conceptNodeCircle:hover {
@@ -118,14 +119,19 @@
 .nodeLabel {
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 1.04rem;
   color: #EAF6FF;
-  line-height: 1.26;
+  line-height: 1.25;
+  overflow-wrap: break-word;
   word-break: break-word;
   hyphens: auto;
   pointer-events: none;
   width: 100%;
+  max-width: 86%;
+  max-height: 86%;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .nodeControls {

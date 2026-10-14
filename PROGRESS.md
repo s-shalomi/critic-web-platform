@@ -1395,4 +1395,36 @@
 - **Tests Passing**:
   - `npm test` (47/47 tests passing across 9 test suites).
   - `npm run build` (100% clean Next.js App Router build with 0 compilation errors across all 12 routes).
-- **Immediate Next Step**: Seek user approval for Fix 6 before proceeding to Fix 8 ("make sure text doesn't overflow nodes. if there is overflow, make text smaller, but still readable and accessible and the nodes larger, to an extent").
+- **Immediate Next Step**: Approved. Proceed to Landing Page Login Indicator and Fix 8 ("node text overflow and dynamic sizing").
+
+---
+
+### [2026-10-14] - Fix: Landing Page Login Loading Indicator & Node Text Overflow Prevention
+
+- **Role**: Full Stack Developer
+- **User Instructions**:
+  - *"also clicking login button on landing page needs a loading indicator"*
+  - *"make sure text doesn't overflow nodes. if there is overflow, make text smaller, but still readable and accessible and the nodes larger, to an extent."*
+  - *"ensure all loading indicators are visually coherent with the current design"*
+  - *"make sure to seek approval after each fix."*
+- **Code Built & Updated**:
+  - **Landing Page: Login Button Loading Indicators ([`src/app/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/page.tsx) & [`src/app/page.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/page.module.css))**:
+    - Added `isNavigatingLogin` boolean state in `src/app/page.tsx`.
+    - **Header Pill Button (`.loginPillBtn`)**: When clicked, immediately disables the button, replaces text with an inline cyan spinner (`.spinnerSmallCyan`) and `"Loading..."`, with an enhanced cyan glow border (`.loginPillBtnLoading`).
+    - **Bottom CTA Button (`.primaryCtaBtn`)**: When clicked, immediately disables the button, displays an inline dark spinner (`.spinnerSmallDark`) with `"Opening Login..."` (`.primaryCtaBtnLoading`).
+    - **Fullscreen Route Overlay**: Added `<LoadingOverlay title="OPENING LOGIN..." subtitle="Loading student login and access code verification..." fullScreen />` during page chunk compilation and route transition.
+  - **Concept Map Canvas: Node Text Overflow Prevention & Dynamic Accessible Scaling ([`ConceptMapCanvas.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/ConceptMapCanvas/ConceptMapCanvas.tsx) & [`ConceptMapCanvas.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/ConceptMapCanvas/ConceptMapCanvas.module.css))**:
+    - **Proportional Node Enlargement (`getNodeDiameter`)**:
+      - Expanded base diameters from (120px - 240px) to (130px - 260px).
+      - Added dynamic calculation for long single words ($\ge 15$ characters): scales diameter up to 265px to provide a comfortable circular chord width.
+    - **Dynamic Accessible Typography (`getNodeFontSize`)**:
+      - Dynamically computes font size from `1.02rem` down to an accessible minimum of `0.78rem` (~12.5px), meeting accessibility guidelines while keeping multi-word concepts fully visible without text clipping.
+      - Automatically scales down font when encountering long words ($\ge 13$ chars: `0.82rem`, $\ge 16$ chars: `0.78rem`).
+    - **Circular Inset Protection (`.nodeLabel` & `.conceptNodeCircle`)**:
+      - Applied circular safe padding (`clamp(14px, 12%, 24px)`) and `overflow: hidden` on the circle container.
+      - Constrained `.nodeLabel` to `max-width: 86%`, `max-height: 86%`, with `overflow-wrap: break-word`, `word-break: break-word`, and `hyphens: auto`.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (47/47 tests passing across 9 test suites).
+  - `npm run build` (100% clean Next.js App Router build with 0 compilation errors across all 12 routes).
+- **Immediate Next Step**: Seek user approval for Landing Page Login Indicator and Node Text Overflow fixes.

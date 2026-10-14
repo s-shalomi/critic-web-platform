@@ -14,12 +14,40 @@ export interface ConceptNode {
 }
 
 export function getNodeDiameter(text: string): number {
-  const len = (text || '').trim().length;
-  if (len <= 15) return 120;
-  if (len <= 30) return 145;
-  if (len <= 55) return 175;
-  if (len <= 85) return 205;
-  return 240;
+  const clean = (text || '').trim();
+  const len = clean.length;
+  // Calculate longest single word to avoid horizontal overflow in circles
+  const words = clean.split(/\s+/);
+  const maxWordLen = words.reduce((max, w) => Math.max(max, w.length), 0);
+
+  // If a single word is exceptionally long, give the circle extra horizontal room
+  if (maxWordLen >= 15) {
+    return Math.max(185, Math.min(265, 140 + maxWordLen * 7));
+  }
+
+  // Expanded base diameters to comfortably fit multi-line concepts without clipping
+  if (len <= 12) return 130;
+  if (len <= 25) return 155;
+  if (len <= 48) return 190;
+  if (len <= 75) return 225;
+  return 260;
+}
+
+export function getNodeFontSize(text: string): string {
+  const clean = (text || '').trim();
+  const len = clean.length;
+  const words = clean.split(/\s+/);
+  const maxWordLen = words.reduce((max, w) => Math.max(max, w.length), 0);
+
+  // Accessible font scaling: stays strictly >= 12.5px (0.78rem) for high legibility
+  if (maxWordLen >= 16) return '0.78rem';
+  if (maxWordLen >= 13) return '0.82rem';
+
+  if (len <= 12) return '1.02rem';
+  if (len <= 25) return '0.94rem';
+  if (len <= 48) return '0.86rem';
+  if (len <= 75) return '0.80rem';
+  return '0.78rem';
 }
 
 export interface ConceptLink {
@@ -727,7 +755,11 @@ export default function ConceptMapCanvas({
                   </div>
                 ) : (
                   <>
-                    <span className={styles.nodeLabel} title={node.text}>
+                    <span
+                      className={styles.nodeLabel}
+                      style={{ fontSize: getNodeFontSize(node.text) }}
+                      title={node.text}
+                    >
                       {node.text}
                     </span>
 

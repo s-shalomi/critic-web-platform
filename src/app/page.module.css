@@ -60,6 +60,30 @@
   transform: translateY(0);
 }
 
+.loginPillBtn:disabled,
+.primaryCtaBtn:disabled {
+  opacity: 0.8;
+  cursor: wait !important;
+  transform: none !important;
+}
+
+.loginPillBtnLoading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-color: #37F3FF;
+  box-shadow: 0 0 26px rgba(55, 243, 255, 0.7) !important;
+}
+
+.primaryCtaBtnLoading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 0 32px rgba(55, 243, 255, 0.8) !important;
+}
+
 /* Main Content Container */
 .mainWrapper {
   width: 100%;
@@ -906,6 +930,28 @@
   height: 16px;
   border: 2px solid rgba(255, 255, 255, 0.35);
   border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.spinnerSmallCyan {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(55, 243, 255, 0.25);
+  border-top-color: #37F3FF;
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.spinnerSmallDark {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(7, 11, 26, 0.35);
+  border-top-color: #070B1A;
   border-radius: 50%;
   animation: spin 0.75s linear infinite;
   display: inline-block;
