@@ -6,7 +6,7 @@ import { LoadingOverlay } from '@/shared/components/LoadingOverlay/LoadingOverla
 export default function DashboardLoading() {
   return (
     <LoadingOverlay
-      title="INITIALIZING INVESTIGATION DASHBOARD..."
+      title="INITIALIZING DASHBOARD..."
       subtitle="Compiling workspace, loading available topics & synchronizing Socratic profile..."
       fullScreen
     />

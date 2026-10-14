@@ -144,7 +144,20 @@ export default function DashboardPage() {
     } catch {
       // Ignored
     }
-  }, []);
+
+    // Pre-fetch familiarise stage for rapid instant navigation
+    try {
+      let studentId = 'student_demo';
+      const userStr = localStorage.getItem('critic_user');
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        studentId = user.id || user.email || user.accessCode || 'student_demo';
+      }
+      router.prefetch(`/module/mod_climate-change_${studentId}/familiarise`);
+    } catch {
+      // Ignored
+    }
+  }, [router]);
 
   const handleEnterModule = (topicId: string) => {
     if (enteringTopicId) return;
@@ -172,6 +185,7 @@ export default function DashboardPage() {
     // If student previously reached review/debrief, restart them at familiarise stage
     const targetStage = savedStage === 'review' ? 'familiarise' : savedStage;
 
+    router.prefetch(`/module/${moduleId}/${targetStage}`);
     router.push(`/module/${moduleId}/${targetStage}`);
   };
 
@@ -267,23 +281,27 @@ export default function DashboardPage() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [isCustomiseModalOpen, customiseTab, activeAvatarIndex, selectedTone]);
 
+  const handlePrefetchModule = (topicId: string) => {
+    try {
+      let studentId = 'student_demo';
+      const userStr = localStorage.getItem('critic_user');
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        studentId = user.id || user.email || user.accessCode || 'student_demo';
+      }
+      const moduleId = `mod_${topicId}_${studentId}`;
+      const stageKey = `critic_current_stage_${studentId}_${topicId}`;
+      const savedStage =
+        localStorage.getItem(stageKey) ||
+        localStorage.getItem(`critic_current_stage_${topicId}`) ||
+        'familiarise';
+      const targetStage = savedStage === 'review' ? 'familiarise' : savedStage;
+      router.prefetch(`/module/${moduleId}/${targetStage}`);
+    } catch {}
+  };
+
   return (
     <div className={styles.container}>
-      {/* Loading Overlay when Entering Module */}
-      {enteringTopicId && (
-        <div className={styles.loadingOverlay}>
-          <div className={styles.loadingGlowBox}>
-            <div className={styles.spinnerLarge} />
-            <h2 className={styles.loadingOverlayTitle}>
-              INITIALIZING CASEFILE MODULE...
-            </h2>
-            <p className={styles.loadingOverlaySub}>
-              Loading evidence sources, syncing investigation notes &amp; briefing Socratic Agent Aria.
-            </p>
-          </div>
-        </div>
-      )}
-
       {/* Top Header per screens_v2/dashboard.png */}
       <header className={styles.header}>
         <CriticLogo href="/dashboard" />
@@ -314,7 +332,21 @@ export default function DashboardPage() {
           <h2 className={styles.sectionHeading}>Choose a topic</h2>
           <div className={styles.topicsGrid}>
             {loading ? (
-              <div style={{ color: 'var(--color-accent-cyan)' }}>Loading available topics...</div>
+              <div className={styles.topicsLoadingWrapper}>
+                <div className={styles.topicsLoadingCard}>
+                  <div className={styles.spinnerDual}>
+                    <div className={styles.spinnerDualOuter} />
+                    <div className={styles.spinnerDualInner} />
+                  </div>
+                  <h3 className={styles.topicsLoadingTitle}>LOADING AVAILABLE TOPICS...</h3>
+                  <p className={styles.topicsLoadingSub}>
+                    Retrieving critical thinking curriculum and active learning modules...
+                  </p>
+                  <div className={styles.progressBarTrack}>
+                    <div className={styles.progressBarFill} />
+                  </div>
+                </div>
+              </div>
             ) : (
               topics.map((topic) => {
                 const isAvailable = topic.status === 'Available';
@@ -339,6 +371,7 @@ export default function DashboardPage() {
                   <div
                     key={topic.id}
                     onClick={isAvailable ? () => handleEnterModule(topic.id) : undefined}
+                    onMouseEnter={isAvailable ? () => handlePrefetchModule(topic.id) : undefined}
                     role={isAvailable ? 'button' : undefined}
                     tabIndex={isAvailable ? 0 : undefined}
                     onKeyDown={
@@ -354,7 +387,7 @@ export default function DashboardPage() {
                     aria-label={isAvailable ? `Enter ${displayTitle} module` : undefined}
                     className={`${styles.topicCard} ${
                       isAvailable ? styles.topicCardAvailable : styles.topicCardDisabled
-                    }`}
+                    } ${isEntering ? styles.topicCardEntering : ''}`}
                   >
                     <div>
                       <h3
@@ -378,8 +411,10 @@ export default function DashboardPage() {
                         <div className={styles.enterModuleLink}>
                           {isEntering ? (
                             <>
-                              <span className={styles.spinnerSmall} />
-                              <span>Entering Module...</span>
+                              <span className={styles.spinnerSmallCyan} />
+                              <span style={{ color: 'var(--color-accent-cyan)', fontWeight: 700 }}>
+                                Entering Module...
+                              </span>
                             </>
                           ) : (
                             <>

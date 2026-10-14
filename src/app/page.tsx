@@ -526,7 +526,7 @@ export default function LandingPage() {
           title={redirectTarget === 'dashboard' ? 'ACCESS CODE VERIFIED' : 'CREDENTIALS VERIFIED'}
           subtitle={
             redirectTarget === 'dashboard'
-              ? 'Compiling workspace, briefing Aria, and loading your investigation dashboard...'
+              ? 'Compiling workspace, briefing Aria, and loading your dashboard...'
               : 'Compiling curriculum dashboard and loading Teacher Portal...'
           }
           fullScreen

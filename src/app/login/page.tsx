@@ -177,7 +177,7 @@ export default function StudentLoginPage() {
       {isRedirecting && (
         <LoadingOverlay
           title="ACCESS CODE VERIFIED"
-          subtitle="Compiling workspace, briefing Aria, and loading your investigation dashboard..."
+          subtitle="Compiling workspace, briefing Aria, and loading your dashboard..."
           fullScreen
         />
       )}

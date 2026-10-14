@@ -216,9 +216,9 @@ export default function TeacherDashboardPage() {
       case 'inquire':
         return '03. Inquire & Evaluate (Socratic Inquiry)';
       case 'synthesise':
-        return '04. Synthesise (Closing Case)';
+        return '04. Synthesise (Reasoned Conclusion)';
       case 'review':
-        return '05. Case Debrief (Completed)';
+        return '05. Review (Completed)';
       default:
         return stage || 'Starting Module';
     }

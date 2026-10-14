@@ -58,8 +58,27 @@ export default function FamiliariseStagePage() {
   const params = useParams();
   const moduleId = (params?.moduleId as string) || 'mod_climate_change_demo';
 
-  const [sources, setSources] = useState<Source[]>([]);
-  const [selectedSourceId, setSelectedSourceId] = useState<string>('');
+  const [sources, setSources] = useState<Source[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('critic_sources_climate-change');
+        if (cached) return JSON.parse(cached);
+      } catch {}
+    }
+    return [];
+  });
+  const [selectedSourceId, setSelectedSourceId] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = localStorage.getItem('critic_sources_climate-change');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed[0].id;
+        }
+      } catch {}
+    }
+    return '';
+  });
   const [notes, setNotes] = useState<Note[]>([]);
   const [showIntroModal, setShowIntroModal] = useState<boolean>(false);
   const [showTutorialModal, setShowTutorialModal] = useState<boolean>(false);
@@ -72,7 +91,7 @@ export default function FamiliariseStagePage() {
   const [selectedText, setSelectedText] = useState<string>('');
   const [noteInput, setNoteInput] = useState<string>('');
   const [isHighlighting, setIsHighlighting] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(() => sources.length === 0);
 
   // Hovered, Pinned, Editing Note & Toast state
   const [hoveredNoteId, setHoveredNoteId] = useState<string | null>(null);
@@ -94,7 +113,7 @@ export default function FamiliariseStagePage() {
   };
 
   useEffect(() => {
-    setLoading(true);
+    if (sources.length === 0) setLoading(true);
     setAgentPrefs(getStoredAgentPreferences());
     const notesKey = getStudentStorageKey('critic_notes', moduleId);
 
@@ -115,6 +134,9 @@ export default function FamiliariseStagePage() {
         .then((data) => {
           if (data.sources) {
             setSources(data.sources);
+            try {
+              localStorage.setItem('critic_sources_climate-change', JSON.stringify(data.sources));
+            } catch {}
             setSelectedSourceId((prev) => {
               if (data.sources.some((s: Source) => s.id === prev)) return prev;
               return data.sources.length > 0 ? data.sources[0].id : '';

@@ -3,7 +3,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'CRITIC | Socratic AI Critical Thinking Platform',
-  description: 'Gamified casefile educational platform empowering high school students through Socratic inquiry and AI scaffolding.',
+  description: 'Gamified educational platform empowering high school students through Socratic inquiry and AI scaffolding.',
 };
 
 export default function RootLayout({
