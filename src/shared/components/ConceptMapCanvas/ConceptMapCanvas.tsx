@@ -62,6 +62,8 @@ export default function ConceptMapCanvas({
   const [zoomLevel, setZoomLevel] = useState<number>(1);
   const [showAddNodeModal, setShowAddNodeModal] = useState<boolean>(false);
   const [newNodeText, setNewNodeText] = useState<string>('');
+  const [isCreatingNode, setIsCreatingNode] = useState<boolean>(false);
+  const [justCreatedNodeId, setJustCreatedNodeId] = useState<string | null>(null);
 
   // Panning & Drag State
   const [panOffset, setPanOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -208,7 +210,8 @@ export default function ConceptMapCanvas({
 
   // Handle Add Concept Node
   const handleAddNode = async () => {
-    if (!newNodeText.trim()) return;
+    if (!newNodeText.trim() || isCreatingNode) return;
+    setIsCreatingNode(true);
 
     // Center new node in currently visible viewport
     const canvasWidth = canvasStageRef.current?.clientWidth || 800;
@@ -229,12 +232,16 @@ export default function ConceptMapCanvas({
       if (data.success && data.node) {
         const updated = [...nodes, { ...data.node, linkCount: 0 }];
         saveCanvasState(updated, links);
+        setJustCreatedNodeId(data.node.id);
+        setTimeout(() => setJustCreatedNodeId(null), 1800);
         setNewNodeText('');
         setShowAddNodeModal(false);
         setActiveTool('pan');
       }
     } catch (err) {
       console.error('Error creating concept node:', err);
+    } finally {
+      setIsCreatingNode(false);
     }
   };
 
@@ -586,7 +593,7 @@ export default function ConceptMapCanvas({
                 data-tour="concept-node"
                 className={`${styles.conceptNodeCircle} ${isSelected ? styles.selectedNode : ''} ${
                   activeTool === 'link' && isLinkSource ? styles.linkSourceNode : ''
-                }`}
+                } ${justCreatedNodeId === node.id ? styles.nodeJustCreated : ''}`}
                 style={{
                   left: `${node.positionX}px`,
                   top: `${node.positionY}px`,
@@ -756,7 +763,12 @@ export default function ConceptMapCanvas({
 
       {/* Create Node Modal */}
       {showAddNodeModal && (
-        <div className={styles.modalBackdrop} onClick={() => setShowAddNodeModal(false)}>
+        <div
+          className={styles.modalBackdrop}
+          onClick={() => {
+            if (!isCreatingNode) setShowAddNodeModal(false);
+          }}
+        >
           <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
             <h3 className={styles.modalTitle}>Create Concept Node</h3>
             <p className={styles.modalSubtitle}>
@@ -767,19 +779,39 @@ export default function ConceptMapCanvas({
               placeholder="e.g. record setting cold / extreme weather"
               value={newNodeText}
               onChange={(e) => setNewNodeText(e.target.value)}
+              disabled={isCreatingNode}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') handleAddNode();
-                if (e.key === 'Escape') setShowAddNodeModal(false);
+                if (e.key === 'Enter' && !isCreatingNode) handleAddNode();
+                if (e.key === 'Escape' && !isCreatingNode) setShowAddNodeModal(false);
               }}
               className={styles.modalInput}
               autoFocus
             />
             <div className={styles.modalActions}>
-              <button onClick={() => setShowAddNodeModal(false)} className={styles.cancelBtn}>
+              <button
+                type="button"
+                onClick={() => setShowAddNodeModal(false)}
+                disabled={isCreatingNode}
+                className={styles.cancelBtn}
+              >
                 Cancel
               </button>
-              <button onClick={handleAddNode} className={styles.createNodeBtn}>
-                Create Node
+              <button
+                type="button"
+                onClick={handleAddNode}
+                disabled={isCreatingNode || !newNodeText.trim()}
+                className={`${styles.createNodeBtn} ${
+                  isCreatingNode ? styles.createNodeBtnLoading : ''
+                }`}
+              >
+                {isCreatingNode ? (
+                  <>
+                    <span className={styles.spinnerSmallDark} />
+                    <span>Creating Node...</span>
+                  </>
+                ) : (
+                  'Create Node'
+                )}
               </button>
             </div>
           </div>

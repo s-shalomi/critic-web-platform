@@ -100,6 +100,7 @@ export default function FamiliariseStagePage() {
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
   const [editText, setEditText] = useState<string>('');
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [convertingNoteId, setConvertingNoteId] = useState<string | null>(null);
 
   const handleCloseIntroModal = () => {
     setShowIntroModal(false);
@@ -313,6 +314,9 @@ export default function FamiliariseStagePage() {
   };
 
   const handleConvertToNode = async (noteId: string) => {
+    if (convertingNoteId) return;
+    setConvertingNoteId(noteId);
+
     const targetNote = notes.find((n) => n.id === noteId);
     updateNotesState((prev) =>
       prev.map((n) => (n.id === noteId ? { ...n, convertedToNode: true } : n))
@@ -343,6 +347,8 @@ export default function FamiliariseStagePage() {
       });
     } catch (err) {
       console.error(err);
+    } finally {
+      setConvertingNoteId(null);
     }
   };
 
@@ -512,9 +518,20 @@ export default function FamiliariseStagePage() {
                           e.stopPropagation();
                           handleConvertToNode(n.id);
                         }}
-                        className={styles.convertTooltipBtn}
+                        disabled={convertingNoteId === n.id}
+                        className={`${styles.convertTooltipBtn} ${
+                          convertingNoteId === n.id ? styles.convertTooltipBtnLoading : ''
+                        }`}
+                        title="Convert this note into a Concept Node on your Mind Map"
                       >
-                        + Convert to node
+                        {convertingNoteId === n.id ? (
+                          <span className={styles.inlineSpinnerRow}>
+                            <span className={styles.spinnerMini} />
+                            Creating Node...
+                          </span>
+                        ) : (
+                          '+ Convert to node'
+                        )}
                       </button>
                     )}
                   </div>

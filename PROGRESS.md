@@ -1340,4 +1340,29 @@
 - **Tests Passing**:
   - `npm test` (47/47 tests passing across 9 test suites).
   - `npm run build` (100% clean Next.js App Router build with 0 compilation errors across all 12 routes).
-- **Immediate Next Step**: Seek user approval for Fix 4 before proceeding to Fix 5 ("loading on create node").
+- **Immediate Next Step**: Approved. Proceed to Fix 5 ("loading on create node").
+
+---
+
+### [2026-10-14] - Fix 5: Loading on Create Node Across Mind Map Canvas & Evidence Annotations
+
+- **Role**: Full Stack Developer
+- **User Instructions**:
+  - *"loading on create node"*
+  - *"ensure all loading indicators are visually coherent with the current design"*
+  - *"make sure to seek approval after each fix."*
+- **Code Built & Updated**:
+  - **Mind Map Canvas: Create Node Modal ([`ConceptMapCanvas.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/ConceptMapCanvas/ConceptMapCanvas.tsx) & [`ConceptMapCanvas.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/ConceptMapCanvas/ConceptMapCanvas.module.css))**:
+    - Added `isCreatingNode` boolean state in `ConceptMapCanvas.tsx`.
+    - Modal button displays an inline cyber-spinner (`.spinnerSmallDark`), updates text to `"Creating Node..."`, and gains a cyan pulse glow (`.createNodeBtnLoading`).
+    - Inputs and modal backdrop dismissals are disabled during submission (`disabled={isCreatingNode}`) to prevent accidental closures or duplicate node submissions from repeated Enter key presses.
+    - Added `justCreatedNodeId` tracking with a stylish spawn glow animation (`.nodeJustCreated` via `spawnNodeGlow` keyframes) so new nodes visibly pulse with cyan and purple energy upon landing on the canvas.
+  - **Familiarise Annotations: Convert Note to Node ([`familiarise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/familiarise/page.tsx) & [`familiarise.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/familiarise/familiarise.module.css))**:
+    - Added `convertingNoteId: string | null` state to track active note conversion.
+    - Added inline mini-spinner (`.spinnerMini`) with `"Creating Node..."` label and disabled button state (`.convertTooltipBtnLoading`) during network persistence.
+    - Cleanly resets state in `finally` blocks to guarantee robust UI recovery.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (47/47 tests passing across 9 test suites).
+  - `npm run build` (100% clean Next.js App Router build with 0 compilation errors across all 12 routes).
+- **Immediate Next Step**: Seek user approval for Fix 5 before proceeding to Fix 6 ("loading on node linkage, make this faster").
