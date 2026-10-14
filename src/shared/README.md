@@ -6,6 +6,7 @@ This folder contains shared system configurations, theme design tokens, database
 
 ## Directory Overview
 
+- **`components/LoadingOverlay/`**: Reusable cyberpunk-themed loading overlay and indicator with dual rotating neon cyan and purple glowing rings, pulsating core, animated scanline beam, and accessible status labels for page compiling, route transitions, and async operations.
 - **`components/TooltipTutorial/`**: Reusable interactive step-by-step onboarding tutorial tour component with animated spotlight target highlighting ring, directional arrow pointer, progress counter, keyboard navigation, and Next/Back/Skip controls.
 - **`components/StageOverviewModal/`**: Accessible educational stage overview modal triggered by the '?' button explaining why each stage matters and providing actionable checklists.
 - **`config/theme.ts`**: Unified brand design system tokens defining typography, primary colors, neon accents, glassmorphism styles, and badge metadata. Used across all stage screens to ensure strict visual consistency without hardcoded hex colors.

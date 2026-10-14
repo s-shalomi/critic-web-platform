@@ -1,17 +1,24 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import styles from './login.module.css';
 import { RobotAvatar } from '@/shared/components/RobotAvatar/RobotAvatar';
 import { CriticLogo } from '@/shared/components/CriticLogo/CriticLogo';
+import { LoadingOverlay } from '@/shared/components/LoadingOverlay/LoadingOverlay';
 
 export default function StudentLoginPage() {
   const router = useRouter();
   const [accessCode, setAccessCode] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // Pre-fetch dashboard chunks immediately on mount so compilation and loading are accelerated
+  useEffect(() => {
+    router.prefetch('/dashboard');
+  }, [router]);
 
   const handleStudentLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,11 +40,13 @@ export default function StudentLoginPage() {
       localStorage.setItem('critic_token', data.token);
       localStorage.setItem('critic_user', JSON.stringify(data.user));
 
+      // Keep loading active and transition into redirecting state
+      setIsRedirecting(true);
       router.push('/dashboard');
     } catch (err: any) {
       setErrorMsg(err.message);
-    } finally {
       setLoading(false);
+      setIsRedirecting(false);
     }
   };
 
@@ -147,9 +156,14 @@ export default function StudentLoginPage() {
               className={styles.loginSubmitBtn}
               disabled={loading}
             >
-              {loading ? 'AUTHENTICATING...' : (
+              {loading ? (
                 <>
-                  LOGIN
+                  <span className={styles.spinnerSmall} />
+                  <span>{isRedirecting ? 'ENTERING DASHBOARD...' : 'AUTHENTICATING...'}</span>
+                </>
+              ) : (
+                <>
+                  LOGIN <span>→</span>
                 </>
               )}
             </button>
@@ -158,6 +172,15 @@ export default function StudentLoginPage() {
           </form>
         </div>
       </div>
+
+      {/* Cyberpunk Loading Overlay during page compilation & dashboard route transition */}
+      {isRedirecting && (
+        <LoadingOverlay
+          title="ACCESS CODE VERIFIED"
+          subtitle="Compiling workspace, briefing Aria, and loading your investigation dashboard..."
+          fullScreen
+        />
+      )}
     </div>
   );
 }

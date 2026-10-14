@@ -122,21 +122,21 @@
     [
       "CLASS_B_2026",
       {
-        "id": "code_1791649003249",
+        "id": "code_1791940352068",
         "code": "CLASS_B_2026",
         "teacherId": "teacher-123",
-        "createdAt": "2026-10-10T16:16:43.249Z",
-        "expiresAt": "2026-11-09T16:16:43.249Z"
+        "createdAt": "2026-10-14T01:12:32.068Z",
+        "expiresAt": "2026-11-13T01:12:32.068Z"
       }
     ],
     [
       "EXP_CHEM_2026",
       {
-        "id": "code_1791649003751",
+        "id": "code_1791940352526",
         "code": "EXP_CHEM_2026",
         "teacherId": "teacher-demo",
-        "createdAt": "2026-10-10T16:16:43.751Z",
-        "expiresAt": "2026-11-09T16:16:43.751Z"
+        "createdAt": "2026-10-14T01:12:32.526Z",
+        "expiresAt": "2026-11-13T01:12:32.526Z"
       }
     ],
     [
@@ -170,7 +170,7 @@
         "topicTitle": "Climate Change",
         "currentStage": "synthesise",
         "status": "in_progress",
-        "lastActive": "2026-10-10T16:16:43.285Z"
+        "lastActive": "2026-10-14T01:12:32.078Z"
       }
     ],
     [
@@ -193,6 +193,17 @@
         "currentStage": "familiarise",
         "status": "in_progress",
         "lastActive": "2026-10-10T15:47:29.743Z"
+      }
+    ],
+    [
+      "A3",
+      {
+        "studentId": "student_4133",
+        "accessCode": "A3",
+        "topicTitle": "Climate Change",
+        "currentStage": "review",
+        "status": "completed",
+        "lastActive": "2026-10-13T14:07:06.961Z"
       }
     ]
   ],
@@ -325,6 +336,21 @@
           "updatedAt": "2026-10-10T15:41:54.122Z"
         }
       ]
+    ],
+    [
+      "mod_convert_1791940012827",
+      [
+        {
+          "id": "note_1791940012827_gjh4w",
+          "moduleId": "mod_convert_1791940012827",
+          "sourceId": "source-1",
+          "highlightedText": "polar vortex",
+          "noteText": "Polar vortex instability caused by Arctic warming",
+          "convertedToNode": true,
+          "createdAt": "2026-10-14T01:06:52.827Z",
+          "updatedAt": "2026-10-14T01:06:52.831Z"
+        }
+      ]
     ]
   ],
   "conceptNodes": [
@@ -411,6 +437,14 @@
           "updatedAt": "2026-10-10T15:41:54.119Z"
         }
       ]
+    ],
+    [
+      "mod_climate-change_student_4133",
+      []
+    ],
+    [
+      "mod_clean_canvas_1791940012815",
+      []
     ]
   ],
   "conceptLinks": [
@@ -424,6 +458,14 @@
     ],
     [
       "mod_climate-change_student_434c494d4154",
+      []
+    ],
+    [
+      "mod_climate-change_student_4133",
+      []
+    ],
+    [
+      "mod_clean_canvas_1791940012815",
       []
     ]
   ],
@@ -485,6 +527,239 @@
           }
         ]
       }
+    ],
+    [
+      "mod_climate-change_student_4133",
+      {
+        "moduleId": "mod_climate-change_student_4133",
+        "conceptsIdentified": 2,
+        "assumptionsChallenged": 3,
+        "questionsAsked": 16,
+        "misinformationEvaluations": 2,
+        "criticalThinkingScore": 100,
+        "synthesisScore": 100,
+        "mbtiPersonalityTitle": "The Socratic Questioner (S-Q-P-I)",
+        "mbtiPersonalitySummary": "You use targeted inquiry as your primary tool for discovery. Unafraid to challenge assumptions or probe counter-arguments, you uncover underlying truths by asking relentless, clarifying questions.",
+        "badges": [
+          {
+            "id": "badge-concepts",
+            "title": "Master Conceptualizer",
+            "description": "Identified 2 concept nodes",
+            "icon": "🧠",
+            "unlocked": true
+          },
+          {
+            "id": "badge-assumptions",
+            "title": "Assumption Slayer",
+            "description": "Challenged 3 implicit biases",
+            "icon": "🛡️",
+            "unlocked": true
+          },
+          {
+            "id": "badge-questions",
+            "title": "Socratic Inquirer",
+            "description": "Asked 16 probing questions",
+            "icon": "❓",
+            "unlocked": true
+          },
+          {
+            "id": "badge-misinfo",
+            "title": "Truth Auditor",
+            "description": "Evaluated 2 counter-claims",
+            "icon": "🔍",
+            "unlocked": true
+          },
+          {
+            "id": "badge-critical",
+            "title": "High-Velocity Reasoner",
+            "description": "Critical Thinking Score: 100/100",
+            "icon": "⚡",
+            "unlocked": true
+          },
+          {
+            "id": "badge-synthesis",
+            "title": "Synthesis Master",
+            "description": "Synthesis Quality Score: 100/100",
+            "icon": "🏆",
+            "unlocked": true
+          }
+        ]
+      }
+    ],
+    [
+      "test_review_mod",
+      {
+        "moduleId": "test_review_mod",
+        "conceptsIdentified": 6,
+        "assumptionsChallenged": 5,
+        "questionsAsked": 10,
+        "misinformationEvaluations": 0,
+        "criticalThinkingScore": 100,
+        "synthesisScore": 85,
+        "mbtiPersonalityTitle": "The Systemic Architect (S-A-C-M)",
+        "mbtiPersonalitySummary": "You view complex problems as interconnected webs of cause and effect. You excel at synthesizing evidence into clear visual concept structures, identifying structural vulnerabilities in bad arguments, and formulating holistically sound conclusions.",
+        "badges": [
+          {
+            "id": "badge-concepts",
+            "title": "Master Conceptualizer",
+            "description": "Identified 6 concept nodes",
+            "icon": "🧠",
+            "unlocked": true
+          },
+          {
+            "id": "badge-assumptions",
+            "title": "Assumption Slayer",
+            "description": "Challenged 5 implicit biases",
+            "icon": "🛡️",
+            "unlocked": true
+          },
+          {
+            "id": "badge-questions",
+            "title": "Socratic Inquirer",
+            "description": "Asked 10 probing questions",
+            "icon": "❓",
+            "unlocked": true
+          },
+          {
+            "id": "badge-misinfo",
+            "title": "Truth Auditor",
+            "description": "Evaluated 0 counter-claims",
+            "icon": "🔍",
+            "unlocked": true
+          },
+          {
+            "id": "badge-critical",
+            "title": "High-Velocity Reasoner",
+            "description": "Critical Thinking Score: 100/100",
+            "icon": "⚡",
+            "unlocked": true
+          },
+          {
+            "id": "badge-synthesis",
+            "title": "Synthesis Master",
+            "description": "Synthesis Quality Score: 85/100",
+            "icon": "🏆",
+            "unlocked": true
+          }
+        ]
+      }
+    ],
+    [
+      "test_mbti",
+      {
+        "moduleId": "test_mbti",
+        "conceptsIdentified": 0,
+        "assumptionsChallenged": 0,
+        "questionsAsked": 0,
+        "misinformationEvaluations": 0,
+        "criticalThinkingScore": 50,
+        "synthesisScore": 55,
+        "mbtiPersonalityTitle": "The Empiricist Investigator (E-S-R-T)",
+        "mbtiPersonalitySummary": "You approach complex claims with rigorous empirical scrutiny. Rather than accepting rhetoric at face value, you systematically map conceptual links, interrogate underlying assumptions, and demand verified evidence before forming conclusions.",
+        "badges": [
+          {
+            "id": "badge-concepts",
+            "title": "Master Conceptualizer",
+            "description": "Identified 0 concept nodes",
+            "icon": "🧠",
+            "unlocked": false
+          },
+          {
+            "id": "badge-assumptions",
+            "title": "Assumption Slayer",
+            "description": "Challenged 0 implicit biases",
+            "icon": "🛡️",
+            "unlocked": false
+          },
+          {
+            "id": "badge-questions",
+            "title": "Socratic Inquirer",
+            "description": "Asked 0 probing questions",
+            "icon": "❓",
+            "unlocked": false
+          },
+          {
+            "id": "badge-misinfo",
+            "title": "Truth Auditor",
+            "description": "Evaluated 0 counter-claims",
+            "icon": "🔍",
+            "unlocked": false
+          },
+          {
+            "id": "badge-critical",
+            "title": "High-Velocity Reasoner",
+            "description": "Critical Thinking Score: 50/100",
+            "icon": "⚡",
+            "unlocked": false
+          },
+          {
+            "id": "badge-synthesis",
+            "title": "Synthesis Master",
+            "description": "Synthesis Quality Score: 55/100",
+            "icon": "🏆",
+            "unlocked": false
+          }
+        ]
+      }
+    ],
+    [
+      "saved_module_eval",
+      {
+        "moduleId": "saved_module_eval",
+        "conceptsIdentified": 8,
+        "assumptionsChallenged": 4,
+        "questionsAsked": 7,
+        "misinformationEvaluations": 3,
+        "criticalThinkingScore": 100,
+        "synthesisScore": 100,
+        "mbtiPersonalityTitle": "The Systemic Architect (S-A-C-M)",
+        "mbtiPersonalitySummary": "You view complex problems as interconnected webs of cause and effect. You excel at synthesizing evidence into clear visual concept structures, identifying structural vulnerabilities in bad arguments, and formulating holistically sound conclusions.",
+        "badges": [
+          {
+            "id": "badge-concepts",
+            "title": "Master Conceptualizer",
+            "description": "Identified 8 concept nodes",
+            "icon": "🧠",
+            "unlocked": true
+          },
+          {
+            "id": "badge-assumptions",
+            "title": "Assumption Slayer",
+            "description": "Challenged 4 implicit biases",
+            "icon": "🛡️",
+            "unlocked": true
+          },
+          {
+            "id": "badge-questions",
+            "title": "Socratic Inquirer",
+            "description": "Asked 7 probing questions",
+            "icon": "❓",
+            "unlocked": true
+          },
+          {
+            "id": "badge-misinfo",
+            "title": "Truth Auditor",
+            "description": "Evaluated 3 counter-claims",
+            "icon": "🔍",
+            "unlocked": true
+          },
+          {
+            "id": "badge-critical",
+            "title": "High-Velocity Reasoner",
+            "description": "Critical Thinking Score: 100/100",
+            "icon": "⚡",
+            "unlocked": true
+          },
+          {
+            "id": "badge-synthesis",
+            "title": "Synthesis Master",
+            "description": "Synthesis Quality Score: 100/100",
+            "icon": "🏆",
+            "unlocked": true
+          }
+        ]
+      }
     ]
-  ]
+  ],
+  "agentPreferences": []
 }
