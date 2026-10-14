@@ -64,6 +64,7 @@ export default function ConceptMapCanvas({
   const [newNodeText, setNewNodeText] = useState<string>('');
   const [isCreatingNode, setIsCreatingNode] = useState<boolean>(false);
   const [justCreatedNodeId, setJustCreatedNodeId] = useState<string | null>(null);
+  const [linkingIds, setLinkingIds] = useState<Set<string>>(new Set());
 
   // Panning & Drag State
   const [panOffset, setPanOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -317,32 +318,102 @@ export default function ConceptMapCanvas({
   };
 
   // Handle Node Click (Selection or Link Creation)
+  // Handle Node Click (Selection or Fast Optimistic Link Creation)
   const handleNodeClick = async (nodeId: string) => {
     if (activeTool === 'link') {
       if (!linkSourceNodeId) {
         setLinkSourceNodeId(nodeId);
       } else if (linkSourceNodeId !== nodeId) {
+        const sourceId = linkSourceNodeId;
+        const targetId = nodeId;
+
+        // Prevent redundant duplicate link between the same two nodes
+        const alreadyLinked = links.some(
+          (l) =>
+            (l.fromNodeId === sourceId && l.toNodeId === targetId) ||
+            (l.fromNodeId === targetId && l.toNodeId === sourceId)
+        );
+
+        if (alreadyLinked) {
+          setLinkSourceNodeId(null);
+          return;
+        }
+
+        // 1. Instant Audio & Instant Optimistic Line Rendering (0ms perceived latency!)
+        playLinkAudioSound();
+
+        const tempLinkId = `temp_link_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+        const optimisticLink: ConceptLink = {
+          id: tempLinkId,
+          fromNodeId: sourceId,
+          toNodeId: targetId,
+        };
+
+        // Add to linkingIds to show animated high-tech energy pulse indicator
+        setLinkingIds((prev) => new Set(prev).add(tempLinkId));
+
+        // Optimistically update links and increment node link counts immediately
+        const optimisticLinks = [...links, optimisticLink];
+        const optimisticNodes = nodes.map((n) => {
+          if (n.id === sourceId || n.id === targetId) {
+            return { ...n, linkCount: (n.linkCount || 0) + 1 };
+          }
+          return n;
+        });
+
+        setLinks(optimisticLinks);
+        setNodes(optimisticNodes);
+        setLinkSourceNodeId(null); // Instantly free student for subsequent interactions
+
+        // 2. Synchronize link persistence in the background
         try {
           const res = await fetch(`/api/modules/${moduleId}/concepts/links`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ fromNodeId: linkSourceNodeId, toNodeId: nodeId }),
+            body: JSON.stringify({ fromNodeId: sourceId, toNodeId: targetId }),
           });
           const data = await res.json();
 
           if (data.success && data.link) {
-            playLinkAudioSound();
-            const updatedLinks = [...links, data.link];
-            const updatedNodes = nodes.map((n) => {
-              if (n.id === linkSourceNodeId || n.id === nodeId) {
-                return { ...n, linkCount: (n.linkCount || 0) + 1 };
+            const confirmedLink: ConceptLink = data.link;
+            // Replace temporary link with confirmed server record
+            setLinks((curr) =>
+              curr.map((l) => (l.id === tempLinkId ? confirmedLink : l))
+            );
+            const finalLinks = optimisticLinks.map((l) =>
+              l.id === tempLinkId ? confirmedLink : l
+            );
+            saveCanvasState(optimisticNodes, finalLinks);
+          } else {
+            // Revert optimistic link if rejected
+            setLinks((curr) => curr.filter((l) => l.id !== tempLinkId));
+            setNodes((curr) =>
+              curr.map((n) => {
+                if (n.id === sourceId || n.id === targetId) {
+                  return { ...n, linkCount: Math.max(0, (n.linkCount || 1) - 1) };
+                }
+                return n;
+              })
+            );
+          }
+        } catch (err) {
+          console.error('Error linking nodes:', err);
+          // Revert optimistic link on network error
+          setLinks((curr) => curr.filter((l) => l.id !== tempLinkId));
+          setNodes((curr) =>
+            curr.map((n) => {
+              if (n.id === sourceId || n.id === targetId) {
+                return { ...n, linkCount: Math.max(0, (n.linkCount || 1) - 1) };
               }
               return n;
-            });
-            saveCanvasState(updatedNodes, updatedLinks);
-          }
+            })
+          );
         } finally {
-          setLinkSourceNodeId(null);
+          setLinkingIds((prev) => {
+            const next = new Set(prev);
+            next.delete(tempLinkId);
+            return next;
+          });
         }
       }
     } else {
@@ -509,6 +580,7 @@ export default function ConceptMapCanvas({
               if (!fromNode || !toNode) return null;
 
               const isHovered = hoveredLinkId === link.id;
+              const isLinking = linkingIds.has(link.id);
               const fromDiameter = getNodeDiameter(fromNode.text);
               const toDiameter = getNodeDiameter(toNode.text);
               const x1 = fromNode.positionX + fromDiameter / 2;
@@ -544,10 +616,24 @@ export default function ConceptMapCanvas({
                     x2={x2}
                     y2={y2}
                     stroke={isHovered ? '#A855F7' : '#37F3FF'}
-                    strokeWidth={isHovered ? 3.5 : 2.5}
-                    className={styles.svgLineGlow}
+                    strokeWidth={isHovered ? 3.5 : isLinking ? 3.4 : 2.5}
+                    className={`${styles.svgLineGlow} ${isLinking ? styles.svgLineLinking : ''}`}
                     pointerEvents="stroke"
                   />
+                  {/* Animated electric energy flow beam while syncing */}
+                  {isLinking && (
+                    <line
+                      x1={x1}
+                      y1={y1}
+                      x2={x2}
+                      y2={y2}
+                      stroke="#FFFFFF"
+                      strokeWidth="2.5"
+                      strokeDasharray="8 6"
+                      className={styles.svgLineEnergyFlow}
+                      pointerEvents="none"
+                    />
+                  )}
                 </g>
               );
             })}

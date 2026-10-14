@@ -215,6 +215,34 @@
   transition: stroke 0.2s ease, stroke-width 0.2s ease;
 }
 
+.svgLineLinking {
+  filter: drop-shadow(0 0 10px rgba(55, 243, 255, 0.95)) drop-shadow(0 0 16px rgba(168, 85, 247, 0.75));
+  animation: linkingPulse 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes linkingPulse {
+  0% {
+    stroke-width: 2.8px;
+    filter: drop-shadow(0 0 6px rgba(55, 243, 255, 0.7));
+  }
+  100% {
+    stroke-width: 3.8px;
+    filter: drop-shadow(0 0 14px rgba(55, 243, 255, 1)) drop-shadow(0 0 20px rgba(168, 85, 247, 0.9));
+  }
+}
+
+.svgLineEnergyFlow {
+  animation: energyDash 0.85s linear infinite;
+  filter: drop-shadow(0 0 6px #37F3FF);
+}
+
+@keyframes energyDash {
+  to {
+    stroke-dashoffset: -28;
+  }
+}
+
+
 /* Right-Side Vertical Tool Column matching screens_v2/conceptualise.png */
 .canvasToolbar {
   position: absolute;

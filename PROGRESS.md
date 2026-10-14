@@ -1365,4 +1365,34 @@
 - **Tests Passing**:
   - `npm test` (47/47 tests passing across 9 test suites).
   - `npm run build` (100% clean Next.js App Router build with 0 compilation errors across all 12 routes).
-- **Immediate Next Step**: Seek user approval for Fix 5 before proceeding to Fix 6 ("loading on node linkage, make this faster").
+- **Immediate Next Step**: Approved. Proceed to Fix 6 ("loading on node linkage, make this faster").
+
+---
+
+### [2026-10-14] - Fix 6: Ultra-Fast Optimistic Node Linkage & Dynamic Energy Flow Loading Indicator
+
+- **Role**: Full Stack Developer
+- **User Instructions**:
+  - *"loading on node linkage, make this faster"*
+  - *"ensure all loading indicators are visually coherent with the current design"*
+  - *"make sure to seek approval after each fix."*
+- **Code Built & Updated**:
+  - **Instant Optimistic Node Linkage (0ms Latency) ([`ConceptMapCanvas.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/ConceptMapCanvas/ConceptMapCanvas.tsx))**:
+    - Eliminated network roundtrip delay when connecting nodes in the mind map canvas.
+    - Upon clicking the second node in link mode:
+      - Instantly triggers audio feedback (`playLinkAudioSound()`) with 0ms perceived latency.
+      - Checks for redundant duplicate connections between the same pair of nodes.
+      - Immediately draws the connecting link line using a temporary optimistic link (`temp_link_*`), increments connected node link counts, and resets `linkSourceNodeId` so the user is immediately free to continue interacting or linking additional nodes.
+      - Persists the link to `/api/modules/${moduleId}/concepts/links` in the background, smoothly substituting the temporary ID with the confirmed server record once complete.
+      - Includes full error recovery: automatically reverts optimistic link state and decrements link counts if the server request fails.
+  - **Animated High-Tech Linking Loading Indicator ([`ConceptMapCanvas.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/ConceptMapCanvas/ConceptMapCanvas.tsx) & [`ConceptMapCanvas.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/ConceptMapCanvas/ConceptMapCanvas.module.css))**:
+    - Added `linkingIds: Set<string>` state tracking active background synchronization.
+    - While syncing, the link SVG line renders with:
+      - `.svgLineLinking`: High-contrast dual drop-shadow pulse (`#37F3FF` cyan and `#A855F7` purple) via `linkingPulse` keyframes.
+      - `.svgLineEnergyFlow`: An animated electric dashed particle beam running along the link vector via `energyDash` stroke-dashoffset animation.
+      - Once server confirmation resolves, the energy beam seamlessly transitions into the solid resting link line.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (47/47 tests passing across 9 test suites).
+  - `npm run build` (100% clean Next.js App Router build with 0 compilation errors across all 12 routes).
+- **Immediate Next Step**: Seek user approval for Fix 6 before proceeding to Fix 8 ("make sure text doesn't overflow nodes. if there is overflow, make text smaller, but still readable and accessible and the nodes larger, to an extent").
