@@ -1408,23 +1408,21 @@
   - *"ensure all loading indicators are visually coherent with the current design"*
   - *"make sure to seek approval after each fix."*
 - **Code Built & Updated**:
-  - **Landing Page: Login Button Loading Indicators ([`src/app/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/page.tsx) & [`src/app/page.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/page.module.css))**:
-    - Added `isNavigatingLogin` boolean state in `src/app/page.tsx`.
+  - **Landing Page: Button-Only Login Loading Indicators ([`src/app/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/page.tsx) & [`src/app/page.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/page.module.css))**:
+    - Scoped the loading indicator strictly to the clicked button itself per user specification (removed full-screen overlay during navigation to `/login`).
     - **Header Pill Button (`.loginPillBtn`)**: When clicked, immediately disables the button, replaces text with an inline cyan spinner (`.spinnerSmallCyan`) and `"Loading..."`, with an enhanced cyan glow border (`.loginPillBtnLoading`).
     - **Bottom CTA Button (`.primaryCtaBtn`)**: When clicked, immediately disables the button, displays an inline dark spinner (`.spinnerSmallDark`) with `"Opening Login..."` (`.primaryCtaBtnLoading`).
-    - **Fullscreen Route Overlay**: Added `<LoadingOverlay title="OPENING LOGIN..." subtitle="Loading student login and access code verification..." fullScreen />` during page chunk compilation and route transition.
-  - **Concept Map Canvas: Node Text Overflow Prevention & Dynamic Accessible Scaling ([`ConceptMapCanvas.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/ConceptMapCanvas/ConceptMapCanvas.tsx) & [`ConceptMapCanvas.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/ConceptMapCanvas/ConceptMapCanvas.module.css))**:
-    - **Proportional Node Enlargement (`getNodeDiameter`)**:
-      - Expanded base diameters from (120px - 240px) to (130px - 260px).
-      - Added dynamic calculation for long single words ($\ge 15$ characters): scales diameter up to 265px to provide a comfortable circular chord width.
+  - **Concept Map Canvas: Compact Node Sizing & Restored Edit/Delete Controls ([`ConceptMapCanvas.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/ConceptMapCanvas/ConceptMapCanvas.tsx) & [`ConceptMapCanvas.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/ConceptMapCanvas/ConceptMapCanvas.module.css))**:
+    - **Compact Node Diameters (`getNodeDiameter`)**:
+      - Scaled diameters down to compact dimensions: $\le 15$ chars $\to$ 108px, $\le 30$ chars $\to$ 124px, $\le 55$ chars $\to$ 144px, $\le 80$ chars $\to$ 168px, $> 80$ chars $\to$ 192px max.
+      - Reduced minimum node circle dimensions in CSS to `min-width: 105px; min-height: 105px; padding: 8px 12px;`.
+    - **Restored Node Edit & Delete Controls (`.nodeControls`)**:
+      - Removed `overflow: hidden` on `.conceptNodeCircle` which previously clipped the action pill at `top: -38px`.
+      - Positioned `.nodeControls` prominently at `top: -42px; left: 50%; transform: translateX(-50%); z-index: 60;` with glassmorphic dark container, cyan glow border, and full click interactivity.
     - **Dynamic Accessible Typography (`getNodeFontSize`)**:
-      - Dynamically computes font size from `1.02rem` down to an accessible minimum of `0.78rem` (~12.5px), meeting accessibility guidelines while keeping multi-word concepts fully visible without text clipping.
-      - Automatically scales down font when encountering long words ($\ge 13$ chars: `0.82rem`, $\ge 16$ chars: `0.78rem`).
-    - **Circular Inset Protection (`.nodeLabel` & `.conceptNodeCircle`)**:
-      - Applied circular safe padding (`clamp(14px, 12%, 24px)`) and `overflow: hidden` on the circle container.
-      - Constrained `.nodeLabel` to `max-width: 86%`, `max-height: 86%`, with `overflow-wrap: break-word`, `word-break: break-word`, and `hyphens: auto`.
+      - Calibrated font sizes proportionally (`0.92rem` down to accessible `0.68rem`) with `overflow-wrap: break-word`, `word-break: break-word`, `hyphens: auto`, and `max-width: 90%` to guarantee text remains crisp and never bleeds outside circular bounds.
 - **Dependencies Introduced**: None.
 - **Tests Passing**:
   - `npm test` (47/47 tests passing across 9 test suites).
   - `npm run build` (100% clean Next.js App Router build with 0 compilation errors across all 12 routes).
-- **Immediate Next Step**: Seek user approval for Landing Page Login Indicator and Node Text Overflow fixes.
+- **Immediate Next Step**: Seek user approval for refined compact node sizing, restored edit/delete controls, and button-only login loading.

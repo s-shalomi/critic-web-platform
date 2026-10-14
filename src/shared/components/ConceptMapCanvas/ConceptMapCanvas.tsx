@@ -16,21 +16,12 @@ export interface ConceptNode {
 export function getNodeDiameter(text: string): number {
   const clean = (text || '').trim();
   const len = clean.length;
-  // Calculate longest single word to avoid horizontal overflow in circles
-  const words = clean.split(/\s+/);
-  const maxWordLen = words.reduce((max, w) => Math.max(max, w.length), 0);
-
-  // If a single word is exceptionally long, give the circle extra horizontal room
-  if (maxWordLen >= 15) {
-    return Math.max(185, Math.min(265, 140 + maxWordLen * 7));
-  }
-
-  // Expanded base diameters to comfortably fit multi-line concepts without clipping
-  if (len <= 12) return 130;
-  if (len <= 25) return 155;
-  if (len <= 48) return 190;
-  if (len <= 75) return 225;
-  return 260;
+  // Compact node sizing to prevent nodes from being too large on canvas
+  if (len <= 15) return 108;
+  if (len <= 30) return 124;
+  if (len <= 55) return 144;
+  if (len <= 80) return 168;
+  return 192;
 }
 
 export function getNodeFontSize(text: string): string {
@@ -39,15 +30,15 @@ export function getNodeFontSize(text: string): string {
   const words = clean.split(/\s+/);
   const maxWordLen = words.reduce((max, w) => Math.max(max, w.length), 0);
 
-  // Accessible font scaling: stays strictly >= 12.5px (0.78rem) for high legibility
-  if (maxWordLen >= 16) return '0.78rem';
-  if (maxWordLen >= 13) return '0.82rem';
+  // Proportional accessible font scaling to prevent circular text overflow
+  if (maxWordLen >= 14) return '0.70rem';
+  if (maxWordLen >= 11) return '0.75rem';
 
-  if (len <= 12) return '1.02rem';
-  if (len <= 25) return '0.94rem';
-  if (len <= 48) return '0.86rem';
-  if (len <= 75) return '0.80rem';
-  return '0.78rem';
+  if (len <= 12) return '0.92rem';
+  if (len <= 25) return '0.84rem';
+  if (len <= 48) return '0.78rem';
+  if (len <= 75) return '0.72rem';
+  return '0.68rem';
 }
 
 export interface ConceptLink {

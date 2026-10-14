@@ -65,8 +65,8 @@
 
 .conceptNodeCircle {
   position: absolute;
-  min-width: 130px;
-  min-height: 130px;
+  min-width: 105px;
+  min-height: 105px;
   border-radius: 50%;
   background: radial-gradient(circle at 50% 35%, #16203D 0%, #0C1328 100%);
   border: 2px solid #7C4DFF;
@@ -77,13 +77,12 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: clamp(14px, 12%, 24px);
+  padding: 8px 12px;
   box-sizing: border-box;
   cursor: grab;
   user-select: none;
   z-index: 20;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
-  overflow: hidden;
 }
 
 .conceptNodeCircle:hover {
@@ -120,14 +119,14 @@
   font-family: var(--font-display);
   font-weight: 700;
   color: #EAF6FF;
-  line-height: 1.25;
+  line-height: 1.2;
   overflow-wrap: break-word;
   word-break: break-word;
   hyphens: auto;
   pointer-events: none;
   width: 100%;
-  max-width: 86%;
-  max-height: 86%;
+  max-width: 90%;
+  max-height: 90%;
   text-align: center;
   display: flex;
   align-items: center;
@@ -136,15 +135,20 @@
 
 .nodeControls {
   position: absolute;
-  top: -38px;
+  top: -42px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
-  gap: 6px;
-  background: rgba(15, 23, 46, 0.95);
-  border: 1px solid rgba(55, 243, 255, 0.5);
-  padding: 4px 10px;
+  align-items: center;
+  gap: 8px;
+  background: rgba(15, 23, 46, 0.96);
+  border: 1.5px solid rgba(55, 243, 255, 0.6);
+  padding: 5px 12px;
   border-radius: 9999px;
-  z-index: 25;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+  z-index: 60;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.65), 0 0 12px rgba(55, 243, 255, 0.35);
+  white-space: nowrap;
+  pointer-events: auto;
 }
 
 .nodeActionBtn, .nodeDeleteBtn {

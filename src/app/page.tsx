@@ -544,14 +544,7 @@ export default function LandingPage() {
         </div>
       )}
 
-      {/* Fullscreen Loading Overlay during page compilation & route transition */}
-      {isNavigatingLogin && (
-        <LoadingOverlay
-          title="OPENING LOGIN..."
-          subtitle="Loading student login and access code verification..."
-          fullScreen
-        />
-      )}
+      {/* Fullscreen Loading Overlay during credentials verification */}
       {isRedirecting && (
         <LoadingOverlay
           title={redirectTarget === 'dashboard' ? 'ACCESS CODE VERIFIED' : 'CREDENTIALS VERIFIED'}
