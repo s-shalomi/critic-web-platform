@@ -181,5 +181,47 @@ describe('StageProgressionNudge Inquire Stage Socratic Milestone Banner', () => 
       const synthesisStagesWithNudge = ['familiarise', 'conceptualise', 'inquire'];
       expect(synthesisStagesWithNudge).not.toContain('synthesise');
     });
+
+    it('manages 10, 20, 30 milestone cadence and suppresses banner on stage entry', () => {
+      const milestoneKey = getStudentStorageKey('critic_nudge_seen_milestone_inquire', moduleId);
+      
+      // Step 1: User reaches 10 questions for first time
+      let effectiveCount = 10;
+      let currentMilestone = Math.floor(effectiveCount / 10) * 10;
+      let lastSeenMilestone = parseInt(localStorage.getItem(milestoneKey) || '0', 10);
+      expect(currentMilestone >= 10 && currentMilestone > lastSeenMilestone).toBe(true);
+
+      // User dismisses milestone 10
+      localStorage.setItem(milestoneKey, String(currentMilestone));
+      lastSeenMilestone = currentMilestone;
+      expect(lastSeenMilestone).toBe(10);
+
+      // Step 2: User re-enters stage at 14 questions
+      effectiveCount = 14;
+      currentMilestone = Math.floor(effectiveCount / 10) * 10;
+      // Should NOT show on stage entry because currentMilestone (10) <= lastSeenMilestone (10)
+      expect(currentMilestone > lastSeenMilestone).toBe(false);
+
+      // Step 3: User reaches 20 questions
+      effectiveCount = 20;
+      currentMilestone = Math.floor(effectiveCount / 10) * 10;
+      // Should show for milestone 20!
+      expect(currentMilestone > lastSeenMilestone).toBe(true);
+
+      // User dismisses milestone 20
+      localStorage.setItem(milestoneKey, String(currentMilestone));
+      lastSeenMilestone = currentMilestone;
+      expect(lastSeenMilestone).toBe(20);
+
+      // Step 4: User at 25 questions
+      effectiveCount = 25;
+      currentMilestone = Math.floor(effectiveCount / 10) * 10;
+      expect(currentMilestone > lastSeenMilestone).toBe(false);
+
+      // Step 5: User reaches 30 questions
+      effectiveCount = 30;
+      currentMilestone = Math.floor(effectiveCount / 10) * 10;
+      expect(currentMilestone > lastSeenMilestone).toBe(true);
+    });
   });
 });

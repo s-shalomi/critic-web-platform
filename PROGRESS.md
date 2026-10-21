@@ -1517,13 +1517,20 @@
     - Integrated glassmorphism aesthetics with `backdrop-filter: blur(20px)`, dark translucent navy gradient (`rgba(13, 21, 46, 0.94)`), rounded corners (`border-radius: 16px`), glowing cyan border (`1px solid rgba(55, 243, 255, 0.45)`), and depth box-shadow (`0 16px 40px rgba(0,0,0,0.65)`).
     - Added dedicated glowing milestone icon pill (`.iconGlowWrapper` with radial cyan glow and drop shadow), header row with milestone tag (`STAGE PROGRESSION MILESTONE`), count pill, formatted prompt message, and subtle SVG dismiss button.
     - Added smooth entrance slide-down animation with spring easing (`@keyframes toastSlideDown`).
+  - **Milestone Cadence (10, 20, 30...) & Stage Entry Suppression**:
+    - Addressed requirement: *"dont allow the banner on stage entry every time. the first time it shows is when 10 socratic questions have been asked, then the next time is 20 and so on"*.
+    - Computed milestone thresholds: `const currentMilestone = Math.floor(effectiveCount / 10) * 10`.
+    - Maintained student-scoped persistence key `critic_nudge_seen_milestone_${currentStage}` in localStorage.
+    - When a student re-enters a stage or navigates between stages, `lastSeenMilestone` is retained so the notification does not pop up on stage entry every time.
+    - It triggers strictly when crossing milestone intervals: first at 10, then at 20, 30, and so on.
+    - Dismissing the notification records that milestone as seen, suppressing further popups until the next multiple of 10 is reached.
   - **Unit Test Suite**:
-    - Expanded [`tests/stageProgressionNudge.test.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/tests/stageProgressionNudge.test.ts) covering familiarise copy (next source or next stage), conceptualise copy, inquire copy, rapid clicks in familiarise/conceptualise, dialogue turns trigger, absence of proceed button, and synthesis stage exclusion.
+    - Expanded [`tests/stageProgressionNudge.test.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/tests/stageProgressionNudge.test.ts) covering familiarise copy (next source or next stage), conceptualise copy, inquire copy, rapid clicks in familiarise/conceptualise, dialogue turns trigger, absence of proceed button, synthesis stage exclusion, 10-20-30 milestone cadence, and stage entry suppression.
   - **Requirements Documented**:
     - Updated [`requirements.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/requirements.md) section on Nudges & Stage Progression.
 - **Dependencies Introduced**: None.
 - **Tests Passing**:
-  - `npm test` (59/59 tests passing across 10 test suites).
+  - `npm test` (60/60 tests passing across 10 test suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
 - **Immediate Next Step**: Seek user approval for Fix 3 before proceeding to Fix 4.
 

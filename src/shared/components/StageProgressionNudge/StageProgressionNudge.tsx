@@ -70,60 +70,87 @@ export const StageProgressionNudge: React.FC<StageProgressionNudgeProps> = ({
   onDismiss,
   className = '',
 }) => {
-  const [dismissed, setDismissed] = useState<boolean>(false);
   const [mounted, setMounted] = useState<boolean>(false);
   const [internalCount, setInternalCount] = useState<number>(0);
+  const [dismissedMilestone, setDismissedMilestone] = useState<number>(0);
+  const [lastSeenMilestone, setLastSeenMilestone] = useState<number>(0);
 
   const socraticKey = getStudentStorageKey(`critic_socratic_count_${currentStage}`, moduleId);
+  const milestoneSeenKey = getStudentStorageKey(`critic_nudge_seen_milestone_${currentStage}`, moduleId);
 
   useEffect(() => {
     setMounted(true);
 
-    // Clear any stale legacy dismissal keys from prior sessions to ensure fresh visibility
-    try {
-      localStorage.removeItem(`critic_nudge_dismissed_${currentStage}`);
-      localStorage.removeItem(getStudentStorageKey(`critic_nudge_dismissed_${currentStage}`, moduleId));
-      sessionStorage.removeItem(getStudentStorageKey(`critic_nudge_dismissed_${currentStage}`, moduleId));
-    } catch {
-      // Ignore storage cleanup errors
-    }
-
-    const readStoredCount = () => {
+    const readStoredCountAndMilestone = () => {
       try {
         const val1 = parseInt(localStorage.getItem(socraticKey) || '0', 10);
         const val2 = parseInt(localStorage.getItem(`critic_socratic_count_${currentStage}`) || '0', 10);
         const val3 = parseInt(localStorage.getItem(getStudentStorageKey('critic_hints', moduleId)) || '0', 10);
         const val4 = parseInt(localStorage.getItem('critic_hints') || '0', 10);
         setInternalCount(Math.max(val1, val2, val3, val4));
+
+        const storedMilestone = parseInt(localStorage.getItem(milestoneSeenKey) || '0', 10);
+        setLastSeenMilestone(storedMilestone);
       } catch {
         // Ignore storage error
       }
     };
 
-    readStoredCount();
-    window.addEventListener('critic_socratic_sync', readStoredCount);
-    window.addEventListener('storage', readStoredCount);
-    window.addEventListener('focus', readStoredCount);
-    const pollInterval = setInterval(readStoredCount, 800);
+    // On stage entry: if student already has questions on mount (e.g. re-entering stage with existing progress),
+    // record their current milestone so the notification does NOT pop up on stage entry every time
+    try {
+      const storedMilestone = localStorage.getItem(milestoneSeenKey);
+      if (storedMilestone !== null) {
+        setLastSeenMilestone(parseInt(storedMilestone, 10));
+      } else {
+        const val1 = parseInt(localStorage.getItem(socraticKey) || '0', 10);
+        const val2 = parseInt(localStorage.getItem(`critic_socratic_count_${currentStage}`) || '0', 10);
+        const existingCount = Math.max(val1, val2);
+        if (existingCount >= threshold) {
+          const entryMilestone = Math.floor(existingCount / 10) * 10;
+          localStorage.setItem(milestoneSeenKey, String(entryMilestone));
+          setLastSeenMilestone(entryMilestone);
+        }
+      }
+    } catch {}
+
+    readStoredCountAndMilestone();
+    window.addEventListener('critic_socratic_sync', readStoredCountAndMilestone);
+    window.addEventListener('storage', readStoredCountAndMilestone);
+    window.addEventListener('focus', readStoredCountAndMilestone);
+    const pollInterval = setInterval(readStoredCountAndMilestone, 800);
 
     return () => {
-      window.removeEventListener('critic_socratic_sync', readStoredCount);
-      window.removeEventListener('storage', readStoredCount);
-      window.removeEventListener('focus', readStoredCount);
+      window.removeEventListener('critic_socratic_sync', readStoredCountAndMilestone);
+      window.removeEventListener('storage', readStoredCountAndMilestone);
+      window.removeEventListener('focus', readStoredCountAndMilestone);
       clearInterval(pollInterval);
     };
-  }, [socraticKey, currentStage, moduleId]);
+  }, [socraticKey, milestoneSeenKey, currentStage, moduleId, threshold]);
 
   const effectiveCount = Math.max(propQuestionCount ?? 0, internalCount);
+  const currentMilestone = Math.floor(effectiveCount / 10) * 10;
 
-  if (!mounted || effectiveCount < threshold || dismissed) {
+  // The banner appears only when a multiple of 10 is reached (10, 20, 30...),
+  // and does NOT show on stage entry if that milestone was already seen/dismissed.
+  const shouldShow =
+    mounted &&
+    currentMilestone >= threshold &&
+    currentMilestone > lastSeenMilestone &&
+    currentMilestone > dismissedMilestone;
+
+  if (!shouldShow) {
     return null;
   }
 
   const stageConfig = STAGE_CONFIGS[currentStage] || STAGE_CONFIGS.inquire;
 
   const handleDismiss = () => {
-    setDismissed(true);
+    setDismissedMilestone(currentMilestone);
+    setLastSeenMilestone(currentMilestone);
+    try {
+      localStorage.setItem(milestoneSeenKey, String(currentMilestone));
+    } catch {}
     if (onDismiss) {
       onDismiss();
     }
@@ -145,10 +172,10 @@ export const StageProgressionNudge: React.FC<StageProgressionNudgeProps> = ({
       <div className={styles.contentBody}>
         <div className={styles.headerRow}>
           <span className={styles.milestoneTag}>Stage Progression Milestone</span>
-          <span className={styles.countPill}>{effectiveCount} Socratic Questions</span>
+          <span className={styles.countPill}>{currentMilestone} Socratic Questions</span>
         </div>
         <p className={styles.notificationMessage}>
-          {stageConfig.renderPrompt(effectiveCount)}
+          {stageConfig.renderPrompt(currentMilestone)}
         </p>
       </div>
 
