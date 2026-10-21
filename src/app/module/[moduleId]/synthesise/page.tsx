@@ -24,6 +24,7 @@ import { TooltipTutorial } from '@/shared/components/TooltipTutorial/TooltipTuto
 import { StageOverviewModal } from '@/shared/components/StageOverviewModal/StageOverviewModal';
 import { STAGE_TUTORIAL_STEPS } from '@/shared/config/tutorials';
 import { StageNavigationDock } from '@/shared/components/StageNavigationDock/StageNavigationDock';
+import { StageProgressionNudge } from '@/shared/components/StageProgressionNudge/StageProgressionNudge';
 
 export default function SynthesiseStagePage() {
   const router = useRouter();
@@ -41,6 +42,7 @@ export default function SynthesiseStagePage() {
   // Evidence notes count for non-blocking AI nudge
   const [notesCount, setNotesCount] = useState<number>(0);
   const [showNudge, setShowNudge] = useState<boolean>(true);
+  const [socraticCount, setSocraticCount] = useState<number>(0);
 
   const handleCloseHelpModal = () => {
     setShowHelpModal(false);
@@ -57,6 +59,10 @@ export default function SynthesiseStagePage() {
   useEffect(() => {
     const synthKey = getStudentStorageKey('critic_synthesis', moduleId);
     const notesKey = getStudentStorageKey('critic_notes', moduleId);
+    const socraticKey = getStudentStorageKey('critic_socratic_count_synthesise', moduleId);
+    const initialSocratic = parseInt(localStorage.getItem(socraticKey) || '0', 10);
+    setSocraticCount(initialSocratic);
+
     setAgentPrefs(getStoredAgentPreferences());
 
     // Show mandatory AI disclosure automatically once when the student first enters the module
@@ -148,6 +154,13 @@ export default function SynthesiseStagePage() {
         }),
       });
 
+      const socraticKey = getStudentStorageKey('critic_socratic_count_synthesise', moduleId);
+      const currentSocratic = parseInt(localStorage.getItem(socraticKey) || '0', 10);
+      const nextSocratic = currentSocratic + 1;
+      localStorage.setItem(socraticKey, String(nextSocratic));
+      setSocraticCount(nextSocratic);
+      window.dispatchEvent(new Event('critic_socratic_sync'));
+
       const data = await res.json();
       if (data.success && data.feedback) {
         setAiFeedback(data.feedback);
@@ -169,6 +182,11 @@ export default function SynthesiseStagePage() {
 
   return (
     <div className={styles.container}>
+      <StageProgressionNudge
+        currentStage="synthesise"
+        moduleId={moduleId}
+        questionCount={socraticCount}
+      />
       {/* Main Split Workspace */}
       <div className={styles.workspace}>
         {/* Left Conclude Panel matching screens_v2/synthesis.png */}

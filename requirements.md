@@ -59,6 +59,7 @@ Stage specific behaviour:
   - Devil's Advocate mode can be triggered randomly
 - Synthesise stage: compare the student's draft synthesis against notes, nodes and chat history from earlier stages; identify missing links or unaddressed counterarguments and phrase these as questions rather than corrections
 - Nudges: if a student attempts to enter Inquire/Evaluate or Synthesise without having interacted with any source in Familiarise, show a non-blocking suggestion (e.g. a dismissible banner)
+- Stage Progression Socratic Nudge Banner: after 10 Socratic questions have been asked in any stage (Stage 01 Annotate, Stage 02 Mind Map, Stage 03 Challenge, or Stage 04 Conclude), display a prominent, non-blocking milestone banner nudging the user to move forward to the next stage, while explicitly reassuring them that they can return to this stage later to refine their work. Includes a direct "Move to [Next Stage] →" CTA and dismiss button (✕).
 
 Devil's Advocate Mode:
 

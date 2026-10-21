@@ -1486,6 +1486,43 @@
 - **Tests Passing**:
   - `npm test` (47/47 tests passing across 9 test suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
-- **Immediate Next Step**: Seek user approval for Fix 2 revision before proceeding to Fix 3.
+- **Immediate Next Step**: Approved by user. Proceeded to Fix 3.
+
+---
+
+### [2026-10-21] - Fix 3: Socratic Question Nudge Banner in Each Stage (10 Questions Reached)
+
+- **Role**: Full Stack Developer
+- **User Instructions**:
+  - *"show a banning nudging user to move to next stage after 10 socratic questions have been asked, in each stage. in the banner tell them they can return to this stage later"*
+  - *"make sure to seek approval after each fix."*
+- **Code Built & Updated**:
+  - **Shared Component `StageProgressionNudge`**:
+    - Created [`src/shared/components/StageProgressionNudge/StageProgressionNudge.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/StageProgressionNudge/StageProgressionNudge.tsx) and CSS module [`StageProgressionNudge.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/StageProgressionNudge/StageProgressionNudge.module.css).
+    - Features a cyber-academic glassmorphism banner sliding down from the top (`@keyframes slideDown`) with neon cyan accents, a `💡 10 Socratic Questions Reached` badge, and direct call-to-action button: `Move to [Next Stage Name] →`.
+    - Explicit message reassuring the student: *"You've explored 10 Socratic questions in this stage! Consider moving forward to [Next Stage Name]. (You can always return to this stage later to refine your work.)"*.
+    - Includes a dismiss button (`✕`) persisting dismissal in `sessionStorage` with key `critic_nudge_dismissed_${currentStage}_${moduleId}` to avoid repeated interruptions while allowing free navigation.
+    - Uses `role="status"` and `aria-live="polite"` for complete screen reader accessibility.
+  - **Stage Transition Routing Architecture**:
+    - **Stage 01 (`familiarise`)** -> Next: `Stage 02: Mind Map` (`/module/${moduleId}/conceptualise`)
+    - **Stage 02 (`conceptualise`)** -> Next: `Stage 03: Challenge` (`/module/${moduleId}/inquire`)
+    - **Stage 03 (`inquire`)** -> Next: `Stage 04: Conclude` (`/module/${moduleId}/synthesise`)
+    - **Stage 04 (`synthesise`)** -> Next: `Module Review & Debrief` (`/module/${moduleId}/review`)
+  - **Stage-Specific Socratic Question Tracking**:
+    - **Stage 01 (`familiarise/page.tsx`)**: Increments and persists `critic_socratic_count_familiarise_${moduleId}` whenever the student requests a Socratic hint from the robot companion avatar (`handleAgentClick`).
+    - **Stage 02 (`conceptualise/page.tsx`)**: Increments and persists `critic_socratic_count_conceptualise_${moduleId}` on Socratic concept-mapping hints (`handleAgentClick`).
+    - **Stage 03 (`inquire/page.tsx`)**: Computes agent Socratic inquiry questions in live chat history (`messages.filter(m => m.sender === 'agent').length`), synchronizing with `critic_socratic_count_inquire_${moduleId}`.
+    - **Stage 04 (`synthesise/page.tsx`)**: Increments and persists `critic_socratic_count_synthesise_${moduleId}` whenever the student requests a Socratic audit of their conclusion (`handleCrossCheckSynthesis`).
+    - Dispatches custom `critic_socratic_sync` DOM event for reactive multi-tab / cross-component synchronization.
+  - **Unit Test Suite**:
+    - Created [`tests/stageProgressionNudge.test.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/tests/stageProgressionNudge.test.ts) covering threshold triggers, all 4 stage routing destinations, return-later guarantee copy verification, dismissal state persistence, and chat inquiry message counting.
+  - **Requirements Documented**:
+    - Updated [`requirements.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/requirements.md) section on Nudges & Stage Progression.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (60/60 tests passing across 10 test suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+- **Immediate Next Step**: Seek user approval for Fix 3 before proceeding to Fix 4.
+
 
 

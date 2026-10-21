@@ -24,6 +24,7 @@ import { TooltipTutorial } from '@/shared/components/TooltipTutorial/TooltipTuto
 import { StageOverviewModal } from '@/shared/components/StageOverviewModal/StageOverviewModal';
 import { STAGE_TUTORIAL_STEPS } from '@/shared/config/tutorials';
 import { StageNavigationDock } from '@/shared/components/StageNavigationDock/StageNavigationDock';
+import { StageProgressionNudge } from '@/shared/components/StageProgressionNudge/StageProgressionNudge';
 
 interface ChatMessage {
   id: string;
@@ -140,11 +141,18 @@ export default function InquireEvaluateStagePage() {
     return () => window.removeEventListener('focus', handleFocus);
   }, [moduleId]);
 
-  // Persist chat history
+  // Persist chat history and sync Socratic question count
   useEffect(() => {
     if (messages.length > 0) {
       const chatKey = getStudentStorageKey('critic_chat', moduleId);
       localStorage.setItem(chatKey, JSON.stringify(messages));
+
+      const agentCount = messages.filter((m) => m.sender === 'agent').length;
+      const socraticKey = getStudentStorageKey('critic_socratic_count_inquire', moduleId);
+      const stored = parseInt(localStorage.getItem(socraticKey) || '0', 10);
+      const updated = Math.max(agentCount, stored);
+      localStorage.setItem(socraticKey, String(updated));
+      window.dispatchEvent(new Event('critic_socratic_sync'));
     }
   }, [messages, moduleId]);
 
@@ -278,8 +286,25 @@ export default function InquireEvaluateStagePage() {
     await submitMessage();
   };
 
+  const agentCount = messages.filter((m) => m.sender === 'agent').length;
+  const storedSocratic =
+    typeof window !== 'undefined'
+      ? parseInt(
+          localStorage.getItem(
+            getStudentStorageKey('critic_socratic_count_inquire', moduleId)
+          ) || '0',
+          10
+        )
+      : 0;
+  const socraticCount = Math.max(agentCount, storedSocratic);
+
   return (
     <div className={styles.container}>
+      <StageProgressionNudge
+        currentStage="inquire"
+        moduleId={moduleId}
+        questionCount={socraticCount}
+      />
       {/* Main Workspace Split */}
       <div className={styles.workspace}>
         {/* Left Interactive Socratic Inquiry Chat Panel */}

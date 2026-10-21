@@ -23,6 +23,7 @@ import { TooltipTutorial } from '@/shared/components/TooltipTutorial/TooltipTuto
 import { StageOverviewModal } from '@/shared/components/StageOverviewModal/StageOverviewModal';
 import { STAGE_TUTORIAL_STEPS } from '@/shared/config/tutorials';
 import { StageNavigationDock } from '@/shared/components/StageNavigationDock/StageNavigationDock';
+import { StageProgressionNudge } from '@/shared/components/StageProgressionNudge/StageProgressionNudge';
 
 interface Source {
   id: string;
@@ -101,6 +102,7 @@ export default function FamiliariseStagePage() {
   const [editText, setEditText] = useState<string>('');
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [convertingNoteId, setConvertingNoteId] = useState<string | null>(null);
+  const [socraticCount, setSocraticCount] = useState<number>(0);
 
   const handleCloseIntroModal = () => {
     setShowIntroModal(false);
@@ -118,6 +120,9 @@ export default function FamiliariseStagePage() {
     if (sources.length === 0) setLoading(true);
     setAgentPrefs(getStoredAgentPreferences());
     const notesKey = getStudentStorageKey('critic_notes', moduleId);
+    const socraticKey = getStudentStorageKey('critic_socratic_count_familiarise', moduleId);
+    const initialSocratic = parseInt(localStorage.getItem(socraticKey) || '0', 10);
+    setSocraticCount(initialSocratic);
 
     // Show mandatory AI disclosure automatically once when the student first enters the module
     if (!hasSeenModuleDisclosure(moduleId)) {
@@ -363,6 +368,13 @@ export default function FamiliariseStagePage() {
       const nextHintCount = current + 1;
       localStorage.setItem(hintKey, String(nextHintCount));
 
+      const socraticKey = getStudentStorageKey('critic_socratic_count_familiarise', moduleId);
+      const currentSocratic = parseInt(localStorage.getItem(socraticKey) || '0', 10);
+      const nextSocratic = currentSocratic + 1;
+      localStorage.setItem(socraticKey, String(nextSocratic));
+      setSocraticCount(nextSocratic);
+      window.dispatchEvent(new Event('critic_socratic_sync'));
+
       const res = await fetch(`/api/modules/${moduleId}/agent/hint`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -546,6 +558,11 @@ export default function FamiliariseStagePage() {
 
   return (
     <div className={styles.container}>
+      <StageProgressionNudge
+        currentStage="familiarise"
+        moduleId={moduleId}
+        questionCount={socraticCount}
+      />
       {/* Main Split Workspace matching screens_v2/familiarise.png */}
       <div className={styles.workspace}>
         {/* Left Sidebar */}

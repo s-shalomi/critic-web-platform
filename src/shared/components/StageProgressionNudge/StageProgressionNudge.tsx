@@ -1,0 +1,162 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import styles from './StageProgressionNudge.module.css';
+import { getStudentStorageKey } from '@/shared/utils/storage';
+
+export type StageName = 'familiarise' | 'conceptualise' | 'inquire' | 'synthesise';
+
+interface StageConfig {
+  nextStageName: string;
+  nextPath: string;
+}
+
+const STAGE_CONFIGS: Record<StageName, (moduleId: string) => StageConfig> = {
+  familiarise: (moduleId) => ({
+    nextStageName: 'Stage 02: Mind Map',
+    nextPath: `/module/${moduleId}/conceptualise`,
+  }),
+  conceptualise: (moduleId) => ({
+    nextStageName: 'Stage 03: Challenge',
+    nextPath: `/module/${moduleId}/inquire`,
+  }),
+  inquire: (moduleId) => ({
+    nextStageName: 'Stage 04: Conclude',
+    nextPath: `/module/${moduleId}/synthesise`,
+  }),
+  synthesise: (moduleId) => ({
+    nextStageName: 'Module Review & Debrief',
+    nextPath: `/module/${moduleId}/review`,
+  }),
+};
+
+export interface StageProgressionNudgeProps {
+  currentStage: StageName;
+  moduleId: string;
+  questionCount?: number;
+  threshold?: number;
+  onDismiss?: () => void;
+  className?: string;
+}
+
+export const StageProgressionNudge: React.FC<StageProgressionNudgeProps> = ({
+  currentStage,
+  moduleId,
+  questionCount: propQuestionCount,
+  threshold = 10,
+  onDismiss,
+  className = '',
+}) => {
+  const router = useRouter();
+  const [dismissed, setDismissed] = useState<boolean>(false);
+  const [mounted, setMounted] = useState<boolean>(false);
+  const [internalCount, setInternalCount] = useState<number>(0);
+
+  const dismissKey = getStudentStorageKey(`critic_nudge_dismissed_${currentStage}`, moduleId);
+  const socraticKey = getStudentStorageKey(`critic_socratic_count_${currentStage}`, moduleId);
+
+  useEffect(() => {
+    setMounted(true);
+    try {
+      const storedDismiss = sessionStorage.getItem(dismissKey) || localStorage.getItem(dismissKey);
+      if (storedDismiss === 'true') {
+        setDismissed(true);
+      }
+    } catch {
+      // Ignore storage access error
+    }
+
+    const readStoredCount = () => {
+      try {
+        const val = parseInt(localStorage.getItem(socraticKey) || '0', 10);
+        setInternalCount(val);
+      } catch {
+        // Ignore storage error
+      }
+    };
+
+    readStoredCount();
+    window.addEventListener('critic_socratic_sync', readStoredCount);
+    window.addEventListener('storage', readStoredCount);
+
+    return () => {
+      window.removeEventListener('critic_socratic_sync', readStoredCount);
+      window.removeEventListener('storage', readStoredCount);
+    };
+  }, [dismissKey, socraticKey]);
+
+  const effectiveCount = propQuestionCount !== undefined ? propQuestionCount : internalCount;
+
+  if (!mounted || effectiveCount < threshold || dismissed) {
+    return null;
+  }
+
+  const stageConfig = STAGE_CONFIGS[currentStage]?.(moduleId) || {
+    nextStageName: 'Next Stage',
+    nextPath: `/module/${moduleId}/review`,
+  };
+
+  const handleDismiss = () => {
+    setDismissed(true);
+    try {
+      sessionStorage.setItem(dismissKey, 'true');
+    } catch {
+      // Ignore storage error
+    }
+    if (onDismiss) {
+      onDismiss();
+    }
+  };
+
+  const handleProceed = () => {
+    router.push(stageConfig.nextPath);
+  };
+
+  return (
+    <aside
+      className={`${styles.nudgeBanner} ${className}`}
+      role="status"
+      aria-live="polite"
+      data-testid="stage-progression-nudge"
+    >
+      <div className={styles.leftGroup}>
+        <div className={styles.milestoneBadge}>
+          <span className={styles.milestoneIcon}>💡</span>
+          <span>{effectiveCount} Socratic Questions Reached</span>
+        </div>
+        <p className={styles.bannerText}>
+          You&apos;ve explored <strong>{effectiveCount} Socratic questions</strong> in this stage!
+          Consider moving forward to{' '}
+          <span className={styles.highlightStage}>{stageConfig.nextStageName}</span>.
+          <span className={styles.returnLaterNote}>
+            (You can always return to this stage later to refine your work.)
+          </span>
+        </p>
+      </div>
+
+      <div className={styles.actionsGroup}>
+        <button
+          type="button"
+          onClick={handleProceed}
+          className={styles.proceedBtn}
+          title={`Proceed to ${stageConfig.nextStageName}`}
+        >
+          <span>Move to {stageConfig.nextStageName}</span>
+          <span aria-hidden="true">→</span>
+        </button>
+        <button
+          type="button"
+          onClick={handleDismiss}
+          className={styles.dismissBtn}
+          title="Dismiss notification (stay in this stage)"
+          aria-label="Dismiss banner"
+        >
+          ✕
+        </button>
+      </div>
+    </aside>
+  );
+};
+
+export default StageProgressionNudge;

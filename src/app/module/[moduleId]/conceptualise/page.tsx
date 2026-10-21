@@ -24,6 +24,7 @@ import { TooltipTutorial } from '@/shared/components/TooltipTutorial/TooltipTuto
 import { StageOverviewModal } from '@/shared/components/StageOverviewModal/StageOverviewModal';
 import { STAGE_TUTORIAL_STEPS } from '@/shared/config/tutorials';
 import { StageNavigationDock } from '@/shared/components/StageNavigationDock/StageNavigationDock';
+import { StageProgressionNudge } from '@/shared/components/StageProgressionNudge/StageProgressionNudge';
 
 interface Source {
   id: string;
@@ -75,6 +76,7 @@ export default function ConceptualiseStagePage() {
   const [tooltipPos, setTooltipPos] = useState<{ top: number; left: number; placeBelow: boolean } | null>(null);
   const hoverLeaveTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [isSourcePanelCollapsed, setIsSourcePanelCollapsed] = useState<boolean>(false);
+  const [socraticCount, setSocraticCount] = useState<number>(0);
 
   const carouselRef = useRef<HTMLDivElement>(null);
 
@@ -92,6 +94,10 @@ export default function ConceptualiseStagePage() {
 
   useEffect(() => {
     const notesKey = getStudentStorageKey('critic_notes', moduleId);
+    const socraticKey = getStudentStorageKey('critic_socratic_count_conceptualise', moduleId);
+    const initialSocratic = parseInt(localStorage.getItem(socraticKey) || '0', 10);
+    setSocraticCount(initialSocratic);
+
     setAgentPrefs(getStoredAgentPreferences());
 
     // Show mandatory AI disclosure automatically once when the student first enters the module
@@ -331,6 +337,13 @@ export default function ConceptualiseStagePage() {
       const current = parseInt(localStorage.getItem(hintKey) || '0', 10);
       localStorage.setItem(hintKey, String(current + 1));
 
+      const socraticKey = getStudentStorageKey('critic_socratic_count_conceptualise', moduleId);
+      const currentSocratic = parseInt(localStorage.getItem(socraticKey) || '0', 10);
+      const nextSocratic = currentSocratic + 1;
+      localStorage.setItem(socraticKey, String(nextSocratic));
+      setSocraticCount(nextSocratic);
+      window.dispatchEvent(new Event('critic_socratic_sync'));
+
       // Retrieve live concept nodes and links from client canvas storage
       const nodesKey = getStudentStorageKey('critic_nodes_canvas', moduleId);
       const linksKey = getStudentStorageKey('critic_links_canvas', moduleId);
@@ -450,6 +463,11 @@ export default function ConceptualiseStagePage() {
         }
       }}
     >
+      <StageProgressionNudge
+        currentStage="conceptualise"
+        moduleId={moduleId}
+        questionCount={socraticCount}
+      />
       <div className={styles.workspace}>
         {/* Left Panel: Back Navigation, Mind Map Connections Heading, Source Carousel & Agent Dock */}
         <aside

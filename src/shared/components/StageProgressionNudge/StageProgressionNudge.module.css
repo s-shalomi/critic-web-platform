@@ -1,0 +1,144 @@
+.nudgeBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 24px;
+  background: linear-gradient(90deg, rgba(15, 23, 46, 0.96) 0%, rgba(20, 29, 60, 0.98) 50%, rgba(15, 23, 46, 0.96) 100%);
+  border-bottom: 1px solid rgba(55, 243, 255, 0.35);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35), 0 0 15px rgba(55, 243, 255, 0.12);
+  position: relative;
+  z-index: 40;
+  width: 100%;
+  flex-shrink: 0;
+  animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.leftGroup {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.milestoneBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  background: rgba(55, 243, 255, 0.12);
+  border: 1px solid rgba(55, 243, 255, 0.4);
+  border-radius: 999px;
+  font-family: var(--font-display, 'Space Grotesk', sans-serif);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #37F3FF;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.milestoneIcon {
+  font-size: 0.9rem;
+}
+
+.bannerText {
+  color: #E2E8F0;
+  font-size: 0.88rem;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.highlightStage {
+  color: #37F3FF;
+  font-weight: 700;
+}
+
+.returnLaterNote {
+  color: #94A3B8;
+  margin-left: 6px;
+  font-weight: 400;
+}
+
+.actionsGroup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.proceedBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: linear-gradient(135deg, #37F3FF 0%, #00B4D8 100%);
+  color: #0A0F1D;
+  font-family: var(--font-display, 'Space Grotesk', sans-serif);
+  font-size: 0.82rem;
+  font-weight: 700;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 12px rgba(55, 243, 255, 0.35);
+  white-space: nowrap;
+}
+
+.proceedBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 18px rgba(55, 243, 255, 0.6);
+  background: linear-gradient(135deg, #5ff5ff 0%, #00c8f0 100%);
+}
+
+.proceedBtn:active {
+  transform: translateY(0);
+}
+
+.dismissBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  color: #94A3B8;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.dismissBtn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #F8FAFC;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+@media (max-width: 860px) {
+  .nudgeBanner {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px 16px;
+    gap: 10px;
+  }
+
+  .actionsGroup {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
