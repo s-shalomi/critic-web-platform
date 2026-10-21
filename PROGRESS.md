@@ -1512,6 +1512,11 @@
     2. *Inquire Dialogue Multi-Metric Tracking & Instant Send Trigger*: In `inquire/page.tsx`, updated `submitMessage` to compute and sync counts on the new message array immediately upon send. Counts factor in student questions, agent prompts, question marks, and total dialogue turns.
     3. *Count Resolution Bug in StageProgressionNudge*: Fixed `const effectiveCount = Math.max(propQuestionCount ?? 0, internalCount)`. Previously `propQuestionCount !== undefined ? propQuestionCount : internalCount` evaluated to `0` when `propQuestionCount = 0` was passed from the parent state, completely ignoring localStorage count.
     4. *Storage Cross-Tab & DevTools Reactivity*: Added window focus listener and an 800ms periodic storage check in `StageProgressionNudge.tsx`, so manual storage edits in DevTools or rapid cross-component events trigger the banner within sub-seconds.
+  - **Floating Notification Card Redesign**:
+    - Transformed the full-width edge-to-edge bar into an elegant, floating notification card (`.notificationToast`) with `position: fixed; top: 18px; left: 50%; transform: translateX(-50%)` and `z-index: 1000`.
+    - Integrated glassmorphism aesthetics with `backdrop-filter: blur(20px)`, dark translucent navy gradient (`rgba(13, 21, 46, 0.94)`), rounded corners (`border-radius: 16px`), glowing cyan border (`1px solid rgba(55, 243, 255, 0.45)`), and depth box-shadow (`0 16px 40px rgba(0,0,0,0.65)`).
+    - Added dedicated glowing milestone icon pill (`.iconGlowWrapper` with radial cyan glow and drop shadow), header row with milestone tag (`STAGE PROGRESSION MILESTONE`), count pill, formatted prompt message, and subtle SVG dismiss button.
+    - Added smooth entrance slide-down animation with spring easing (`@keyframes toastSlideDown`).
   - **Unit Test Suite**:
     - Expanded [`tests/stageProgressionNudge.test.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/tests/stageProgressionNudge.test.ts) covering familiarise copy (next source or next stage), conceptualise copy, inquire copy, rapid clicks in familiarise/conceptualise, dialogue turns trigger, absence of proceed button, and synthesis stage exclusion.
   - **Requirements Documented**:

@@ -131,17 +131,23 @@ export const StageProgressionNudge: React.FC<StageProgressionNudgeProps> = ({
 
   return (
     <aside
-      className={`${styles.nudgeBanner} ${className}`}
+      className={`${styles.notificationToast} ${className}`}
       role="status"
       aria-live="polite"
       data-testid="stage-progression-nudge"
     >
-      <div className={styles.leftGroup}>
-        <div className={styles.milestoneBadge}>
-          <span className={styles.milestoneIcon}>💡</span>
-          <span>{effectiveCount} Socratic Questions Reached</span>
+      <div className={styles.iconContainer}>
+        <div className={styles.iconGlowWrapper}>
+          <span className={styles.notificationIcon}>💡</span>
         </div>
-        <p className={styles.bannerText}>
+      </div>
+
+      <div className={styles.contentBody}>
+        <div className={styles.headerRow}>
+          <span className={styles.milestoneTag}>Stage Progression Milestone</span>
+          <span className={styles.countPill}>{effectiveCount} Socratic Questions</span>
+        </div>
+        <p className={styles.notificationMessage}>
           {stageConfig.renderPrompt(effectiveCount)}
         </p>
       </div>
@@ -152,9 +158,21 @@ export const StageProgressionNudge: React.FC<StageProgressionNudgeProps> = ({
           onClick={handleDismiss}
           className={styles.dismissBtn}
           title="Dismiss notification"
-          aria-label="Dismiss banner"
+          aria-label="Dismiss notification"
         >
-          ✕
+          <svg
+            width="13"
+            height="13"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
         </button>
       </div>
     </aside>
