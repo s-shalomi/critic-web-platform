@@ -1426,3 +1426,29 @@
   - `npm test` (47/47 tests passing across 9 test suites).
   - `npm run build` (100% clean Next.js App Router build with 0 compilation errors across all 12 routes).
 - **Immediate Next Step**: Seek user approval for refined compact node sizing, restored edit/delete controls, and button-only login loading.
+
+---
+
+### [2026-10-21] - Fix 1: Mind Map Stage Source Card Centering, Overflow Prevention & Full Scrollability
+
+- **Role**: Full Stack Developer
+- **User Instructions**:
+  - *"sources in mind map stage overflow. all text should be nicely centered and scrollable"*
+  - *"make sure to treat requirements.md as the single source of truth. progress.md has all the progress and changes made so far. make to to regularly commit changes for each feature. also make sure to update progress.md and any other relevant documentation. implement the following, making sure to seek approval after each fix."*
+- **Code Built & Updated**:
+  - **CSS Safe Vertical Centering (`.carouselCardContent`)**:
+    - Replaced `justify-content: center` on `.carouselSourceCard` in [`src/app/module/[moduleId]/conceptualise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/conceptualise/page.tsx) and [`conceptualise.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/conceptualise/conceptualise.module.css) with an inner `.carouselCardContent` container utilizing `margin: auto 0`.
+    - This resolves the CSS flex centering overflow defect: when source text is short, content is vertically centered in the card; when text or comments are long (e.g. 950+ char articles), `margin: auto 0` collapses cleanly so the content begins at $y = 0$, guaranteeing the author header and opening sentences are never cut off.
+  - **Full Scrollability & Custom Cyberpunk Scrollbars**:
+    - Configured `.carouselSourceCard` with `overflow-y: auto`, `overflow-x: hidden`, `scrollbar-width: thin`, and neon cyan scrollbar thumb styling (`rgba(55, 243, 255, 0.45)` with `#37F3FF` hover).
+    - Added `word-break: break-word` and `overflow-wrap: break-word` to `.sourceText` to prevent horizontal text overflow.
+  - **Adaptive Viewport & Carousel Container Sizing**:
+    - Calibrated `.carouselRow` with `max-height: clamp(280px, 48vh, 480px)` and `.carouselSourceCard` with `height: 100%; min-height: 0; max-height: 100%`, preventing the evidence carousel from pushing down against the robot avatar dock or overflowing the sidebar boundary.
+  - **Test Suite Compatibility**:
+    - Updated `tests/topics.test.ts` to accommodate dynamic teacher-modified sources in the session store.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (47/47 tests passing across 9 test suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+- **Immediate Next Step**: Seek approval for Fix 1 before implementing Fix 2.
+

@@ -4,73 +4,42 @@
       "climate-change",
       [
         {
-          "id": "source-1",
+          "id": "source_1791954012810_4ia3m",
           "topicId": "climate-change",
           "orderIndex": 0,
-          "title": "Social Media Post",
+          "title": "Tweet",
           "content": {
-            "type": "social_post",
-            "authorName": "Donald Trump",
-            "text": "Be careful and try staying in your house. Large parts of the Country are suffering from tremendous amounts of snow and near record setting cold. Amazing how big this system is. Wouldn't be bad to have a little of that good old fashioned Global Warming right now!"
+            "type": "article",
+            "authorName": "Elon Musk",
+            "text": "Important to note that what happens on Earth’s surface (eg farming) has no meaningful impact on climate change. \n\nOverwhelmingly, the risk of climate change is due to moving billions of tons of carbon from deep underground into the atmosphere.\n\nOver time, if we keep doing this, the chemical makeup of our atmosphere will change enough to induce meaningful climate change."
           }
         },
         {
-          "id": "source-2",
+          "id": "source_1791954239005_mce2n",
           "topicId": "climate-change",
           "orderIndex": 1,
-          "title": "Social Media Post Comments",
+          "title": "Article Excerpt",
           "content": {
-            "type": "comments",
-            "text": "Public reactions and online comments regarding recent weather anomalies.",
-            "comments": [
-              {
-                "author": "User_492",
-                "text": "If temperatures hit record lows in winter, how can global warming be real?"
-              },
-              {
-                "author": "EcoScientist",
-                "text": "Weather refers to short-term atmospheric conditions while climate is regional atmospheric behavior over decades."
-              }
-            ]
+            "type": "article",
+            "authorName": "PubMed Central",
+            "text": "Many climate change scientists do not agree that global warming is happening.\nWhether most scientists outside climatology believe that global warming is happening is less relevant than whether the climatologists do. A letter signed by over 50 leading members of the American Meteorological Society warned about the policies promoted by environmental pressure groups. “The policy initiatives derive from highly uncertain scientific theories. They are based on the unsupported assumption that catastrophic global warming follows from the burning of fossil fuel and requires immediate action. We do not agree.”2 Those who have signed the letter represent the overwhelming majority of climate change scientists in the United States, of whom there are about 60. McMichael and Haines quote the 1995 report of the Intergovernmental Panel on Climate Change (IPCC), which is widely believed to “prove” that climate change induced by humans has occurred."
           }
         },
         {
-          "id": "source-3",
+          "id": "source_1791954309763_2r3il",
           "topicId": "climate-change",
           "orderIndex": 2,
-          "title": "News Article",
+          "title": "Article Exercpt",
           "content": {
             "type": "article",
-            "authorName": "Global Climate Observatory",
-            "text": "Extreme weather events, including arctic deep freezes, are increasingly driven by jet stream disruption resulting from rapid warming in the Arctic region."
+            "authorName": "United Nations",
+            "text": "The average temperature of the Earth’s surface is now about 1.44°C warmer than it was in the late 1800s-prior to the industrial revolution-and warmer than at any time in the last 100,000 years. The last decade (2015-2024) was the warmest on record, and each of the last four decades has been warmer than any previous decade since 1850.\n\nMany people think that climate change mainly means warmer temperatures. But temperature rise is only the beginning of the story. Because the Earth is a system where everything is connected, changes in one area can influence changes in all others."
           }
         },
         {
-          "id": "source-4",
+          "id": "source_1792564807174_b38dy",
           "topicId": "climate-change",
           "orderIndex": 3,
-          "title": "YouTube Video",
-          "content": {
-            "type": "video",
-            "authorName": "Science Explained",
-            "text": "Video Transcript: Understanding polar vortex destabilization and its connection to rising ocean temperatures."
-          }
-        },
-        {
-          "id": "source_1791300367792_231ry",
-          "topicId": "climate-change",
-          "orderIndex": 4,
-          "title": "new source",
-          "content": {
-            "type": "article",
-            "authorName": "name",
-            "text": "some description\n"
-          }
-        },
-        {
-          "id": "source_1791647003132_q9o5a",
-          "topicId": "climate-change",
-          "orderIndex": 5,
           "title": "Teacher Supplementary Report",
           "content": {
             "type": "article",
@@ -79,9 +48,9 @@
           }
         },
         {
-          "id": "source_1791647003136_orpia",
+          "id": "source_1792564807178_zrh1b",
           "topicId": "climate-change",
-          "orderIndex": 6,
+          "orderIndex": 4,
           "title": "Updated Title",
           "content": {
             "type": "article",
@@ -122,21 +91,21 @@
     [
       "CLASS_B_2026",
       {
-        "id": "code_1791940891644",
+        "id": "code_1792564806649",
         "code": "CLASS_B_2026",
         "teacherId": "teacher-123",
-        "createdAt": "2026-10-14T01:21:31.644Z",
-        "expiresAt": "2026-11-13T01:21:31.644Z"
+        "createdAt": "2026-10-21T06:40:06.649Z",
+        "expiresAt": "2026-11-20T06:40:06.649Z"
       }
     ],
     [
       "EXP_CHEM_2026",
       {
-        "id": "code_1791940891966",
+        "id": "code_1792564807015",
         "code": "EXP_CHEM_2026",
         "teacherId": "teacher-demo",
-        "createdAt": "2026-10-14T01:21:31.966Z",
-        "expiresAt": "2026-11-13T01:21:31.966Z"
+        "createdAt": "2026-10-21T06:40:07.015Z",
+        "expiresAt": "2026-11-20T06:40:07.015Z"
       }
     ],
     [
@@ -147,6 +116,56 @@
         "teacherId": "teacher-demo",
         "createdAt": "2026-10-07T13:57:09.892Z",
         "expiresAt": "2026-11-06T13:57:09.892Z"
+      }
+    ],
+    [
+      "RAFAY",
+      {
+        "id": "code_1791953737671",
+        "code": "RAFAY",
+        "teacherId": "teacher-demo",
+        "createdAt": "2026-10-14T04:55:37.671Z",
+        "expiresAt": "2026-11-13T04:55:37.672Z"
+      }
+    ],
+    [
+      "VENURI",
+      {
+        "id": "code_1792039713632",
+        "code": "VENURI",
+        "teacherId": "teacher-demo",
+        "createdAt": "2026-10-15T04:48:33.632Z",
+        "expiresAt": "2026-11-14T04:48:33.632Z"
+      }
+    ],
+    [
+      "CATE",
+      {
+        "id": "code_1792465777832",
+        "code": "CATE",
+        "teacherId": "teacher-demo",
+        "createdAt": "2026-10-20T03:09:37.832Z",
+        "expiresAt": "2026-11-19T03:09:37.832Z"
+      }
+    ],
+    [
+      "JERICA",
+      {
+        "id": "code_1792479727695",
+        "code": "JERICA",
+        "teacherId": "teacher-demo",
+        "createdAt": "2026-10-20T07:02:07.695Z",
+        "expiresAt": "2026-11-19T07:02:07.695Z"
+      }
+    ],
+    [
+      "S1",
+      {
+        "id": "code_1792479803855",
+        "code": "S1",
+        "teacherId": "teacher-demo",
+        "createdAt": "2026-10-20T07:03:23.855Z",
+        "expiresAt": "2026-11-19T07:03:23.855Z"
       }
     ]
   ],
@@ -170,7 +189,7 @@
         "topicTitle": "Climate Change",
         "currentStage": "synthesise",
         "status": "in_progress",
-        "lastActive": "2026-10-14T01:21:31.648Z"
+        "lastActive": "2026-10-21T06:40:06.664Z"
       }
     ],
     [
@@ -190,9 +209,9 @@
         "studentId": "student_434c494d4154",
         "accessCode": "CLIMATE2026",
         "topicTitle": "Climate Change",
-        "currentStage": "conceptualise",
+        "currentStage": "synthesise",
         "status": "in_progress",
-        "lastActive": "2026-10-14T01:19:14.552Z"
+        "lastActive": "2026-10-21T06:26:19.400Z"
       }
     ],
     [
@@ -204,6 +223,61 @@
         "currentStage": "review",
         "status": "completed",
         "lastActive": "2026-10-13T14:07:06.961Z"
+      }
+    ],
+    [
+      "RAFAY",
+      {
+        "studentId": "student_5241464159",
+        "accessCode": "RAFAY",
+        "topicTitle": "Climate Change",
+        "currentStage": "synthesise",
+        "status": "in_progress",
+        "lastActive": "2026-10-14T06:07:09.154Z"
+      }
+    ],
+    [
+      "VENURI",
+      {
+        "studentId": "student_56454e555249",
+        "accessCode": "VENURI",
+        "topicTitle": "Climate Change",
+        "currentStage": "review",
+        "status": "completed",
+        "lastActive": "2026-10-15T05:02:16.522Z"
+      }
+    ],
+    [
+      "CATE",
+      {
+        "studentId": "student_43415445",
+        "accessCode": "CATE",
+        "topicTitle": "Climate Change",
+        "currentStage": "review",
+        "status": "completed",
+        "lastActive": "2026-10-20T03:34:54.967Z"
+      }
+    ],
+    [
+      "S1",
+      {
+        "studentId": "student_5331",
+        "accessCode": "S1",
+        "topicTitle": "Climate Change",
+        "currentStage": "familiarise",
+        "status": "in_progress",
+        "lastActive": "2026-10-20T07:03:48.088Z"
+      }
+    ],
+    [
+      "JERICA",
+      {
+        "studentId": "student_4a4552494341",
+        "accessCode": "JERICA",
+        "topicTitle": "Climate Change",
+        "currentStage": "review",
+        "status": "completed",
+        "lastActive": "2026-10-20T07:17:18.563Z"
       }
     ]
   ],
@@ -267,9 +341,29 @@
           "sourceId": "source-1",
           "highlightedText": "Wouldn't be bad to have a little of that good old fashioned Global Warming right no",
           "noteText": "sarcasm",
-          "convertedToNode": true,
+          "convertedToNode": false,
           "createdAt": "2026-10-08T04:18:06.654Z",
-          "updatedAt": "2026-10-10T15:47:41.588Z"
+          "updatedAt": "2026-10-20T02:58:33.744Z"
+        },
+        {
+          "id": "note_1792465192963_cyivz",
+          "moduleId": "mod_climate-change_student_434c494d4154",
+          "sourceId": "source_1791954012810_4ia3m",
+          "highlightedText": "(eg farming) has no meaningful impact on climate change",
+          "noteText": "misleading claim - farming releases methane",
+          "convertedToNode": true,
+          "createdAt": "2026-10-20T02:59:52.963Z",
+          "updatedAt": "2026-10-20T03:02:04.168Z"
+        },
+        {
+          "id": "note_1792465232945_eb3fx",
+          "moduleId": "mod_climate-change_student_434c494d4154",
+          "sourceId": "source_1791954012810_4ia3m",
+          "highlightedText": "Overwhelmingly, the risk of climate change is due to moving billions of tons of carbon from deep underground into the atmosphere",
+          "noteText": "this is accurate but elon musk makes it seem like fossil fuels are the only source of climate change",
+          "convertedToNode": false,
+          "createdAt": "2026-10-20T03:00:32.945Z",
+          "updatedAt": "2026-10-20T03:00:32.945Z"
         }
       ]
     ],
@@ -351,6 +445,206 @@
           "updatedAt": "2026-10-14T01:06:52.831Z"
         }
       ]
+    ],
+    [
+      "mod_climate-change_student_5241464159",
+      [
+        {
+          "id": "note_1791954647438_75ghl",
+          "moduleId": "mod_climate-change_student_5241464159",
+          "sourceId": "source_1791954012810_4ia3m",
+          "highlightedText": "Overwhelmingly, the risk of climate change is due to moving billions of tons of carbon from deep underground into the atmosphere.",
+          "noteText": "red herring",
+          "convertedToNode": false,
+          "createdAt": "2026-10-14T05:10:47.438Z",
+          "updatedAt": "2026-10-14T05:10:47.438Z"
+        },
+        {
+          "id": "note_1791954694271_a21m6",
+          "moduleId": "mod_climate-change_student_5241464159",
+          "sourceId": "source_1791954012810_4ia3m",
+          "highlightedText": "eg farming",
+          "noteText": "weird example, what about cars and factories and mining efforts",
+          "convertedToNode": false,
+          "createdAt": "2026-10-14T05:11:34.271Z",
+          "updatedAt": "2026-10-14T05:11:34.271Z"
+        },
+        {
+          "id": "note_1791955008209_to506",
+          "moduleId": "mod_climate-change_student_5241464159",
+          "sourceId": "source_1791954239005_mce2n",
+          "highlightedText": "The policy initiatives derive from highly uncertain scientific theories. They are based on the unsupported assumption that catastrophic global warming follows from the burning of fossil fuel and requires immediate action. We do not agree",
+          "noteText": "i want more context. why do they not agree? it feels like some information is left out",
+          "convertedToNode": false,
+          "createdAt": "2026-10-14T05:16:48.209Z",
+          "updatedAt": "2026-10-14T05:16:48.209Z"
+        },
+        {
+          "id": "note_1791955085682_bbtq1",
+          "moduleId": "mod_climate-change_student_5241464159",
+          "sourceId": "source_1791954239005_mce2n",
+          "highlightedText": "McMichael and Haines quote the 1995 report of the Intergovernmental Panel on Climate Change (IPCC), which is widely believed to “prove” that climate change induced by humans has occurred.",
+          "noteText": "i dont understand the point of this article. what is the authors opinion? what are they trying to say. it seems very centrist and unopinionated. i am left confused. maybe more context would help",
+          "convertedToNode": false,
+          "createdAt": "2026-10-14T05:18:05.682Z",
+          "updatedAt": "2026-10-14T05:18:05.682Z"
+        },
+        {
+          "id": "note_1791955212976_sfrla",
+          "moduleId": "mod_climate-change_student_5241464159",
+          "sourceId": "source_1791954309763_2r3il",
+          "highlightedText": "Because the Earth is a system where everything is connected, changes in one area can influence changes in all others.",
+          "noteText": "this sentence elevates the stakes, suggesting that climate change is more important than the reader may realise",
+          "convertedToNode": false,
+          "createdAt": "2026-10-14T05:20:12.976Z",
+          "updatedAt": "2026-10-14T05:20:12.976Z"
+        }
+      ]
+    ],
+    [
+      "mod_climate-change_student_56454e555249",
+      [
+        {
+          "id": "note_1792039976379_l2lpw",
+          "moduleId": "mod_climate-change_student_56454e555249",
+          "sourceId": "source_1791954012810_4ia3m",
+          "highlightedText": "Earth’s surface (eg farming) has no meaningful impact on climate change.",
+          "noteText": "evidence\n",
+          "convertedToNode": false,
+          "createdAt": "2026-10-15T04:52:56.379Z",
+          "updatedAt": "2026-10-15T04:52:56.379Z"
+        },
+        {
+          "id": "note_1792040006571_o9a84",
+          "moduleId": "mod_climate-change_student_56454e555249",
+          "sourceId": "source_1791954012810_4ia3m",
+          "highlightedText": "due to moving billions of tons of carbon from deep underground into the atmosphere.",
+          "noteText": "only one due to, evidence\n",
+          "convertedToNode": false,
+          "createdAt": "2026-10-15T04:53:26.571Z",
+          "updatedAt": "2026-10-15T04:53:26.571Z"
+        },
+        {
+          "id": "note_1792040028949_c1f7t",
+          "moduleId": "mod_climate-change_student_56454e555249",
+          "sourceId": "source_1791954012810_4ia3m",
+          "highlightedText": "if we keep doing this, the chemical makeup of our atmosphere will change enough to induce meaningful climate change",
+          "noteText": "suggests this the only issue\n",
+          "convertedToNode": false,
+          "createdAt": "2026-10-15T04:53:48.949Z",
+          "updatedAt": "2026-10-15T04:53:48.949Z"
+        },
+        {
+          "id": "note_1792040097978_5yy7f",
+          "moduleId": "mod_climate-change_student_56454e555249",
+          "sourceId": "source_1791954239005_mce2n",
+          "highlightedText": "letter signed by over 50 leading members of the American Meteorological Society warned about the policies promoted by environmental pressure groups.",
+          "noteText": "evidence\n",
+          "convertedToNode": false,
+          "createdAt": "2026-10-15T04:54:57.978Z",
+          "updatedAt": "2026-10-15T04:54:57.978Z"
+        },
+        {
+          "id": "note_1792040109886_i46es",
+          "moduleId": "mod_climate-change_student_56454e555249",
+          "sourceId": "source_1791954239005_mce2n",
+          "highlightedText": "highly uncertain scientific theories.",
+          "noteText": "elon",
+          "convertedToNode": false,
+          "createdAt": "2026-10-15T04:55:09.886Z",
+          "updatedAt": "2026-10-15T04:55:09.886Z"
+        },
+        {
+          "id": "note_1792040136937_7q1tr",
+          "moduleId": "mod_climate-change_student_56454e555249",
+          "sourceId": "source_1791954239005_mce2n",
+          "highlightedText": "widely believed to “prove” that climate change induced by humans has occurred.",
+          "noteText": "not definitive\n",
+          "convertedToNode": false,
+          "createdAt": "2026-10-15T04:55:36.937Z",
+          "updatedAt": "2026-10-15T04:55:36.937Z"
+        },
+        {
+          "id": "note_1792040157985_opmht",
+          "moduleId": "mod_climate-change_student_56454e555249",
+          "sourceId": "source_1791954309763_2r3il",
+          "highlightedText": "urface is now about 1.44°C warmer than it was in the late 1800s-prior to the industrial revolution-and warmer than at any time in the last 100,000 ye",
+          "noteText": "climate change evidence to challenge pubmed\n",
+          "convertedToNode": false,
+          "createdAt": "2026-10-15T04:55:57.985Z",
+          "updatedAt": "2026-10-15T04:55:57.985Z"
+        },
+        {
+          "id": "note_1792040183177_q5r8e",
+          "moduleId": "mod_climate-change_student_56454e555249",
+          "sourceId": "source_1791954309763_2r3il",
+          "highlightedText": "Earth is a system where everything is connected, changes in one area can influence changes in all others.",
+          "noteText": "article more so explain what it is in comparison to other sources\n",
+          "convertedToNode": false,
+          "createdAt": "2026-10-15T04:56:23.177Z",
+          "updatedAt": "2026-10-15T04:56:23.177Z"
+        }
+      ]
+    ],
+    [
+      "mod_climate-change_student_43415445",
+      [
+        {
+          "id": "note_1792466425132_b7dl9",
+          "moduleId": "mod_climate-change_student_43415445",
+          "sourceId": "source_1791954012810_4ia3m",
+          "highlightedText": "no meaningful impact on climate change.",
+          "noteText": "Why does he reckon it has no meaningful impact on climate change...?",
+          "convertedToNode": false,
+          "createdAt": "2026-10-20T03:20:25.132Z",
+          "updatedAt": "2026-10-20T03:20:25.132Z"
+        },
+        {
+          "id": "note_1792466554143_9ixol",
+          "moduleId": "mod_climate-change_student_43415445",
+          "sourceId": "source_1791954309763_2r3il",
+          "highlightedText": "was the warmest on record, and each of the last four decades has been warmer than any previous decade since 1850",
+          "noteText": "Makes claim with no evidence to support",
+          "convertedToNode": false,
+          "createdAt": "2026-10-20T03:22:34.143Z",
+          "updatedAt": "2026-10-20T03:24:05.901Z"
+        },
+        {
+          "id": "note_1792466607256_37dhy",
+          "moduleId": "mod_climate-change_student_43415445",
+          "sourceId": "source_1791954239005_mce2n",
+          "highlightedText": "American Meteorological Society",
+          "noteText": "Using reliable (?) sources",
+          "convertedToNode": false,
+          "createdAt": "2026-10-20T03:23:27.256Z",
+          "updatedAt": "2026-10-20T03:23:27.256Z"
+        },
+        {
+          "id": "note_1792466691719_k7v6m",
+          "moduleId": "mod_climate-change_student_43415445",
+          "sourceId": "source_1791954012810_4ia3m",
+          "highlightedText": "is due to moving billions of tons of carbon from deep underground into the atmosphere",
+          "noteText": "Provides no evidence to support this",
+          "convertedToNode": false,
+          "createdAt": "2026-10-20T03:24:51.719Z",
+          "updatedAt": "2026-10-20T03:24:51.719Z"
+        }
+      ]
+    ],
+    [
+      "mod_climate-change_student_4a4552494341",
+      [
+        {
+          "id": "note_1792480212464_zjeen",
+          "moduleId": "mod_climate-change_student_4a4552494341",
+          "sourceId": "source_1791954012810_4ia3m",
+          "highlightedText": "no meaningful impact on climate change",
+          "noteText": "Broad assumption",
+          "convertedToNode": false,
+          "createdAt": "2026-10-20T07:10:12.464Z",
+          "updatedAt": "2026-10-20T07:10:12.464Z"
+        }
+      ]
     ]
   ],
   "conceptNodes": [
@@ -408,19 +702,7 @@
     ],
     [
       "mod_climate-change_student_434c494d4154",
-      [
-        {
-          "id": "node_1791433090771_7g0nz",
-          "moduleId": "mod_climate-change_student_434c494d4154",
-          "text": "sarfgh",
-          "positionX": 402.1193870848799,
-          "positionY": 332.1729644128008,
-          "sourceNoteId": "note_1791433086654_pw9h5",
-          "linkCount": 0,
-          "createdAt": "2026-10-08T04:18:10.771Z",
-          "updatedAt": "2026-10-08T04:18:10.771Z"
-        }
-      ]
+      []
     ],
     [
       "test_mod_456",
@@ -445,6 +727,22 @@
     [
       "mod_clean_canvas_1791940012815",
       []
+    ],
+    [
+      "mod_climate-change_student_5241464159",
+      []
+    ],
+    [
+      "mod_climate-change_student_56454e555249",
+      []
+    ],
+    [
+      "mod_climate-change_student_43415445",
+      []
+    ],
+    [
+      "mod_climate-change_student_4a4552494341",
+      []
     ]
   ],
   "conceptLinks": [
@@ -466,6 +764,22 @@
     ],
     [
       "mod_clean_canvas_1791940012815",
+      []
+    ],
+    [
+      "mod_climate-change_student_5241464159",
+      []
+    ],
+    [
+      "mod_climate-change_student_56454e555249",
+      []
+    ],
+    [
+      "mod_climate-change_student_43415445",
+      []
+    ],
+    [
+      "mod_climate-change_student_4a4552494341",
       []
     ]
   ],
@@ -759,7 +1073,250 @@
           }
         ]
       }
+    ],
+    [
+      "mod_climate-change_student_5241464159",
+      {
+        "moduleId": "mod_climate-change_student_5241464159",
+        "conceptsIdentified": 7,
+        "assumptionsChallenged": 5,
+        "questionsAsked": 7,
+        "misinformationEvaluations": 7,
+        "criticalThinkingScore": 100,
+        "synthesisScore": 100,
+        "mbtiPersonalityTitle": "The Systemic Architect (S-A-C-M)",
+        "mbtiPersonalitySummary": "You view complex problems as interconnected webs of cause and effect. You excel at synthesizing evidence into clear visual concept structures, identifying structural vulnerabilities in bad arguments, and formulating holistically sound conclusions.",
+        "badges": [
+          {
+            "id": "badge-concepts",
+            "title": "Master Conceptualizer",
+            "description": "Identified 7 concept nodes",
+            "icon": "🧠",
+            "unlocked": true
+          },
+          {
+            "id": "badge-assumptions",
+            "title": "Assumption Slayer",
+            "description": "Challenged 5 implicit biases",
+            "icon": "🛡️",
+            "unlocked": true
+          },
+          {
+            "id": "badge-questions",
+            "title": "Socratic Inquirer",
+            "description": "Asked 7 probing questions",
+            "icon": "❓",
+            "unlocked": true
+          },
+          {
+            "id": "badge-misinfo",
+            "title": "Truth Auditor",
+            "description": "Evaluated 7 counter-claims",
+            "icon": "🔍",
+            "unlocked": true
+          },
+          {
+            "id": "badge-critical",
+            "title": "High-Velocity Reasoner",
+            "description": "Critical Thinking Score: 100/100",
+            "icon": "⚡",
+            "unlocked": true
+          },
+          {
+            "id": "badge-synthesis",
+            "title": "Synthesis Master",
+            "description": "Synthesis Quality Score: 100/100",
+            "icon": "🏆",
+            "unlocked": true
+          }
+        ]
+      }
+    ],
+    [
+      "mod_climate-change_student_56454e555249",
+      {
+        "moduleId": "mod_climate-change_student_56454e555249",
+        "conceptsIdentified": 3,
+        "assumptionsChallenged": 8,
+        "questionsAsked": 3,
+        "misinformationEvaluations": 1,
+        "criticalThinkingScore": 100,
+        "synthesisScore": 86,
+        "mbtiPersonalityTitle": "The Systemic Architect (S-A-C-M)",
+        "mbtiPersonalitySummary": "You view complex problems as interconnected webs of cause and effect. You excel at synthesizing evidence into clear visual concept structures, identifying structural vulnerabilities in bad arguments, and formulating holistically sound conclusions.",
+        "badges": [
+          {
+            "id": "badge-concepts",
+            "title": "Master Conceptualizer",
+            "description": "Identified 3 concept nodes",
+            "icon": "🧠",
+            "unlocked": true
+          },
+          {
+            "id": "badge-assumptions",
+            "title": "Assumption Slayer",
+            "description": "Challenged 8 implicit biases",
+            "icon": "🛡️",
+            "unlocked": true
+          },
+          {
+            "id": "badge-questions",
+            "title": "Socratic Inquirer",
+            "description": "Asked 3 probing questions",
+            "icon": "❓",
+            "unlocked": true
+          },
+          {
+            "id": "badge-misinfo",
+            "title": "Truth Auditor",
+            "description": "Evaluated 1 counter-claim",
+            "icon": "🔍",
+            "unlocked": true
+          },
+          {
+            "id": "badge-critical",
+            "title": "High-Velocity Reasoner",
+            "description": "Critical Thinking Score: 100/100",
+            "icon": "⚡",
+            "unlocked": true
+          },
+          {
+            "id": "badge-synthesis",
+            "title": "Synthesis Master",
+            "description": "Synthesis Quality Score: 86/100",
+            "icon": "🏆",
+            "unlocked": true
+          }
+        ]
+      }
+    ],
+    [
+      "mod_climate-change_student_43415445",
+      {
+        "moduleId": "mod_climate-change_student_43415445",
+        "conceptsIdentified": 3,
+        "assumptionsChallenged": 4,
+        "questionsAsked": 4,
+        "misinformationEvaluations": 2,
+        "criticalThinkingScore": 98,
+        "synthesisScore": 95,
+        "mbtiPersonalityTitle": "The Systemic Architect (S-A-C-M)",
+        "mbtiPersonalitySummary": "You view complex problems as interconnected webs of cause and effect. You excel at synthesizing evidence into clear visual concept structures, identifying structural vulnerabilities in bad arguments, and formulating holistically sound conclusions.",
+        "badges": [
+          {
+            "id": "badge-concepts",
+            "title": "Master Conceptualizer",
+            "description": "Identified 3 concept nodes",
+            "icon": "🧠",
+            "unlocked": true
+          },
+          {
+            "id": "badge-assumptions",
+            "title": "Assumption Slayer",
+            "description": "Challenged 4 implicit biases",
+            "icon": "🛡️",
+            "unlocked": true
+          },
+          {
+            "id": "badge-questions",
+            "title": "Socratic Inquirer",
+            "description": "Asked 4 probing questions",
+            "icon": "❓",
+            "unlocked": true
+          },
+          {
+            "id": "badge-misinfo",
+            "title": "Truth Auditor",
+            "description": "Evaluated 2 counter-claims",
+            "icon": "🔍",
+            "unlocked": true
+          },
+          {
+            "id": "badge-critical",
+            "title": "High-Velocity Reasoner",
+            "description": "Critical Thinking Score: 98/100",
+            "icon": "⚡",
+            "unlocked": true
+          },
+          {
+            "id": "badge-synthesis",
+            "title": "Synthesis Master",
+            "description": "Synthesis Quality Score: 95/100",
+            "icon": "🏆",
+            "unlocked": true
+          }
+        ]
+      }
+    ],
+    [
+      "mod_climate-change_student_4a4552494341",
+      {
+        "moduleId": "mod_climate-change_student_4a4552494341",
+        "conceptsIdentified": 2,
+        "assumptionsChallenged": 1,
+        "questionsAsked": 6,
+        "misinformationEvaluations": 6,
+        "criticalThinkingScore": 82,
+        "synthesisScore": 67,
+        "mbtiPersonalityTitle": "The Socratic Questioner (S-Q-P-I)",
+        "mbtiPersonalitySummary": "You use targeted inquiry as your primary tool for discovery. Unafraid to challenge assumptions or probe counter-arguments, you uncover underlying truths by asking relentless, clarifying questions.",
+        "badges": [
+          {
+            "id": "badge-concepts",
+            "title": "Master Conceptualizer",
+            "description": "Identified 2 concept nodes",
+            "icon": "🧠",
+            "unlocked": true
+          },
+          {
+            "id": "badge-assumptions",
+            "title": "Assumption Slayer",
+            "description": "Challenged 1 implicit bias",
+            "icon": "🛡️",
+            "unlocked": true
+          },
+          {
+            "id": "badge-questions",
+            "title": "Socratic Inquirer",
+            "description": "Asked 6 probing questions",
+            "icon": "❓",
+            "unlocked": true
+          },
+          {
+            "id": "badge-misinfo",
+            "title": "Truth Auditor",
+            "description": "Evaluated 6 counter-claims",
+            "icon": "🔍",
+            "unlocked": true
+          },
+          {
+            "id": "badge-critical",
+            "title": "High-Velocity Reasoner",
+            "description": "Critical Thinking Score: 82/100",
+            "icon": "⚡",
+            "unlocked": true
+          },
+          {
+            "id": "badge-synthesis",
+            "title": "Synthesis Master",
+            "description": "Synthesis Quality Score: 67/100",
+            "icon": "🏆",
+            "unlocked": true
+          }
+        ]
+      }
     ]
   ],
-  "agentPreferences": []
+  "agentPreferences": [
+    [
+      "student_5241464159",
+      {
+        "studentId": "student_5241464159",
+        "agentPersonality": "Devil's Advocate",
+        "agentAppearance": "crimson",
+        "avatarName": "Blaze",
+        "updatedAt": "2026-10-14T05:08:51.106Z"
+      }
+    ]
+  ]
 }

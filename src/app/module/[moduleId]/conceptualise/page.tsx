@@ -373,30 +373,32 @@ export default function ConceptualiseStagePage() {
 
                       return (
                         <div key={src.id} className={styles.carouselSourceCard}>
-                          <div className={styles.authorHeader}>
-                            <div className={styles.authorAvatar}>{initials}</div>
-                            <div className={styles.authorMeta}>
-                              <span className={styles.authorName}>{displayAuthor}</span>
-                              {src.content.authorName && src.title !== src.content.authorName && (
-                                <span className={styles.sourceCardBadge}>{src.title}</span>
+                          <div className={styles.carouselCardContent}>
+                            <div className={styles.authorHeader}>
+                              <div className={styles.authorAvatar}>{initials}</div>
+                              <div className={styles.authorMeta}>
+                                <span className={styles.authorName}>{displayAuthor}</span>
+                                {src.content.authorName && src.title !== src.content.authorName && (
+                                  <span className={styles.sourceCardBadge}>{src.title}</span>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className={styles.sourceText}>
+                              {renderHighlightedText(src.id, src.content.text)}
+
+                              {src.content.comments && src.content.comments.length > 0 && (
+                                <div className={styles.commentsSection}>
+                                  <h5 className={styles.commentsHeading}>Comments</h5>
+                                  {src.content.comments.map((c, i) => (
+                                    <div key={i} className={styles.commentItem}>
+                                      <strong className={styles.commentAuthor}>{c.author}:</strong>{' '}
+                                      {renderHighlightedText(src.id, c.text)}
+                                    </div>
+                                  ))}
+                                </div>
                               )}
                             </div>
-                          </div>
-
-                          <div className={styles.sourceText}>
-                            {renderHighlightedText(src.id, src.content.text)}
-
-                            {src.content.comments && src.content.comments.length > 0 && (
-                              <div className={styles.commentsSection}>
-                                <h5 className={styles.commentsHeading}>Comments</h5>
-                                {src.content.comments.map((c, i) => (
-                                  <div key={i} className={styles.commentItem}>
-                                    <strong className={styles.commentAuthor}>{c.author}:</strong>{' '}
-                                    {renderHighlightedText(src.id, c.text)}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
                           </div>
                         </div>
                       );
