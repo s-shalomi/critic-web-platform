@@ -35,72 +35,6 @@
             "authorName": "United Nations",
             "text": "The average temperature of the Earth’s surface is now about 1.44°C warmer than it was in the late 1800s-prior to the industrial revolution-and warmer than at any time in the last 100,000 years. The last decade (2015-2024) was the warmest on record, and each of the last four decades has been warmer than any previous decade since 1850.\n\nMany people think that climate change mainly means warmer temperatures. But temperature rise is only the beginning of the story. Because the Earth is a system where everything is connected, changes in one area can influence changes in all others."
           }
-        },
-        {
-          "id": "source_1792564807174_b38dy",
-          "topicId": "climate-change",
-          "orderIndex": 3,
-          "title": "Teacher Supplementary Report",
-          "content": {
-            "type": "article",
-            "authorName": "Dr. Jane Smith",
-            "text": "Supplementary findings on Arctic sea ice extent trends."
-          }
-        },
-        {
-          "id": "source_1792564807178_zrh1b",
-          "topicId": "climate-change",
-          "orderIndex": 4,
-          "title": "Updated Title",
-          "content": {
-            "type": "article",
-            "authorName": "Teacher Added",
-            "text": "Updated Text Content"
-          }
-        },
-        {
-          "id": "source_1792567349217_rayyl",
-          "topicId": "climate-change",
-          "orderIndex": 5,
-          "title": "Teacher Supplementary Report",
-          "content": {
-            "type": "article",
-            "authorName": "Dr. Jane Smith",
-            "text": "Supplementary findings on Arctic sea ice extent trends."
-          }
-        },
-        {
-          "id": "source_1792567349222_kn9kh",
-          "topicId": "climate-change",
-          "orderIndex": 6,
-          "title": "Updated Title",
-          "content": {
-            "type": "article",
-            "authorName": "Teacher Added",
-            "text": "Updated Text Content"
-          }
-        },
-        {
-          "id": "source_1792584501327_z7ggc",
-          "topicId": "climate-change",
-          "orderIndex": 7,
-          "title": "Teacher Supplementary Report",
-          "content": {
-            "type": "article",
-            "authorName": "Dr. Jane Smith",
-            "text": "Supplementary findings on Arctic sea ice extent trends."
-          }
-        },
-        {
-          "id": "source_1792584501343_crz6t",
-          "topicId": "climate-change",
-          "orderIndex": 8,
-          "title": "Updated Title",
-          "content": {
-            "type": "article",
-            "authorName": "Teacher Added",
-            "text": "Updated Text Content"
-          }
         }
       ]
     ],
@@ -210,6 +144,26 @@
         "teacherId": "teacher-demo",
         "createdAt": "2026-10-20T07:03:23.855Z",
         "expiresAt": "2026-11-19T07:03:23.855Z"
+      }
+    ],
+    [
+      "DEMO",
+      {
+        "id": "code_1792592786483",
+        "code": "DEMO",
+        "teacherId": "teacher-demo",
+        "createdAt": "2026-10-21T14:26:26.483Z",
+        "expiresAt": "2026-11-20T14:26:26.483Z"
+      }
+    ],
+    [
+      "PRACTICE",
+      {
+        "id": "code_1792592789593",
+        "code": "PRACTICE",
+        "teacherId": "teacher-demo",
+        "createdAt": "2026-10-21T14:26:29.593Z",
+        "expiresAt": "2026-11-20T14:26:29.593Z"
       }
     ]
   ],
@@ -322,6 +276,17 @@
         "currentStage": "review",
         "status": "completed",
         "lastActive": "2026-10-20T07:17:18.563Z"
+      }
+    ],
+    [
+      "PRACTICE",
+      {
+        "studentId": "student_505241435449",
+        "accessCode": "PRACTICE",
+        "topicTitle": "Climate Change",
+        "currentStage": "synthesise",
+        "status": "in_progress",
+        "lastActive": "2026-10-21T14:58:32.833Z"
       }
     ]
   ],
@@ -764,6 +729,41 @@
           "updatedAt": "2026-10-21T12:08:21.245Z"
         }
       ]
+    ],
+    [
+      "mod_climate-change_student_505241435449",
+      [
+        {
+          "id": "note_1792593891143_vu9r8",
+          "moduleId": "mod_climate-change_student_505241435449",
+          "sourceId": "source_1791954012810_4ia3m",
+          "highlightedText": "(eg farming) has no meaningful impact on climate change",
+          "noteText": "famring can release methane",
+          "convertedToNode": true,
+          "createdAt": "2026-10-21T14:44:51.143Z",
+          "updatedAt": "2026-10-21T14:48:27.853Z"
+        },
+        {
+          "id": "note_1792593901939_h3ndx",
+          "moduleId": "mod_climate-change_student_505241435449",
+          "sourceId": "source_1791954012810_4ia3m",
+          "highlightedText": "meaningful impact",
+          "noteText": "what is meaningful",
+          "convertedToNode": false,
+          "createdAt": "2026-10-21T14:45:01.939Z",
+          "updatedAt": "2026-10-21T14:45:01.939Z"
+        },
+        {
+          "id": "note_1792594086361_f83j6",
+          "moduleId": "mod_climate-change_student_505241435449",
+          "sourceId": "source_1791954012810_4ia3m",
+          "highlightedText": "risk of climate change is due to moving billions of tons of carbon",
+          "noteText": "fossile fuesl",
+          "convertedToNode": true,
+          "createdAt": "2026-10-21T14:48:06.361Z",
+          "updatedAt": "2026-10-21T14:48:32.159Z"
+        }
+      ]
     ]
   ],
   "conceptNodes": [
@@ -893,6 +893,10 @@
     [
       "mod_clean_canvas_1792584501228",
       []
+    ],
+    [
+      "mod_climate-change_student_505241435449",
+      []
     ]
   ],
   "conceptLinks": [
@@ -938,6 +942,10 @@
     ],
     [
       "mod_clean_canvas_1792584501228",
+      []
+    ],
+    [
+      "mod_climate-change_student_505241435449",
       []
     ]
   ],
@@ -1463,6 +1471,64 @@
           }
         ]
       }
+    ],
+    [
+      "mod_climate-change_student_505241435449",
+      {
+        "moduleId": "mod_climate-change_student_505241435449",
+        "conceptsIdentified": 2,
+        "assumptionsChallenged": 3,
+        "questionsAsked": 1,
+        "misinformationEvaluations": 0,
+        "criticalThinkingScore": 78,
+        "synthesisScore": 71,
+        "mbtiPersonalityTitle": "The Empiricist Investigator (E-S-R-T)",
+        "mbtiPersonalitySummary": "You approach complex claims with rigorous empirical scrutiny. Rather than accepting rhetoric at face value, you systematically map conceptual links, interrogate underlying assumptions, and demand verified evidence before forming conclusions.",
+        "badges": [
+          {
+            "id": "badge-concepts",
+            "title": "Master Conceptualizer",
+            "description": "Identified 2 concept nodes",
+            "icon": "🧠",
+            "unlocked": true
+          },
+          {
+            "id": "badge-assumptions",
+            "title": "Assumption Slayer",
+            "description": "Challenged 3 implicit biases",
+            "icon": "🛡️",
+            "unlocked": true
+          },
+          {
+            "id": "badge-questions",
+            "title": "Socratic Inquirer",
+            "description": "Asked 1 probing question",
+            "icon": "❓",
+            "unlocked": true
+          },
+          {
+            "id": "badge-misinfo",
+            "title": "Truth Auditor",
+            "description": "Evaluated 0 counter-claims",
+            "icon": "🔍",
+            "unlocked": true
+          },
+          {
+            "id": "badge-critical",
+            "title": "High-Velocity Reasoner",
+            "description": "Critical Thinking Score: 78/100",
+            "icon": "⚡",
+            "unlocked": true
+          },
+          {
+            "id": "badge-synthesis",
+            "title": "Synthesis Master",
+            "description": "Synthesis Quality Score: 71/100",
+            "icon": "🏆",
+            "unlocked": true
+          }
+        ]
+      }
     ]
   ],
   "agentPreferences": [
@@ -1484,6 +1550,16 @@
         "agentAppearance": "violet",
         "avatarName": "Nova",
         "updatedAt": "2026-10-21T11:22:25.717Z"
+      }
+    ],
+    [
+      "student_505241435449",
+      {
+        "studentId": "student_505241435449",
+        "agentPersonality": "Friendly",
+        "agentAppearance": "violet",
+        "avatarName": "Nova",
+        "updatedAt": "2026-10-21T14:42:38.075Z"
       }
     ]
   ]

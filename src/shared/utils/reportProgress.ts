@@ -8,6 +8,8 @@
  * POST /api/students/progress endpoint. Fire-and-forget — does not block page load.
  */
 
+import { setStudentCurrentStage } from '@/shared/utils/storage';
+
 export function reportStudentProgress(
   currentStage: string,
   topicTitle = 'Climate Change',
@@ -22,9 +24,13 @@ export function reportStudentProgress(
     const user = JSON.parse(userStr);
     const studentId: string = user.id || user.email || 'guest';
     const accessCode: string = user.accessCode || user.code || studentId;
+    const topicSlug = topicTitle.toLowerCase().replace(/\s+/g, '-');
 
-    // Persist current stage in localStorage for seamless resume
-    localStorage.setItem(`critic_current_stage_${topicTitle.toLowerCase().replace(/\s+/g, '-')}`, currentStage);
+    // Persist current stage strictly scoped to studentId for this topic
+    setStudentCurrentStage(studentId, topicSlug, currentStage);
+
+    // Remove legacy un-scoped key to prevent cross-account pollution to new access codes
+    localStorage.removeItem(`critic_current_stage_${topicSlug}`);
 
     // Fire-and-forget — teacher dashboard polls; this keeps it fresh
     fetch('/api/students/progress', {

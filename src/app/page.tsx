@@ -6,6 +6,7 @@ import styles from './page.module.css';
 import { RobotAvatar } from '@/shared/components/RobotAvatar/RobotAvatar';
 import { CriticLogo } from '@/shared/components/CriticLogo/CriticLogo';
 import { LoadingOverlay } from '@/shared/components/LoadingOverlay/LoadingOverlay';
+import { clearLegacyUnscopedStages, getStudentCurrentStage, setStudentCurrentStage } from '@/shared/utils/storage';
 
 export default function LandingPage() {
   const router = useRouter();
@@ -42,6 +43,16 @@ export default function LandingPage() {
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.error || 'Failed to authenticate access code');
+      }
+
+      // Purge any stale unscoped stage keys from previous sessions
+      clearLegacyUnscopedStages();
+
+      // Ensure that for this student, the topic always starts at 'familiarise' (Annotate) if no prior progress exists
+      const studentId = data.user?.id || data.user?.accessCode || 'student_demo';
+      const existingStage = getStudentCurrentStage(studentId, 'climate-change');
+      if (existingStage === 'familiarise') {
+        setStudentCurrentStage(studentId, 'climate-change', 'familiarise');
       }
 
       // Store in localStorage for client state persistence

@@ -92,3 +92,60 @@ export function resetStageTutorial(moduleId: string, stage: string): void {
   }
 }
 
+/**
+ * Retrieves the current stage for a student on a specific topic.
+ * Always strictly defaults to 'familiarise' (Annotate) for new students or when no stage has been recorded.
+ * Never falls back to un-scoped global keys.
+ */
+export function getStudentCurrentStage(studentId: string, topicId: string): string {
+  if (typeof window === 'undefined' && typeof localStorage === 'undefined') return 'familiarise';
+  try {
+    const key = `critic_current_stage_${studentId}_${topicId}`;
+    const saved = typeof localStorage !== 'undefined' ? localStorage.getItem(key) : null;
+    // If not set, or completed/review, always start at familiarise (Annotate)
+    if (!saved || saved === 'review') {
+      return 'familiarise';
+    }
+    return saved;
+  } catch {
+    return 'familiarise';
+  }
+}
+
+/**
+ * Persists the current stage for a student on a specific topic, strictly scoped to their studentId.
+ */
+export function setStudentCurrentStage(studentId: string, topicId: string, stage: string): void {
+  if (typeof window === 'undefined' && typeof localStorage === 'undefined') return;
+  try {
+    const key = `critic_current_stage_${studentId}_${topicId}`;
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(key, stage);
+    }
+  } catch (e) {
+    console.error(`Error saving stage ${stage} for student ${studentId}:`, e);
+  }
+}
+
+/**
+ * Clears un-scoped legacy stage keys that may have been saved in prior versions,
+ * preventing cross-account stage leakage to new access codes.
+ */
+export function clearLegacyUnscopedStages(): void {
+  if (typeof window === 'undefined' && typeof localStorage === 'undefined') return;
+  try {
+    const legacyKeys = [
+      'critic_current_stage_climate-change',
+      'critic_current_stage',
+      'critic_current_stage_vaccine-safety',
+      'critic_current_stage_mental-wellbeing',
+    ];
+    if (typeof localStorage !== 'undefined') {
+      legacyKeys.forEach((k) => localStorage.removeItem(k));
+    }
+  } catch {
+    // Non-blocking
+  }
+}
+
+

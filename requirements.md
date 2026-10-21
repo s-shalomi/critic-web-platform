@@ -292,6 +292,7 @@ UI non-negotiables:
 - The dock on the bottom should be clearly highlighted to indicate navigation (to next and previous stages).
 - The Conclude (Synthesis) stage includes a dedicated 'Save' button allowing students to manually persist their draft conclusion without triggering an AI audit.
 - Moving between stages displays a high-visibility '✓ Saved' notification pill above the navigation dock when leaving a stage (not on entering) confirming progress persistence.
+- Entering a module from a new access code MUST always start on Stage 01: Annotate (Familiarise); stage progress is strictly isolated to the student ID and never falls back to un-scoped or prior session keys.
 
 Note that the UI is subject to change, so implement it with the flexibility to be changed later on.
 

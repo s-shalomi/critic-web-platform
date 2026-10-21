@@ -11,6 +11,7 @@ import {
   getStoredAgentPreferences,
 } from '@/shared/components/RobotAvatar/RobotAvatar';
 import { CriticLogo } from '@/shared/components/CriticLogo/CriticLogo';
+import { getStudentCurrentStage, clearLegacyUnscopedStages } from '@/shared/utils/storage';
 
 interface Topic {
   id: string;
@@ -145,6 +146,9 @@ export default function DashboardPage() {
       // Ignored
     }
 
+    // Clear any stale unscoped stage keys left from prior sessions on this machine
+    clearLegacyUnscopedStages();
+
     // Pre-fetch familiarise stage for rapid instant navigation
     try {
       let studentId = 'student_demo';
@@ -153,7 +157,8 @@ export default function DashboardPage() {
         const user = JSON.parse(userStr);
         studentId = user.id || user.email || user.accessCode || 'student_demo';
       }
-      router.prefetch(`/module/mod_climate-change_${studentId}/familiarise`);
+      const targetStage = getStudentCurrentStage(studentId, 'climate-change');
+      router.prefetch(`/module/mod_climate-change_${studentId}/${targetStage}`);
     } catch {
       // Ignored
     }
@@ -176,14 +181,8 @@ export default function DashboardPage() {
     }
 
     const moduleId = `mod_${topicId}_${studentId}`;
-    const stageKey = `critic_current_stage_${studentId}_${topicId}`;
-    const savedStage =
-      localStorage.getItem(stageKey) ||
-      localStorage.getItem(`critic_current_stage_${topicId}`) ||
-      'familiarise';
-
-    // If student previously reached review/debrief, restart them at familiarise stage
-    const targetStage = savedStage === 'review' ? 'familiarise' : savedStage;
+    // Always strictly use student-isolated stage, defaulting to 'familiarise' (Annotate) for new access codes
+    const targetStage = getStudentCurrentStage(studentId, topicId);
 
     router.prefetch(`/module/${moduleId}/${targetStage}`);
     router.push(`/module/${moduleId}/${targetStage}`);
@@ -290,12 +289,7 @@ export default function DashboardPage() {
         studentId = user.id || user.email || user.accessCode || 'student_demo';
       }
       const moduleId = `mod_${topicId}_${studentId}`;
-      const stageKey = `critic_current_stage_${studentId}_${topicId}`;
-      const savedStage =
-        localStorage.getItem(stageKey) ||
-        localStorage.getItem(`critic_current_stage_${topicId}`) ||
-        'familiarise';
-      const targetStage = savedStage === 'review' ? 'familiarise' : savedStage;
+      const targetStage = getStudentCurrentStage(studentId, topicId);
       router.prefetch(`/module/${moduleId}/${targetStage}`);
     } catch {}
   };

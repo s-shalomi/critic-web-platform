@@ -1572,5 +1572,44 @@
 - **Tests Passing**:
   - `npm test` (63/63 tests passing across 10 test suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
-- **Immediate Next Step**: Seek user approval for Fix 4.
+- **Immediate Next Step**: Approved and pushed to `feat/iteration-3`. Proceeded to new access code stage initialization fix.
+
+---
+
+### [2026-10-22] - Fix: Ensure New Access Codes Always Start on Annotation Page
+
+- **Role**: Full Stack Developer
+- **User Instruction**:
+  - *"sometimes, when entering a module from a new access code it starts on the conclusion page. ensure it always starts on annotation page"*
+  - *"make sure to seek approval after each fix."*
+- **Root Cause Identified**:
+  - In [`src/app/dashboard/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/page.tsx), `handleEnterModule` previously attempted to read `critic_current_stage_${studentId}_${topicId}` and fell back to `localStorage.getItem('critic_current_stage_' + topicId)`.
+  - When an earlier student reached Stage 04: Conclude (`synthesise`), [`src/shared/utils/reportProgress.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/utils/reportProgress.ts) wrote `'synthesise'` to that un-scoped key `critic_current_stage_climate-change`.
+  - When a student logged in with a brand new access code on that same machine, their student-scoped key did not exist yet, causing the fallback to read `'synthesise'` and redirect the new student straight to the conclusion page.
+- **Code Built & Updated**:
+  - **Student-Isolated Stage Helpers & Legacy Key Purging**:
+    - Enhanced [`src/shared/utils/storage.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/utils/storage.ts):
+      - Added `getStudentCurrentStage(studentId, topicId)`: strictly reads `critic_current_stage_${studentId}_${topicId}`, never falls back to un-scoped keys, and always returns `'familiarise'` (Stage 01: Annotate) if no prior progress exists or if the module was in `'review'`.
+      - Added `setStudentCurrentStage(studentId, topicId, stage)`: strictly writes to the student-isolated key.
+      - Added `clearLegacyUnscopedStages()`: purges all un-scoped global keys (`critic_current_stage_climate-change`, `critic_current_stage`, etc.) to eliminate browser storage pollution across sessions.
+  - **Progress Reporter Fixed**:
+    - Updated [`src/shared/utils/reportProgress.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/utils/reportProgress.ts) to strictly call `setStudentCurrentStage(studentId, topicSlug, currentStage)` and remove any un-scoped legacy key on every report.
+  - **Dashboard Navigation Updated**:
+    - Updated [`src/app/dashboard/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/dashboard/page.tsx) `handleEnterModule`, `handlePrefetchModule`, and mount hook:
+      - Purges legacy un-scoped keys on dashboard load.
+      - Uses `getStudentCurrentStage(studentId, topicId)`, completely eliminating the fallback to un-scoped keys.
+  - **Login Handlers Updated**:
+    - Updated [`src/app/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/page.tsx) and [`src/app/login/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/login/page.tsx):
+      - Upon student login with an access code, purges legacy un-scoped keys and ensures that if no prior stage is recorded for this student, their starting stage is explicitly initialized to `'familiarise'`.
+  - **Module Root Fallback**:
+    - Created [`src/app/module/[moduleId]/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/page.tsx) to redirect any direct module root accesses to the student's stage, defaulting strictly to `'familiarise'`.
+  - **Unit Tests**:
+    - Created [`tests/stageInitialization.test.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/tests/stageInitialization.test.ts) covering new access code isolation, resilience against leftover `synthesise` keys in storage, legacy key clearing, student progress preservation, and completed review reset.
+  - **Requirements & Documentation**:
+    - Updated [`requirements.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/requirements.md) UI non-negotiables specifying that new access codes strictly begin on Stage 01: Annotate.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (68/68 tests passing across 11 test suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+- **Immediate Next Step**: Seek user approval for this fix before committing and pushing.
 
