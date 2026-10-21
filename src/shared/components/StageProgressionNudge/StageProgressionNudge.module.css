@@ -80,34 +80,6 @@
   flex-shrink: 0;
 }
 
-.proceedBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 16px;
-  background: linear-gradient(135deg, #37F3FF 0%, #00B4D8 100%);
-  color: #0A0F1D;
-  font-family: var(--font-display, 'Space Grotesk', sans-serif);
-  font-size: 0.82rem;
-  font-weight: 700;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 0 12px rgba(55, 243, 255, 0.35);
-  white-space: nowrap;
-}
-
-.proceedBtn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 0 18px rgba(55, 243, 255, 0.6);
-  background: linear-gradient(135deg, #5ff5ff 0%, #00c8f0 100%);
-}
-
-.proceedBtn:active {
-  transform: translateY(0);
-}
-
 .dismissBtn {
   display: inline-flex;
   align-items: center;

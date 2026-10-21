@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import styles from './StageProgressionNudge.module.css';
 import { getStudentStorageKey } from '@/shared/utils/storage';
 
@@ -9,30 +8,25 @@ export type StageName = 'familiarise' | 'conceptualise' | 'inquire' | 'synthesis
 
 interface StageConfig {
   nextStageName: string;
-  nextPath: string;
 }
 
-const STAGE_CONFIGS: Record<StageName, (moduleId: string) => StageConfig> = {
-  familiarise: (moduleId) => ({
+const STAGE_CONFIGS: Record<StageName, StageConfig> = {
+  familiarise: {
     nextStageName: 'Stage 02: Mind Map',
-    nextPath: `/module/${moduleId}/conceptualise`,
-  }),
-  conceptualise: (moduleId) => ({
+  },
+  conceptualise: {
     nextStageName: 'Stage 03: Challenge',
-    nextPath: `/module/${moduleId}/inquire`,
-  }),
-  inquire: (moduleId) => ({
+  },
+  inquire: {
     nextStageName: 'Stage 04: Conclude',
-    nextPath: `/module/${moduleId}/synthesise`,
-  }),
-  synthesise: (moduleId) => ({
+  },
+  synthesise: {
     nextStageName: 'Module Review & Debrief',
-    nextPath: `/module/${moduleId}/review`,
-  }),
+  },
 };
 
 export interface StageProgressionNudgeProps {
-  currentStage: StageName;
+  currentStage?: StageName;
   moduleId: string;
   questionCount?: number;
   threshold?: number;
@@ -41,14 +35,13 @@ export interface StageProgressionNudgeProps {
 }
 
 export const StageProgressionNudge: React.FC<StageProgressionNudgeProps> = ({
-  currentStage,
+  currentStage = 'inquire',
   moduleId,
   questionCount: propQuestionCount,
   threshold = 10,
   onDismiss,
   className = '',
 }) => {
-  const router = useRouter();
   const [dismissed, setDismissed] = useState<boolean>(false);
   const [mounted, setMounted] = useState<boolean>(false);
   const [internalCount, setInternalCount] = useState<number>(0);
@@ -92,9 +85,8 @@ export const StageProgressionNudge: React.FC<StageProgressionNudgeProps> = ({
     return null;
   }
 
-  const stageConfig = STAGE_CONFIGS[currentStage]?.(moduleId) || {
-    nextStageName: 'Next Stage',
-    nextPath: `/module/${moduleId}/review`,
+  const stageConfig = STAGE_CONFIGS[currentStage] || {
+    nextStageName: 'Stage 04: Conclude',
   };
 
   const handleDismiss = () => {
@@ -107,10 +99,6 @@ export const StageProgressionNudge: React.FC<StageProgressionNudgeProps> = ({
     if (onDismiss) {
       onDismiss();
     }
-  };
-
-  const handleProceed = () => {
-    router.push(stageConfig.nextPath);
   };
 
   return (
@@ -128,7 +116,7 @@ export const StageProgressionNudge: React.FC<StageProgressionNudgeProps> = ({
         <p className={styles.bannerText}>
           You&apos;ve explored <strong>{effectiveCount} Socratic questions</strong> in this stage!
           Consider moving forward to{' '}
-          <span className={styles.highlightStage}>{stageConfig.nextStageName}</span>.
+          <span className={styles.highlightStage}>{stageConfig.nextStageName}</span> when you&apos;re ready.
           <span className={styles.returnLaterNote}>
             (You can always return to this stage later to refine your work.)
           </span>
@@ -138,18 +126,9 @@ export const StageProgressionNudge: React.FC<StageProgressionNudgeProps> = ({
       <div className={styles.actionsGroup}>
         <button
           type="button"
-          onClick={handleProceed}
-          className={styles.proceedBtn}
-          title={`Proceed to ${stageConfig.nextStageName}`}
-        >
-          <span>Move to {stageConfig.nextStageName}</span>
-          <span aria-hidden="true">→</span>
-        </button>
-        <button
-          type="button"
           onClick={handleDismiss}
           className={styles.dismissBtn}
-          title="Dismiss notification (stay in this stage)"
+          title="Dismiss notification"
           aria-label="Dismiss banner"
         >
           ✕

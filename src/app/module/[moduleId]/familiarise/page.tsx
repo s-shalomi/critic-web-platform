@@ -23,7 +23,6 @@ import { TooltipTutorial } from '@/shared/components/TooltipTutorial/TooltipTuto
 import { StageOverviewModal } from '@/shared/components/StageOverviewModal/StageOverviewModal';
 import { STAGE_TUTORIAL_STEPS } from '@/shared/config/tutorials';
 import { StageNavigationDock } from '@/shared/components/StageNavigationDock/StageNavigationDock';
-import { StageProgressionNudge } from '@/shared/components/StageProgressionNudge/StageProgressionNudge';
 
 interface Source {
   id: string;
@@ -558,11 +557,6 @@ export default function FamiliariseStagePage() {
 
   return (
     <div className={styles.container}>
-      <StageProgressionNudge
-        currentStage="familiarise"
-        moduleId={moduleId}
-        questionCount={socraticCount}
-      />
       {/* Main Split Workspace matching screens_v2/familiarise.png */}
       <div className={styles.workspace}>
         {/* Left Sidebar */}

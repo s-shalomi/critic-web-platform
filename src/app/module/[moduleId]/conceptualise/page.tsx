@@ -24,7 +24,6 @@ import { TooltipTutorial } from '@/shared/components/TooltipTutorial/TooltipTuto
 import { StageOverviewModal } from '@/shared/components/StageOverviewModal/StageOverviewModal';
 import { STAGE_TUTORIAL_STEPS } from '@/shared/config/tutorials';
 import { StageNavigationDock } from '@/shared/components/StageNavigationDock/StageNavigationDock';
-import { StageProgressionNudge } from '@/shared/components/StageProgressionNudge/StageProgressionNudge';
 
 interface Source {
   id: string;
@@ -463,11 +462,6 @@ export default function ConceptualiseStagePage() {
         }
       }}
     >
-      <StageProgressionNudge
-        currentStage="conceptualise"
-        moduleId={moduleId}
-        questionCount={socraticCount}
-      />
       <div className={styles.workspace}>
         {/* Left Panel: Back Navigation, Mind Map Connections Heading, Source Carousel & Agent Dock */}
         <aside

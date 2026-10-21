@@ -24,7 +24,6 @@ import { TooltipTutorial } from '@/shared/components/TooltipTutorial/TooltipTuto
 import { StageOverviewModal } from '@/shared/components/StageOverviewModal/StageOverviewModal';
 import { STAGE_TUTORIAL_STEPS } from '@/shared/config/tutorials';
 import { StageNavigationDock } from '@/shared/components/StageNavigationDock/StageNavigationDock';
-import { StageProgressionNudge } from '@/shared/components/StageProgressionNudge/StageProgressionNudge';
 
 export default function SynthesiseStagePage() {
   const router = useRouter();
@@ -182,11 +181,6 @@ export default function SynthesiseStagePage() {
 
   return (
     <div className={styles.container}>
-      <StageProgressionNudge
-        currentStage="synthesise"
-        moduleId={moduleId}
-        questionCount={socraticCount}
-      />
       {/* Main Split Workspace */}
       <div className={styles.workspace}>
         {/* Left Conclude Panel matching screens_v2/synthesis.png */}

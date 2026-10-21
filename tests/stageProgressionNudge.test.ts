@@ -29,7 +29,7 @@ Object.defineProperty(global, 'sessionStorage', {
   writable: true,
 });
 
-describe('StageProgressionNudge Socratic Milestone Logic', () => {
+describe('StageProgressionNudge Inquire Stage Socratic Milestone Banner', () => {
   const moduleId = 'test_mod_climate';
 
   beforeEach(() => {
@@ -37,75 +37,45 @@ describe('StageProgressionNudge Socratic Milestone Logic', () => {
     sessionStorageMock.clear();
   });
 
-  describe('Storage Keys and Counts for Each Stage', () => {
-    const stages = ['familiarise', 'conceptualise', 'inquire', 'synthesise'] as const;
+  describe('Inquire Stage Socratic Question Counter', () => {
+    it('stores and tracks Socratic question count in Inquire stage', () => {
+      const key = getStudentStorageKey('critic_socratic_count_inquire', moduleId);
+      expect(localStorage.getItem(key)).toBeNull();
 
-    stages.forEach((stage) => {
-      it(`stores and increments Socratic question count for ${stage}`, () => {
-        const key = getStudentStorageKey(`critic_socratic_count_${stage}`, moduleId);
-        expect(localStorage.getItem(key)).toBeNull();
+      localStorage.setItem(key, '1');
+      expect(parseInt(localStorage.getItem(key) || '0', 10)).toBe(1);
 
-        localStorage.setItem(key, '1');
-        expect(parseInt(localStorage.getItem(key) || '0', 10)).toBe(1);
+      // Simulate 10 Socratic questions reached
+      localStorage.setItem(key, '10');
+      const count = parseInt(localStorage.getItem(key) || '0', 10);
+      expect(count).toBe(10);
+      expect(count >= 10).toBe(true);
+    });
 
-        // Simulate 10 Socratic questions
-        localStorage.setItem(key, '10');
-        const count = parseInt(localStorage.getItem(key) || '0', 10);
-        expect(count).toBe(10);
-        expect(count >= 10).toBe(true);
-      });
+    it('handles dismissal state persistence in Inquire stage', () => {
+      const dismissKey = getStudentStorageKey('critic_nudge_dismissed_inquire', moduleId);
+      expect(sessionStorage.getItem(dismissKey)).toBeNull();
 
-      it(`handles dismissal state persistence for ${stage}`, () => {
-        const dismissKey = getStudentStorageKey(`critic_nudge_dismissed_${stage}`, moduleId);
-        expect(sessionStorage.getItem(dismissKey)).toBeNull();
-
-        sessionStorage.setItem(dismissKey, 'true');
-        expect(sessionStorage.getItem(dismissKey)).toBe('true');
-      });
+      sessionStorage.setItem(dismissKey, 'true');
+      expect(sessionStorage.getItem(dismissKey)).toBe('true');
     });
   });
 
-  describe('Stage Transition Mapping & Return-Later Guarantee', () => {
-    const stageFlow = [
-      {
-        stage: 'familiarise',
-        expectedNext: `/module/${moduleId}/conceptualise`,
-        expectedName: 'Stage 02: Mind Map',
-      },
-      {
-        stage: 'conceptualise',
-        expectedNext: `/module/${moduleId}/inquire`,
-        expectedName: 'Stage 03: Challenge',
-      },
-      {
-        stage: 'inquire',
-        expectedNext: `/module/${moduleId}/synthesise`,
-        expectedName: 'Stage 04: Conclude',
-      },
-      {
-        stage: 'synthesise',
-        expectedNext: `/module/${moduleId}/review`,
-        expectedName: 'Module Review & Debrief',
-      },
-    ];
+  describe('Banner Copy & Return-Later Guarantee', () => {
+    it('shows milestone banner copy with return-later reassurance and next stage mention (no proceed button)', () => {
+      const currentCount = 10;
+      const nextStageName = 'Stage 04: Conclude';
+      const bannerPrompt = `You've explored ${currentCount} Socratic questions in this stage! Consider moving forward to ${nextStageName} when you're ready. (You can always return to this stage later to refine your work.)`;
 
-    stageFlow.forEach(({ stage, expectedNext, expectedName }) => {
-      it(`maps ${stage} to ${expectedName} (${expectedNext}) and confirms student can return later`, () => {
-        const threshold = 10;
-        const currentCount = 10;
-        const isTriggered = currentCount >= threshold;
-        expect(isTriggered).toBe(true);
-
-        const bannerPrompt = `You've explored ${currentCount} Socratic questions in this stage! Consider moving forward to ${expectedName}. (You can always return to this stage later to refine your work.)`;
-        expect(bannerPrompt).toContain('10 Socratic questions');
-        expect(bannerPrompt).toContain(expectedName);
-        expect(bannerPrompt).toContain('You can always return to this stage later');
-      });
+      expect(bannerPrompt).toContain('10 Socratic questions');
+      expect(bannerPrompt).toContain(nextStageName);
+      expect(bannerPrompt).toContain('when you\'re ready');
+      expect(bannerPrompt).toContain('You can always return to this stage later');
     });
   });
 
-  describe('Inquire Stage Agent Messages Count Integration', () => {
-    it('accurately identifies 10 Socratic questions in conversation history', () => {
+  describe('Inquire Stage Chat Integration: 10 Socratic Questions Trigger', () => {
+    it('accurately identifies when 10 Socratic questions have been asked by the agent in chat dialogue', () => {
       const messages = [
         { id: 'msg-1', sender: 'agent', text: 'Opener Socratic question?' },
         { id: 'msg-2', sender: 'student', text: 'My initial response.' },
