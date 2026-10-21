@@ -319,6 +319,10 @@ export default function ConceptMapCanvas({
       }
     }
 
+    // Immediately notify all active stage listeners that a node was deleted and note status reverted
+    window.dispatchEvent(new Event('critic_notes_updated'));
+    window.dispatchEvent(new Event('critic_canvas_sync'));
+
     // Fire-and-forget sync to server
     try {
       await fetch(`/api/concepts/${nodeId}`, {

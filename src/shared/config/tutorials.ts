@@ -48,7 +48,7 @@ export const STAGE_TUTORIAL_STEPS: Record<StageKey, TutorialStep[]> = {
       targetSelector: '[data-tour="sources-sidebar"]',
       title: 'Sources & Notes',
       content:
-        'Scroll through your sources here and hover over highlights to review your saved notes.',
+        'Scroll through your sources here. Hover or click on highlights to view notes and click "+ Convert to node" to add them to your canvas.',
       placement: 'right',
     },
     {

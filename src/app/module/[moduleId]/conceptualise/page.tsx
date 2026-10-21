@@ -170,12 +170,14 @@ export default function ConceptualiseStagePage() {
 
     window.addEventListener('focus', loadAndSyncNotes);
     window.addEventListener('critic_canvas_sync', loadAndSyncNotes);
+    window.addEventListener('critic_notes_updated', loadAndSyncNotes);
 
     return () => {
       clearInterval(sourcesInterval);
       window.removeEventListener('focus', fetchSources);
       window.removeEventListener('focus', loadAndSyncNotes);
       window.removeEventListener('critic_canvas_sync', loadAndSyncNotes);
+      window.removeEventListener('critic_notes_updated', loadAndSyncNotes);
     };
   }, [moduleId]);
 
@@ -745,7 +747,27 @@ export default function ConceptualiseStagePage() {
             </button>
           </div>
 
-          <ConceptMapCanvas moduleId={moduleId} stageTitle="conceptualise" />
+          <ConceptMapCanvas
+            moduleId={moduleId}
+            stageTitle="conceptualise"
+            onNodesChange={(currentCanvasNodes) => {
+              setNotes((prevNotes) => {
+                const updated = prevNotes.map((note) => {
+                  if (!note.convertedToNode) return note;
+                  const hasNode = currentCanvasNodes.some(
+                    (cn) =>
+                      (cn.sourceNoteId && cn.sourceNoteId === note.id) ||
+                      cn.text === note.noteText ||
+                      cn.text === note.highlightedText
+                  );
+                  return hasNode ? note : { ...note, convertedToNode: false };
+                });
+                const notesKey = getStudentStorageKey('critic_notes', moduleId);
+                localStorage.setItem(notesKey, JSON.stringify(updated));
+                return updated;
+              });
+            }}
+          />
         </div>
       </div>
 

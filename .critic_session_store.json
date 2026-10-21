@@ -113,21 +113,21 @@
     [
       "CLASS_B_2026",
       {
-        "id": "code_1792567349286",
+        "id": "code_1792568453841",
         "code": "CLASS_B_2026",
         "teacherId": "teacher-123",
-        "createdAt": "2026-10-21T07:22:29.286Z",
-        "expiresAt": "2026-11-20T07:22:29.286Z"
+        "createdAt": "2026-10-21T07:40:53.841Z",
+        "expiresAt": "2026-11-20T07:40:53.841Z"
       }
     ],
     [
       "EXP_CHEM_2026",
       {
-        "id": "code_1792567349534",
+        "id": "code_1792568454502",
         "code": "EXP_CHEM_2026",
         "teacherId": "teacher-demo",
-        "createdAt": "2026-10-21T07:22:29.534Z",
-        "expiresAt": "2026-11-20T07:22:29.534Z"
+        "createdAt": "2026-10-21T07:40:54.502Z",
+        "expiresAt": "2026-11-20T07:40:54.502Z"
       }
     ],
     [
@@ -211,7 +211,7 @@
         "topicTitle": "Climate Change",
         "currentStage": "synthesise",
         "status": "in_progress",
-        "lastActive": "2026-10-21T07:22:29.290Z"
+        "lastActive": "2026-10-21T07:40:53.850Z"
       }
     ],
     [
@@ -231,9 +231,9 @@
         "studentId": "student_434c494d4154",
         "accessCode": "CLIMATE2026",
         "topicTitle": "Climate Change",
-        "currentStage": "familiarise",
+        "currentStage": "conceptualise",
         "status": "in_progress",
-        "lastActive": "2026-10-21T06:50:33.772Z"
+        "lastActive": "2026-10-21T07:33:02.562Z"
       }
     ],
     [
@@ -375,7 +375,7 @@
           "noteText": "misleading claim - farming releases methane",
           "convertedToNode": true,
           "createdAt": "2026-10-20T02:59:52.963Z",
-          "updatedAt": "2026-10-20T03:02:04.168Z"
+          "updatedAt": "2026-10-21T07:33:50.396Z"
         },
         {
           "id": "note_1792465232945_eb3fx",
@@ -383,9 +383,9 @@
           "sourceId": "source_1791954012810_4ia3m",
           "highlightedText": "Overwhelmingly, the risk of climate change is due to moving billions of tons of carbon from deep underground into the atmosphere",
           "noteText": "this is accurate but elon musk makes it seem like fossil fuels are the only source of climate change",
-          "convertedToNode": false,
+          "convertedToNode": true,
           "createdAt": "2026-10-20T03:00:32.945Z",
-          "updatedAt": "2026-10-20T03:00:32.945Z"
+          "updatedAt": "2026-10-21T07:32:33.765Z"
         }
       ]
     ],
@@ -769,7 +769,19 @@
     ],
     [
       "mod_climate-change_student_434c494d4154",
-      []
+      [
+        {
+          "id": "node_1792567941325_ermyy",
+          "moduleId": "mod_climate-change_student_434c494d4154",
+          "text": "misleading claim - farming releases methane",
+          "positionX": 256.50026805146365,
+          "positionY": 227.08847696580904,
+          "sourceNoteId": "note_1792465192963_cyivz",
+          "linkCount": 0,
+          "createdAt": "2026-10-21T07:32:21.325Z",
+          "updatedAt": "2026-10-21T07:32:21.325Z"
+        }
+      ]
     ],
     [
       "test_mod_456",

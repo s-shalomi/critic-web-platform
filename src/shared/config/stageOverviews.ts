@@ -50,9 +50,9 @@ export const STAGE_OVERVIEWS: Record<
       'Arguments are interconnected webs of claims, evidence, and logical leaps. Mind mapping transforms scattered thoughts into a clear visual structure, exposing logical gaps, contradictions, and missing justifications.',
     overviewItems: [
       {
-        title: 'Review Highlights',
+        title: 'Review Highlights & Convert to Node',
         description:
-          'Browse your sources in the sidebar and hover over purple highlights to inspect your saved notes.',
+          'Browse your sources in the sidebar, hover or click on highlights to inspect notes, and click "+ Convert to node" to add them to your canvas.',
       },
       {
         title: 'Create Concept Nodes (◯)',

@@ -130,6 +130,13 @@ describe('Tooltip Onboarding Tutorial & Stage Overviews', () => {
             s.content.toLowerCase().includes('select a node to edit and delete')
         )
       ).toBe(true);
+      expect(
+        conceptualiseSteps.some(
+          (s) =>
+            s.targetSelector === '[data-tour="sources-sidebar"]' &&
+            s.content.toLowerCase().includes('convert to node')
+        )
+      ).toBe(true);
 
       // Challenge stage requirements (chat, concept canvas reference, navigation dock; no ? button)
       const inquireSteps = STAGE_TUTORIAL_STEPS.inquire;

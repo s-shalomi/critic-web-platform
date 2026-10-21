@@ -1474,16 +1474,18 @@
       - Triggers an animated feedback toast (`✨ Note converted to Concept Node! Added to Mind Map.`) sliding up from the bottom dock.
       - Calls `POST /api/notes/:noteId/convert-to-node` in the background with loading spinner state (`Creating Node...`).
     - Once converted, shows `✓ Converted to Concept Node` cyan badge.
-  - **Two-Way Node Reversion Synchronization**:
-    - Added `syncNotesWithCanvas` in `conceptualise/page.tsx` listening to `critic_canvas_sync` and `focus` events: if a converted node is deleted from the canvas, the corresponding source note immediately flips back to `convertedToNode: false` and the `+ Convert to node` button re-appears in the tooltip.
-  - **Event Listeners in ConceptMapCanvas**:
-    - Added `critic_canvas_sync` and `storage` event listeners to `ConceptMapCanvas.tsx` to react immediately to cross-panel node additions and deletions.
-  - **Documentation**:
-    - Updated [`requirements.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/requirements.md) Section 10 Stage 2 to document note conversion from the sources sidebar.
+  - **Instant Reactivity on Node Deletion (Zero-Refresh Reversion)**:
+    - Wired up `onNodesChange` callback on `<ConceptMapCanvas />` in `conceptualise/page.tsx` so that when a node is deleted on the canvas, `setNotes` in `conceptualise/page.tsx` updates synchronously within the same React render cycle.
+    - Added `window.dispatchEvent(new Event('critic_notes_updated'))` and `window.dispatchEvent(new Event('critic_canvas_sync'))` inside `handleDeleteNode` in [`ConceptMapCanvas.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/ConceptMapCanvas/ConceptMapCanvas.tsx) and added the corresponding event listeners in `conceptualise/page.tsx`.
+    - When a user deletes a node from the canvas, the button on the note tooltip in the sources panel instantly transitions back from `✓ Converted to Concept Node` to `+ Convert to node` with zero page refresh.
+  - **Convert to Node Feature in Stage 2 Tutorial & Overview**:
+    - Updated `STAGE_TUTORIAL_STEPS.conceptualise` in [`src/shared/config/tutorials.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/config/tutorials.ts) to instruct users: *"Scroll through your sources here. Hover or click on highlights to view notes and click '+ Convert to node' to add them to your canvas."*
+    - Updated `STAGE_OVERVIEWS.conceptualise` in [`src/shared/config/stageOverviews.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/config/stageOverviews.ts).
+    - Added verification assertion in [`tests/tutorial.test.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/tests/tutorial.test.ts).
 - **Dependencies Introduced**: None.
 - **Tests Passing**:
   - `npm test` (47/47 tests passing across 9 test suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
-- **Immediate Next Step**: Seek user approval for Fix 2 before proceeding to Fix 3.
+- **Immediate Next Step**: Seek user approval for Fix 2 revision before proceeding to Fix 3.
 
 
