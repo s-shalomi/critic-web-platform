@@ -23,6 +23,7 @@ import { TooltipTutorial } from '@/shared/components/TooltipTutorial/TooltipTuto
 import { StageOverviewModal } from '@/shared/components/StageOverviewModal/StageOverviewModal';
 import { STAGE_TUTORIAL_STEPS } from '@/shared/config/tutorials';
 import { StageNavigationDock } from '@/shared/components/StageNavigationDock/StageNavigationDock';
+import { StageProgressionNudge } from '@/shared/components/StageProgressionNudge/StageProgressionNudge';
 
 interface Source {
   id: string;
@@ -120,7 +121,12 @@ export default function FamiliariseStagePage() {
     setAgentPrefs(getStoredAgentPreferences());
     const notesKey = getStudentStorageKey('critic_notes', moduleId);
     const socraticKey = getStudentStorageKey('critic_socratic_count_familiarise', moduleId);
-    const initialSocratic = parseInt(localStorage.getItem(socraticKey) || '0', 10);
+    const initialSocratic = Math.max(
+      parseInt(localStorage.getItem(socraticKey) || '0', 10),
+      parseInt(localStorage.getItem('critic_socratic_count_familiarise') || '0', 10),
+      parseInt(localStorage.getItem(getStudentStorageKey('critic_hints', moduleId)) || '0', 10),
+      parseInt(localStorage.getItem('critic_hints') || '0', 10)
+    );
     setSocraticCount(initialSocratic);
 
     // Show mandatory AI disclosure automatically once when the student first enters the module
@@ -357,23 +363,28 @@ export default function FamiliariseStagePage() {
   };
 
   const handleAgentClick = async () => {
+    // Increment Socratic question count immediately so multiple rapid clicks or tests are registered
+    const socraticKey = getStudentStorageKey('critic_socratic_count_familiarise', moduleId);
+    const currentSocratic = Math.max(
+      parseInt(localStorage.getItem(socraticKey) || '0', 10),
+      parseInt(localStorage.getItem('critic_socratic_count_familiarise') || '0', 10)
+    );
+    const nextSocratic = currentSocratic + 1;
+    localStorage.setItem(socraticKey, String(nextSocratic));
+    localStorage.setItem('critic_socratic_count_familiarise', String(nextSocratic));
+    setSocraticCount(nextSocratic);
+    window.dispatchEvent(new Event('critic_socratic_sync'));
+
+    const hintKey = getStudentStorageKey('critic_hints', moduleId);
+    const current = parseInt(localStorage.getItem(hintKey) || '0', 10);
+    const nextHintCount = current + 1;
+    localStorage.setItem(hintKey, String(nextHintCount));
+
     if (agentLoading) return;
     setAgentLoading(true);
     setAgentSpeech(null);
 
     try {
-      const hintKey = getStudentStorageKey('critic_hints', moduleId);
-      const current = parseInt(localStorage.getItem(hintKey) || '0', 10);
-      const nextHintCount = current + 1;
-      localStorage.setItem(hintKey, String(nextHintCount));
-
-      const socraticKey = getStudentStorageKey('critic_socratic_count_familiarise', moduleId);
-      const currentSocratic = parseInt(localStorage.getItem(socraticKey) || '0', 10);
-      const nextSocratic = currentSocratic + 1;
-      localStorage.setItem(socraticKey, String(nextSocratic));
-      setSocraticCount(nextSocratic);
-      window.dispatchEvent(new Event('critic_socratic_sync'));
-
       const res = await fetch(`/api/modules/${moduleId}/agent/hint`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -557,6 +568,11 @@ export default function FamiliariseStagePage() {
 
   return (
     <div className={styles.container}>
+      <StageProgressionNudge
+        currentStage="familiarise"
+        moduleId={moduleId}
+        questionCount={socraticCount}
+      />
       {/* Main Split Workspace matching screens_v2/familiarise.png */}
       <div className={styles.workspace}>
         {/* Left Sidebar */}

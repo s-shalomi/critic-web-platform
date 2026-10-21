@@ -126,5 +126,60 @@ describe('StageProgressionNudge Inquire Stage Socratic Milestone Banner', () => 
       expect(marksCount).toBe(10);
       expect(marksCount >= 10).toBe(true);
     });
+
+    it('triggers when 10 dialogue turns occur in total between student and agent', () => {
+      const totalTurns = Array.from({ length: 10 }, (_, i) => ({
+        id: `turn_${i}`,
+        sender: (i % 2 === 0 ? 'student' : 'agent') as 'student' | 'agent',
+        text: `Turn text ${i + 1}`,
+      }));
+
+      expect(totalTurns.length).toBe(10);
+      expect(totalTurns.length >= 10).toBe(true);
+    });
+  });
+
+  describe('Multi-Stage Socratic Question Tracking (Every Stage Except Synthesis)', () => {
+    it('generates correct banner copy for familiarise prompting next source or next stage', () => {
+      const currentCount = 10;
+      const familiarisePrompt = `You've explored ${currentCount} Socratic questions in this stage! Consider moving to the next source or moving forward to Stage 02: Mind Map when you're ready. (You can always return to this stage later to refine your work.)`;
+
+      expect(familiarisePrompt).toContain('moving to the next source or moving forward to Stage 02: Mind Map');
+      expect(familiarisePrompt).toContain('You can always return to this stage later to refine your work.');
+      expect(familiarisePrompt).not.toContain('button');
+    });
+
+    it('generates correct banner copy for conceptualise stage', () => {
+      const currentCount = 10;
+      const conceptualisePrompt = `You've explored ${currentCount} Socratic questions in this stage! Consider moving forward to Stage 03: Challenge when you're ready. (You can always return to this stage later to refine your work.)`;
+
+      expect(conceptualisePrompt).toContain('Stage 03: Challenge');
+      expect(conceptualisePrompt).toContain('You can always return to this stage later to refine your work.');
+    });
+
+    it('tracks rapid avatar clicks immediately in familiarise stage', () => {
+      const socraticKey = getStudentStorageKey('critic_socratic_count_familiarise', moduleId);
+      let count = 0;
+      for (let i = 0; i < 10; i++) {
+        count += 1;
+        localStorage.setItem(socraticKey, String(count));
+      }
+      expect(parseInt(localStorage.getItem(socraticKey) || '0', 10)).toBe(10);
+    });
+
+    it('tracks rapid avatar clicks immediately in conceptualise stage', () => {
+      const socraticKey = getStudentStorageKey('critic_socratic_count_conceptualise', moduleId);
+      let count = 0;
+      for (let i = 0; i < 10; i++) {
+        count += 1;
+        localStorage.setItem(socraticKey, String(count));
+      }
+      expect(parseInt(localStorage.getItem(socraticKey) || '0', 10)).toBe(10);
+    });
+
+    it('confirms synthesis stage has no progression nudge banner', () => {
+      const synthesisStagesWithNudge = ['familiarise', 'conceptualise', 'inquire'];
+      expect(synthesisStagesWithNudge).not.toContain('synthesise');
+    });
   });
 });

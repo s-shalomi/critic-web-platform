@@ -24,6 +24,7 @@ import { TooltipTutorial } from '@/shared/components/TooltipTutorial/TooltipTuto
 import { StageOverviewModal } from '@/shared/components/StageOverviewModal/StageOverviewModal';
 import { STAGE_TUTORIAL_STEPS } from '@/shared/config/tutorials';
 import { StageNavigationDock } from '@/shared/components/StageNavigationDock/StageNavigationDock';
+import { StageProgressionNudge } from '@/shared/components/StageProgressionNudge/StageProgressionNudge';
 
 interface Source {
   id: string;
@@ -94,7 +95,12 @@ export default function ConceptualiseStagePage() {
   useEffect(() => {
     const notesKey = getStudentStorageKey('critic_notes', moduleId);
     const socraticKey = getStudentStorageKey('critic_socratic_count_conceptualise', moduleId);
-    const initialSocratic = parseInt(localStorage.getItem(socraticKey) || '0', 10);
+    const initialSocratic = Math.max(
+      parseInt(localStorage.getItem(socraticKey) || '0', 10),
+      parseInt(localStorage.getItem('critic_socratic_count_conceptualise') || '0', 10),
+      parseInt(localStorage.getItem(getStudentStorageKey('critic_hints', moduleId)) || '0', 10),
+      parseInt(localStorage.getItem('critic_hints') || '0', 10)
+    );
     setSocraticCount(initialSocratic);
 
     setAgentPrefs(getStoredAgentPreferences());
@@ -327,21 +333,27 @@ export default function ConceptualiseStagePage() {
   };
 
   const handleAgentClick = async () => {
+    // Increment Socratic question count immediately so multiple rapid clicks or tests are registered
+    const socraticKey = getStudentStorageKey('critic_socratic_count_conceptualise', moduleId);
+    const currentSocratic = Math.max(
+      parseInt(localStorage.getItem(socraticKey) || '0', 10),
+      parseInt(localStorage.getItem('critic_socratic_count_conceptualise') || '0', 10)
+    );
+    const nextSocratic = currentSocratic + 1;
+    localStorage.setItem(socraticKey, String(nextSocratic));
+    localStorage.setItem('critic_socratic_count_conceptualise', String(nextSocratic));
+    setSocraticCount(nextSocratic);
+    window.dispatchEvent(new Event('critic_socratic_sync'));
+
+    const hintKey = getStudentStorageKey('critic_hints', moduleId);
+    const current = parseInt(localStorage.getItem(hintKey) || '0', 10);
+    localStorage.setItem(hintKey, String(current + 1));
+
     if (agentLoading) return;
     setAgentLoading(true);
     setAgentSpeech(null);
 
     try {
-      const hintKey = getStudentStorageKey('critic_hints', moduleId);
-      const current = parseInt(localStorage.getItem(hintKey) || '0', 10);
-      localStorage.setItem(hintKey, String(current + 1));
-
-      const socraticKey = getStudentStorageKey('critic_socratic_count_conceptualise', moduleId);
-      const currentSocratic = parseInt(localStorage.getItem(socraticKey) || '0', 10);
-      const nextSocratic = currentSocratic + 1;
-      localStorage.setItem(socraticKey, String(nextSocratic));
-      setSocraticCount(nextSocratic);
-      window.dispatchEvent(new Event('critic_socratic_sync'));
 
       // Retrieve live concept nodes and links from client canvas storage
       const nodesKey = getStudentStorageKey('critic_nodes_canvas', moduleId);
@@ -462,6 +474,11 @@ export default function ConceptualiseStagePage() {
         }
       }}
     >
+      <StageProgressionNudge
+        currentStage="conceptualise"
+        moduleId={moduleId}
+        questionCount={socraticCount}
+      />
       <div className={styles.workspace}>
         {/* Left Panel: Back Navigation, Mind Map Connections Heading, Source Carousel & Agent Dock */}
         <aside

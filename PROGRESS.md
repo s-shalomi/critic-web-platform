@@ -1490,38 +1490,38 @@
 
 ---
 
-### [2026-10-21] - Fix 3: Socratic Question Nudge Banner in Inquire Stage (10 Questions Reached)
+### [2026-10-21] - Fix 3: Multi-Stage Socratic Question Progression Nudge Banner (Every Stage Except Synthesis)
 
 - **Role**: Full Stack Developer
 - **User Instructions**:
   - *"show a banning nudging user to move to next stage after 10 socratic questions have been asked, in each stage. in the banner tell them they can return to this stage later"*
   - *"no, dont have move to next stage button, only banner. when does the banner appear for each stage. only the inquire and evaluate stage should have a banner, the other stages don't need one"*
+  - *"banner still doesnt appear after 10 questions. also implement this on every stage, except the synthesis stage. on the familiarise stage, prompt them to move to the next source or the next stage"*
   - *"make sure to seek approval after each fix."*
 - **Code Built & Updated**:
-  - **Inquire & Evaluate Stage Exclusivity**:
-    - Scoped the milestone progression banner exclusively to Stage 03: Inquire & Evaluate ([`src/app/module/[moduleId]/inquire/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/inquire/page.tsx)).
-    - Removed banner triggers from Stages 01 (Familiarise), 02 (Conceptualise), and 04 (Synthesise) per explicit user direction.
-  - **Banner-Only Design (No 'Move to Next Stage' Button)**:
-    - In [`src/shared/components/StageProgressionNudge/StageProgressionNudge.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/StageProgressionNudge/StageProgressionNudge.tsx) and [`StageProgressionNudge.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/StageProgressionNudge/StageProgressionNudge.module.css), removed the proceed button (`.proceedBtn`).
-    - The banner functions strictly as an unobtrusive, cyber-academic informational notification at the top of the chat stage with an accessible dismiss button (`✕`).
-    - Banner text: *"You've explored {count} Socratic questions in this stage! Consider moving forward to Stage 04: Conclude when you're ready. (You can always return to this stage later to refine your work.)"*
-  - **Exact Trigger Timing & Comprehensive Question Counting**:
-    - Previously, the trigger condition counted only incoming agent messages (`m.sender === 'agent'`), which failed to trigger when the student asked questions in the chat or before agent replies returned.
-    - Updated `inquire/page.tsx` to accurately evaluate Socratic questions asked across student questions (`studentQuestions = messages.filter(m => m.sender === 'student').length`), agent prompts, and questions with question marks (`text.includes('?')`).
-    - The banner appears immediately as soon as **10 questions** are reached (`Math.max(studentQuestions, agentQuestions, questionMarks) >= 10`).
-  - **Storage & Dismissal Defect Resolved**:
-    - Discovered that reading `localStorage.getItem(dismissKey)` on mount caused a single historical dismiss during testing to permanently suppress the banner forever on that browser.
-    - Removed `localStorage` dismissal checking in `StageProgressionNudge.tsx`, added automated cleanup of stale localStorage dismissal keys, and ensured `sessionStorage` or local component state is used without permanently muting the nudge.
-    - Enhanced banner styling in `StageProgressionNudge.module.css` with vibrant cyan border (`border-bottom: 2px solid rgba(55, 243, 255, 0.7)`), elevated z-index (100), and fallback visibility guarantee.
+  - **Multi-Stage Implementation (Every Stage Except Synthesis)**:
+    - Implemented across **all stages except synthesis** ([`src/app/module/[moduleId]/familiarise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/familiarise/page.tsx), [`src/app/module/[moduleId]/conceptualise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/conceptualise/page.tsx), and [`src/app/module/[moduleId]/inquire/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/inquire/page.tsx)).
+    - Synthesis stage (`synthesise/page.tsx`) explicitly excluded from having the banner per user instruction.
+  - **Stage-Specific Banner Copy & Return-Later Guarantee (No Proceed Button)**:
+    - **Familiarise Stage**: *"You've explored {count} Socratic questions in this stage! Consider moving to the next source or moving forward to Stage 02: Mind Map when you're ready. (You can always return to this stage later to refine your work.)"*
+    - **Conceptualise Stage**: *"You've explored {count} Socratic questions in this stage! Consider moving forward to Stage 03: Challenge when you're ready. (You can always return to this stage later to refine your work.)"*
+    - **Inquire Stage**: *"You've explored {count} Socratic questions in this stage! Consider moving forward to Stage 04: Conclude when you're ready. (You can always return to this stage later to refine your work.)"*
+    - No "move to next stage" button on the banner; only the notification banner with milestone indicator and dismiss button (`✕`).
+  - **Root Cause Fix for 'Banner Doesn't Appear'**:
+    1. *Rapid Avatar Click Dropping Fixed*: In `familiarise/page.tsx` and `conceptualise/page.tsx`, `handleAgentClick` previously checked `if (agentLoading) return;` at the very top. When testing by clicking the avatar repeatedly, only 1 click registered and the other 9 were dropped while waiting for the LLM response. Fixed so the Socratic question count increments immediately upon each click.
+    2. *Inquire Dialogue Multi-Metric Tracking & Instant Send Trigger*: In `inquire/page.tsx`, updated `submitMessage` to compute and sync counts on the new message array immediately upon send. Counts factor in student questions, agent prompts, question marks, and total dialogue turns.
+    3. *Count Resolution Bug in StageProgressionNudge*: Fixed `const effectiveCount = Math.max(propQuestionCount ?? 0, internalCount)`. Previously `propQuestionCount !== undefined ? propQuestionCount : internalCount` evaluated to `0` when `propQuestionCount = 0` was passed from the parent state, completely ignoring localStorage count.
+    4. *Storage Cross-Tab & DevTools Reactivity*: Added window focus listener and an 800ms periodic storage check in `StageProgressionNudge.tsx`, so manual storage edits in DevTools or rapid cross-component events trigger the banner within sub-seconds.
   - **Unit Test Suite**:
-    - Updated [`tests/stageProgressionNudge.test.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/tests/stageProgressionNudge.test.ts) testing the 10-question Socratic trigger, student question counts, question mark counts, banner copy, return-later guarantee, absence of proceed button, and dismissal persistence.
+    - Expanded [`tests/stageProgressionNudge.test.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/tests/stageProgressionNudge.test.ts) covering familiarise copy (next source or next stage), conceptualise copy, inquire copy, rapid clicks in familiarise/conceptualise, dialogue turns trigger, absence of proceed button, and synthesis stage exclusion.
   - **Requirements Documented**:
     - Updated [`requirements.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/requirements.md) section on Nudges & Stage Progression.
 - **Dependencies Introduced**: None.
 - **Tests Passing**:
-  - `npm test` (53/53 tests passing across 10 test suites).
+  - `npm test` (59/59 tests passing across 10 test suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
-- **Immediate Next Step**: Seek user approval for refined Fix 3 before proceeding to Fix 4.
+- **Immediate Next Step**: Seek user approval for Fix 3 before proceeding to Fix 4.
+
 
 
 

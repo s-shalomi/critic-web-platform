@@ -152,12 +152,16 @@ export default function InquireEvaluateStagePage() {
         (m) => m.sender === 'agent' && !m.id.startsWith('msg_err')
       ).length;
       const markQ = messages.filter((m) => m.text && m.text.includes('?')).length;
-      const currentCount = Math.max(studentQ, agentQ, markQ);
+      const currentCount = Math.max(studentQ, agentQ, markQ, messages.length);
 
       const socraticKey = getStudentStorageKey('critic_socratic_count_inquire', moduleId);
-      const stored = parseInt(localStorage.getItem(socraticKey) || '0', 10);
+      const stored = Math.max(
+        parseInt(localStorage.getItem(socraticKey) || '0', 10),
+        parseInt(localStorage.getItem('critic_socratic_count_inquire') || '0', 10)
+      );
       const updated = Math.max(currentCount, stored);
       localStorage.setItem(socraticKey, String(updated));
+      localStorage.setItem('critic_socratic_count_inquire', String(updated));
       window.dispatchEvent(new Event('critic_socratic_sync'));
     }
   }, [messages, moduleId]);
@@ -267,8 +271,29 @@ export default function InquireEvaluateStagePage() {
     };
 
     const historyBeforeTurn = [...messages];
-    setMessages((prev) => [...prev, userMsg]);
+    const newMessages = [...messages, userMsg];
+    setMessages(newMessages);
     setInputText('');
+
+    // Immediately update question count and sync so banner shows up instantly on the 10th message
+    const studentQ = newMessages.filter((m) => m.sender === 'student').length;
+    const agentQ = newMessages.filter(
+      (m) => m.sender === 'agent' && !m.id.startsWith('msg_err')
+    ).length;
+    const markQ = newMessages.filter((m) => m.text && m.text.includes('?')).length;
+    const totalTurns = newMessages.length;
+    const computedCount = Math.max(studentQ, agentQ, markQ, totalTurns);
+
+    const socraticKey = getStudentStorageKey('critic_socratic_count_inquire', moduleId);
+    const prevStored = Math.max(
+      parseInt(localStorage.getItem(socraticKey) || '0', 10),
+      parseInt(localStorage.getItem('critic_socratic_count_inquire') || '0', 10)
+    );
+    const newCount = Math.max(computedCount, prevStored);
+    localStorage.setItem(socraticKey, String(newCount));
+    localStorage.setItem('critic_socratic_count_inquire', String(newCount));
+    window.dispatchEvent(new Event('critic_socratic_sync'));
+
     await sendInquireTurn(userText, historyBeforeTurn);
   };
 
@@ -297,14 +322,18 @@ export default function InquireEvaluateStagePage() {
     (m) => m.sender === 'agent' && !m.id.startsWith('msg_err')
   ).length;
   const questionMarksCount = messages.filter((m) => m.text && m.text.includes('?')).length;
+  const totalTurns = messages.length;
 
   const storedSocratic =
     typeof window !== 'undefined'
-      ? parseInt(
-          localStorage.getItem(
-            getStudentStorageKey('critic_socratic_count_inquire', moduleId)
-          ) || '0',
-          10
+      ? Math.max(
+          parseInt(
+            localStorage.getItem(
+              getStudentStorageKey('critic_socratic_count_inquire', moduleId)
+            ) || '0',
+            10
+          ),
+          parseInt(localStorage.getItem('critic_socratic_count_inquire') || '0', 10)
         )
       : 0;
 
@@ -312,6 +341,7 @@ export default function InquireEvaluateStagePage() {
     studentQuestions,
     agentQuestions,
     questionMarksCount,
+    totalTurns,
     storedSocratic
   );
 
