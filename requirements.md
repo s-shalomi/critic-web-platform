@@ -521,7 +521,7 @@ The platform provides a step-by-step tooltip onboarding tutorial for each stage 
 - **AI Agent Hints**: The AI agent can be used for hints when the user is stuck.
 
 ### Stage 2: Mind Map (Conceptualise)
-- **Sources & Notes**: The sidebar contains the sources. The user can scroll through these and hover on highlights to see the notes they made.
+- **Sources & Notes**: The sidebar contains the sources. The user can scroll through these and hover or click on highlights to see the notes they made and convert them to concept nodes.
 - **Hand Icon (Pan & Select)**: The hand icon can be used to pan around the canvas or select a node.
 - **Concept Node Selection (Edit & Delete)**: The tutorial points directly to concept nodes on the canvas, instructing users that they can select a node to edit and delete it (selected nodes glow blue).
 - **Circle Icon (Create Node)**: The circle icon can be used to create a node. These are key concepts identified from the text.

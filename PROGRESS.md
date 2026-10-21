@@ -1450,5 +1450,40 @@
 - **Tests Passing**:
   - `npm test` (47/47 tests passing across 9 test suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
-- **Immediate Next Step**: Seek approval for Fix 1 before implementing Fix 2.
+- **Immediate Next Step**: Approved by user. Proceeded to Fix 2.
+
+---
+
+### [2026-10-21] - Fix 2: Mind Map Stage Note-to-Node Conversion & Overflow-Free Tooltips
+
+- **Role**: Full Stack Developer
+- **User Instructions**:
+  - *"add a 'convert to node' button when hovering over or clicking on the notes made on sources for the mind map stage. ensure the notes dont overflow and show cleanly on screen.the convert to node button should act in the same way as it does on the annotate stage"*
+  - *"make sure to seek approval after each fix."*
+- **Code Built & Updated**:
+  - **Anchored, Fixed Popover Positioning (`.hoverTooltipFixed`)**:
+    - Replaced the inline relative-positioned tooltip with a viewport-anchored, non-clipping popover rendered at the page container level in [`src/app/module/[moduleId]/conceptualise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/conceptualise/page.tsx) and [`conceptualise.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/conceptualise/conceptualise.module.css).
+    - Dynamically computes bounding coordinates (`rect.top`, `rect.left`) via `calculateTooltipPosition()`, automatically flipping below highlights (`placeBelow`) if positioned too close to the top boundary, and clamping horizontally (`16px` to `window.innerWidth - 296px`) to ensure the note popover never bleeds off-screen.
+    - Completely eliminates the bug where `overflow-y: auto` / `overflow-x: hidden` on `.carouselSourceCard` clipped tooltips inside the sidebar.
+    - Added scroll-listener (`handleCardScroll` and `handleCarouselScroll`) to update tooltip anchor position in real time when the user scrolls sources.
+  - **Convert to Node Interactivity & Exact Parity with Annotate Stage**:
+    - Implemented `handleConvertToNode(noteId)` in `conceptualise/page.tsx`:
+      - Optimistically flips `convertedToNode: true` in component state and `critic_notes_${moduleId}` in localStorage.
+      - Constructs and saves a new concept node into `critic_nodes_canvas_${moduleId}` with unique ID, text, source note reference, and starting canvas coordinates.
+      - Dispatches `critic_canvas_sync` event so [`ConceptMapCanvas.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/ConceptMapCanvas/ConceptMapCanvas.tsx) immediately re-queries local storage and renders the new node on the canvas with zero page reload.
+      - Triggers an animated feedback toast (`✨ Note converted to Concept Node! Added to Mind Map.`) sliding up from the bottom dock.
+      - Calls `POST /api/notes/:noteId/convert-to-node` in the background with loading spinner state (`Creating Node...`).
+    - Once converted, shows `✓ Converted to Concept Node` cyan badge.
+  - **Two-Way Node Reversion Synchronization**:
+    - Added `syncNotesWithCanvas` in `conceptualise/page.tsx` listening to `critic_canvas_sync` and `focus` events: if a converted node is deleted from the canvas, the corresponding source note immediately flips back to `convertedToNode: false` and the `+ Convert to node` button re-appears in the tooltip.
+  - **Event Listeners in ConceptMapCanvas**:
+    - Added `critic_canvas_sync` and `storage` event listeners to `ConceptMapCanvas.tsx` to react immediately to cross-panel node additions and deletions.
+  - **Documentation**:
+    - Updated [`requirements.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/requirements.md) Section 10 Stage 2 to document note conversion from the sources sidebar.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (47/47 tests passing across 9 test suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+- **Immediate Next Step**: Seek user approval for Fix 2 before proceeding to Fix 3.
+
 

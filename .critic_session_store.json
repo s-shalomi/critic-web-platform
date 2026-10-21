@@ -57,6 +57,28 @@
             "authorName": "Teacher Added",
             "text": "Updated Text Content"
           }
+        },
+        {
+          "id": "source_1792567349217_rayyl",
+          "topicId": "climate-change",
+          "orderIndex": 5,
+          "title": "Teacher Supplementary Report",
+          "content": {
+            "type": "article",
+            "authorName": "Dr. Jane Smith",
+            "text": "Supplementary findings on Arctic sea ice extent trends."
+          }
+        },
+        {
+          "id": "source_1792567349222_kn9kh",
+          "topicId": "climate-change",
+          "orderIndex": 6,
+          "title": "Updated Title",
+          "content": {
+            "type": "article",
+            "authorName": "Teacher Added",
+            "text": "Updated Text Content"
+          }
         }
       ]
     ],
@@ -91,21 +113,21 @@
     [
       "CLASS_B_2026",
       {
-        "id": "code_1792564806649",
+        "id": "code_1792567349286",
         "code": "CLASS_B_2026",
         "teacherId": "teacher-123",
-        "createdAt": "2026-10-21T06:40:06.649Z",
-        "expiresAt": "2026-11-20T06:40:06.649Z"
+        "createdAt": "2026-10-21T07:22:29.286Z",
+        "expiresAt": "2026-11-20T07:22:29.286Z"
       }
     ],
     [
       "EXP_CHEM_2026",
       {
-        "id": "code_1792564807015",
+        "id": "code_1792567349534",
         "code": "EXP_CHEM_2026",
         "teacherId": "teacher-demo",
-        "createdAt": "2026-10-21T06:40:07.015Z",
-        "expiresAt": "2026-11-20T06:40:07.015Z"
+        "createdAt": "2026-10-21T07:22:29.534Z",
+        "expiresAt": "2026-11-20T07:22:29.534Z"
       }
     ],
     [
@@ -189,7 +211,7 @@
         "topicTitle": "Climate Change",
         "currentStage": "synthesise",
         "status": "in_progress",
-        "lastActive": "2026-10-21T06:40:06.664Z"
+        "lastActive": "2026-10-21T07:22:29.290Z"
       }
     ],
     [
@@ -209,9 +231,9 @@
         "studentId": "student_434c494d4154",
         "accessCode": "CLIMATE2026",
         "topicTitle": "Climate Change",
-        "currentStage": "synthesise",
+        "currentStage": "familiarise",
         "status": "in_progress",
-        "lastActive": "2026-10-21T06:26:19.400Z"
+        "lastActive": "2026-10-21T06:50:33.772Z"
       }
     ],
     [
@@ -394,6 +416,16 @@
           "convertedToNode": false,
           "createdAt": "2026-10-10T15:41:54.107Z",
           "updatedAt": "2026-10-10T15:41:54.109Z"
+        },
+        {
+          "id": "note_1792567349177_imqbh",
+          "moduleId": "test_mod_edit",
+          "sourceId": "source-1",
+          "highlightedText": "tremendous amounts of snow",
+          "noteText": "Updated note explaining local vs regional weather",
+          "convertedToNode": false,
+          "createdAt": "2026-10-21T07:22:29.177Z",
+          "updatedAt": "2026-10-21T07:22:29.178Z"
         }
       ]
     ],
@@ -413,6 +445,16 @@
           "convertedToNode": true,
           "createdAt": "2026-10-10T15:41:54.116Z",
           "updatedAt": "2026-10-10T15:41:54.118Z"
+        },
+        {
+          "id": "note_1792567349184_bo92z",
+          "moduleId": "test_mod_456",
+          "sourceId": "source-1",
+          "highlightedText": "Record cold snow",
+          "noteText": "Weather anomaly",
+          "convertedToNode": true,
+          "createdAt": "2026-10-21T07:22:29.184Z",
+          "updatedAt": "2026-10-21T07:22:29.186Z"
         }
       ]
     ],
@@ -428,6 +470,16 @@
           "convertedToNode": false,
           "createdAt": "2026-10-10T15:41:54.122Z",
           "updatedAt": "2026-10-10T15:41:54.122Z"
+        },
+        {
+          "id": "note_client_1792567349188",
+          "moduleId": "mod_resilient_test",
+          "sourceId": "src-1",
+          "highlightedText": "Evidence snippet",
+          "noteText": "Resiliently saved note text",
+          "convertedToNode": false,
+          "createdAt": "2026-10-21T07:22:29.189Z",
+          "updatedAt": "2026-10-21T07:22:29.189Z"
         }
       ]
     ],
@@ -645,6 +697,21 @@
           "updatedAt": "2026-10-20T07:10:12.464Z"
         }
       ]
+    ],
+    [
+      "test_mod_1792567349171",
+      [
+        {
+          "id": "note_1792567349171_wicw8",
+          "moduleId": "test_mod_1792567349171",
+          "sourceId": "source-1",
+          "highlightedText": "Global Warming right now!",
+          "noteText": "The author confuses weather anomalies with climate trends.",
+          "convertedToNode": false,
+          "createdAt": "2026-10-21T07:22:29.171Z",
+          "updatedAt": "2026-10-21T07:22:29.171Z"
+        }
+      ]
     ]
   ],
   "conceptNodes": [
@@ -717,6 +784,17 @@
           "linkCount": 0,
           "createdAt": "2026-10-10T15:41:54.119Z",
           "updatedAt": "2026-10-10T15:41:54.119Z"
+        },
+        {
+          "id": "node_1792567349187_v3fu7",
+          "moduleId": "test_mod_456",
+          "text": "Weather anomaly",
+          "positionX": 304.5073447684291,
+          "positionY": 322.91881789812186,
+          "sourceNoteId": "note_1792567349184_bo92z",
+          "linkCount": 0,
+          "createdAt": "2026-10-21T07:22:29.187Z",
+          "updatedAt": "2026-10-21T07:22:29.187Z"
         }
       ]
     ],

@@ -70,6 +70,10 @@ export default function ConceptualiseStagePage() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [hoveredNoteId, setHoveredNoteId] = useState<string | null>(null);
   const [pinnedNoteId, setPinnedNoteId] = useState<string | null>(null);
+  const [convertingNoteId, setConvertingNoteId] = useState<string | null>(null);
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [tooltipPos, setTooltipPos] = useState<{ top: number; left: number; placeBelow: boolean } | null>(null);
+  const hoverLeaveTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [isSourcePanelCollapsed, setIsSourcePanelCollapsed] = useState<boolean>(false);
 
   const carouselRef = useRef<HTMLDivElement>(null);
@@ -116,24 +120,62 @@ export default function ConceptualiseStagePage() {
     const sourcesInterval = setInterval(fetchSources, 4000);
     window.addEventListener('focus', fetchSources);
 
-    // 2. Fetch Notes
-    const localSavedNotes = localStorage.getItem(notesKey);
-    if (localSavedNotes) {
+    // 2. Fetch Notes with Canvas sync verification
+    const syncNotesWithCanvas = (currentNotes: Note[]) => {
+      const canvasNodesKey = getStudentStorageKey('critic_nodes_canvas', moduleId);
+      const savedCanvas = localStorage.getItem(canvasNodesKey);
+      if (!savedCanvas) return currentNotes;
       try {
-        setNotes(JSON.parse(localSavedNotes));
+        const canvasNodes: Array<{ id: string; sourceNoteId?: string; text: string }> =
+          JSON.parse(savedCanvas);
+        return currentNotes.map((note) => {
+          if (!note.convertedToNode) return note;
+          const hasNode = canvasNodes.some(
+            (cn) =>
+              (cn.sourceNoteId && cn.sourceNoteId === note.id) ||
+              cn.text === note.noteText ||
+              cn.text === note.highlightedText
+          );
+          return hasNode ? note : { ...note, convertedToNode: false };
+        });
       } catch (e) {
-        console.error(e);
+        return currentNotes;
       }
-    }
+    };
+
+    const loadAndSyncNotes = () => {
+      const localSavedNotes = localStorage.getItem(notesKey);
+      if (localSavedNotes) {
+        try {
+          const parsed = JSON.parse(localSavedNotes);
+          const verified = syncNotesWithCanvas(parsed);
+          setNotes(verified);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    };
+
+    loadAndSyncNotes();
     fetch(`/api/modules/${moduleId}/notes`)
       .then((res) => res.json())
       .then((data) => {
-        if (data.notes && data.notes.length > 0) setNotes(data.notes);
-      });
+        if (data.notes && data.notes.length > 0) {
+          const verified = syncNotesWithCanvas(data.notes);
+          setNotes(verified);
+          localStorage.setItem(notesKey, JSON.stringify(verified));
+        }
+      })
+      .catch((err) => console.error(err));
+
+    window.addEventListener('focus', loadAndSyncNotes);
+    window.addEventListener('critic_canvas_sync', loadAndSyncNotes);
 
     return () => {
       clearInterval(sourcesInterval);
       window.removeEventListener('focus', fetchSources);
+      window.removeEventListener('focus', loadAndSyncNotes);
+      window.removeEventListener('critic_canvas_sync', loadAndSyncNotes);
     };
   }, [moduleId]);
 
@@ -154,6 +196,109 @@ export default function ConceptualiseStagePage() {
     }
   };
 
+  const calculateTooltipPosition = (targetEl: HTMLElement) => {
+    const rect = targetEl.getBoundingClientRect();
+    const tooltipWidth = 280;
+    const placeBelow = rect.top < 180;
+    const top = placeBelow ? rect.bottom + 8 : rect.top - 8;
+    const idealLeft = rect.left + rect.width / 2 - tooltipWidth / 2;
+    const left = Math.max(16, Math.min(window.innerWidth - tooltipWidth - 16, idealLeft));
+    return { top, left, placeBelow };
+  };
+
+  const handleHighlightMouseEnter = (noteId: string, el: HTMLElement) => {
+    if (hoverLeaveTimerRef.current) {
+      clearTimeout(hoverLeaveTimerRef.current);
+      hoverLeaveTimerRef.current = null;
+    }
+    if (!pinnedNoteId) {
+      setHoveredNoteId(noteId);
+      setTooltipPos(calculateTooltipPosition(el));
+    }
+  };
+
+  const handleHighlightMouseLeave = (noteId: string) => {
+    if (!pinnedNoteId) {
+      hoverLeaveTimerRef.current = setTimeout(() => {
+        setHoveredNoteId(null);
+        setTooltipPos(null);
+      }, 180);
+    }
+  };
+
+  const handleHighlightClick = (noteId: string, el: HTMLElement) => {
+    if (pinnedNoteId === noteId) {
+      setPinnedNoteId(null);
+      setHoveredNoteId(null);
+      setTooltipPos(null);
+    } else {
+      setPinnedNoteId(noteId);
+      setHoveredNoteId(noteId);
+      setTooltipPos(calculateTooltipPosition(el));
+    }
+  };
+
+  const handleCardScroll = () => {
+    if (pinnedNoteId) {
+      const el = document.querySelector(`[data-note-id="${pinnedNoteId}"]`) as HTMLElement | null;
+      if (el) {
+        setTooltipPos(calculateTooltipPosition(el));
+      } else {
+        setPinnedNoteId(null);
+        setHoveredNoteId(null);
+        setTooltipPos(null);
+      }
+    }
+  };
+
+  const handleConvertToNode = async (noteId: string) => {
+    if (convertingNoteId) return;
+    setConvertingNoteId(noteId);
+
+    const targetNote = notes.find((n) => n.id === noteId);
+
+    // 1. Optimistically update local notes
+    const notesKey = getStudentStorageKey('critic_notes', moduleId);
+    const updatedNotes = notes.map((n) => (n.id === noteId ? { ...n, convertedToNode: true } : n));
+    setNotes(updatedNotes);
+    localStorage.setItem(notesKey, JSON.stringify(updatedNotes));
+
+    // 2. Create concept node for Mind Map Canvas
+    const conceptNodeToSave = {
+      id: `node_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      moduleId,
+      text: targetNote ? targetNote.noteText || targetNote.highlightedText : 'Key Concept',
+      positionX: 200 + Math.floor(Math.random() * 200),
+      positionY: 150 + Math.floor(Math.random() * 150),
+      sourceNoteId: noteId,
+      linkCount: 0,
+    };
+
+    const canvasNodesKey = getStudentStorageKey('critic_nodes_canvas', moduleId);
+    const savedCanvasNodesStr = localStorage.getItem(canvasNodesKey);
+    const canvasNodes = savedCanvasNodesStr ? JSON.parse(savedCanvasNodesStr) : [];
+    canvasNodes.push(conceptNodeToSave);
+    localStorage.setItem(canvasNodesKey, JSON.stringify(canvasNodes));
+
+    // 3. Dispatch sync event so ConceptMapCanvas instantly renders the new node
+    window.dispatchEvent(new Event('critic_canvas_sync'));
+
+    // 4. Show success toast notification
+    setToastMsg('✨ Note converted to Concept Node! Added to Mind Map.');
+    setTimeout(() => setToastMsg(null), 3500);
+
+    // 5. Persist to server API
+    try {
+      await fetch(`/api/notes/${noteId}/convert-to-node`, {
+        method: 'POST',
+      });
+    } catch (err) {
+      console.error('Error persisting note conversion:', err);
+    } finally {
+      setConvertingNoteId(null);
+    }
+  };
+
   const handleCarouselScroll = () => {
     const container = carouselRef.current;
     if (!container || sources.length === 0) return;
@@ -161,6 +306,16 @@ export default function ConceptualiseStagePage() {
     const idx = Math.round(container.scrollLeft / cardWidth);
     if (idx >= 0 && idx < sources.length && idx !== activeSourceIdx) {
       setActiveSourceIdx(idx);
+    }
+    if (pinnedNoteId) {
+      const el = document.querySelector(`[data-note-id="${pinnedNoteId}"]`) as HTMLElement | null;
+      if (el) {
+        setTooltipPos(calculateTooltipPosition(el));
+      } else {
+        setPinnedNoteId(null);
+        setHoveredNoteId(null);
+        setTooltipPos(null);
+      }
     }
   };
 
@@ -255,43 +410,44 @@ export default function ConceptualiseStagePage() {
       if (!part.note) return <span key={index}>{part.text}</span>;
 
       const n = part.note;
-      const isHovered = hoveredNoteId === n.id;
       const isPinned = pinnedNoteId === n.id;
-      const isVisible = isHovered || isPinned;
+      const isHovered = hoveredNoteId === n.id;
 
       return (
         <span
           key={index}
-          className={`${styles.highlightedSpan} ${isPinned ? styles.pinnedSpan : ''}`}
-          onMouseEnter={() => setHoveredNoteId(n.id)}
-          onMouseLeave={() => setHoveredNoteId(null)}
+          data-note-id={n.id}
+          className={`${styles.highlightedSpan} ${isPinned ? styles.pinnedSpan : ''} ${
+            isHovered ? styles.hoveredSpan : ''
+          }`}
+          onMouseEnter={(e) => handleHighlightMouseEnter(n.id, e.currentTarget)}
+          onMouseLeave={() => handleHighlightMouseLeave(n.id)}
           onClick={(e) => {
             e.stopPropagation();
-            if (isPinned) {
-              setPinnedNoteId(null);
-              setHoveredNoteId(null);
-            } else {
-              setPinnedNoteId(n.id);
-            }
+            handleHighlightClick(n.id, e.currentTarget);
           }}
+          title={isPinned ? 'Click to unpin note' : 'Click to pin note'}
         >
           {part.text}
-
-          {isVisible && (
-            <span className={styles.hoverTooltip} onClick={(e) => e.stopPropagation()}>
-              <div className={styles.tooltipHeader}>
-                <span className={styles.tooltipLabel}>NOTE {isPinned ? '📌 (PINNED)' : ''}</span>
-              </div>
-              <p className={styles.tooltipNoteText}>{n.noteText}</p>
-            </span>
-          )}
         </span>
       );
     });
   };
 
+  const activeTooltipNote = notes.find((n) => n.id === (pinnedNoteId || hoveredNoteId));
+  const isPinned = Boolean(pinnedNoteId && activeTooltipNote?.id === pinnedNoteId);
+
   return (
-    <div className={styles.container}>
+    <div
+      className={styles.container}
+      onClick={() => {
+        if (pinnedNoteId) {
+          setPinnedNoteId(null);
+          setHoveredNoteId(null);
+          setTooltipPos(null);
+        }
+      }}
+    >
       <div className={styles.workspace}>
         {/* Left Panel: Back Navigation, Mind Map Connections Heading, Source Carousel & Agent Dock */}
         <aside
@@ -372,7 +528,11 @@ export default function ConceptualiseStagePage() {
                       const initials = getAuthorInitials(displayAuthor);
 
                       return (
-                        <div key={src.id} className={styles.carouselSourceCard}>
+                        <div
+                          key={src.id}
+                          className={styles.carouselSourceCard}
+                          onScroll={handleCardScroll}
+                        >
                           <div className={styles.carouselCardContent}>
                             <div className={styles.authorHeader}>
                               <div className={styles.authorAvatar}>{initials}</div>
@@ -647,6 +807,83 @@ export default function ConceptualiseStagePage() {
           </div>
         </div>
       )}
+
+      {/* Anchored, Non-overflowing Note Tooltip Popover */}
+      {activeTooltipNote && tooltipPos && (
+        <div
+          className={styles.hoverTooltipFixed}
+          style={{
+            top: `${tooltipPos.top}px`,
+            left: `${tooltipPos.left}px`,
+            transform: tooltipPos.placeBelow ? 'none' : 'translateY(-100%)',
+          }}
+          onMouseEnter={() => {
+            if (hoverLeaveTimerRef.current) {
+              clearTimeout(hoverLeaveTimerRef.current);
+              hoverLeaveTimerRef.current = null;
+            }
+          }}
+          onMouseLeave={() => {
+            if (!pinnedNoteId) {
+              setHoveredNoteId(null);
+              setTooltipPos(null);
+            }
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className={styles.tooltipHeader}>
+            <span className={styles.tooltipLabel}>
+              NOTE {isPinned ? '📌 (PINNED)' : ''}
+            </span>
+            {isPinned && (
+              <button
+                type="button"
+                onClick={() => {
+                  setPinnedNoteId(null);
+                  setHoveredNoteId(null);
+                  setTooltipPos(null);
+                }}
+                className={styles.closeTooltipBtn}
+                aria-label="Close note"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
+          <p className={styles.tooltipNoteText}>{activeTooltipNote.noteText}</p>
+
+          <div className={styles.tooltipFooter}>
+            {activeTooltipNote.convertedToNode ? (
+              <span className={styles.convertedBadge}>✓ Converted to Concept Node</span>
+            ) : (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleConvertToNode(activeTooltipNote.id);
+                }}
+                disabled={convertingNoteId === activeTooltipNote.id}
+                className={`${styles.convertTooltipBtn} ${
+                  convertingNoteId === activeTooltipNote.id ? styles.convertTooltipBtnLoading : ''
+                }`}
+                title="Convert this note into a Concept Node on your Mind Map"
+              >
+                {convertingNoteId === activeTooltipNote.id ? (
+                  <span className={styles.inlineSpinnerRow}>
+                    <span className={styles.spinnerMini} />
+                    Creating Node...
+                  </span>
+                ) : (
+                  '+ Convert to node'
+                )}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {toastMsg && <div className={styles.toastBanner}>{toastMsg}</div>}
     </div>
   );
 }

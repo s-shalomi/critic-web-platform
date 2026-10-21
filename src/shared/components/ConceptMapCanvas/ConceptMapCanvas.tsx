@@ -223,8 +223,12 @@ export default function ConceptMapCanvas({
     };
 
     window.addEventListener('focus', handleFocus);
+    window.addEventListener('storage', handleFocus);
+    window.addEventListener('critic_canvas_sync', handleFocus);
     return () => {
       window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('storage', handleFocus);
+      window.removeEventListener('critic_canvas_sync', handleFocus);
     };
   }, [moduleId]);
 
