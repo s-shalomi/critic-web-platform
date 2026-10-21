@@ -147,10 +147,16 @@ export default function InquireEvaluateStagePage() {
       const chatKey = getStudentStorageKey('critic_chat', moduleId);
       localStorage.setItem(chatKey, JSON.stringify(messages));
 
-      const agentCount = messages.filter((m) => m.sender === 'agent').length;
+      const studentQ = messages.filter((m) => m.sender === 'student').length;
+      const agentQ = messages.filter(
+        (m) => m.sender === 'agent' && !m.id.startsWith('msg_err')
+      ).length;
+      const markQ = messages.filter((m) => m.text && m.text.includes('?')).length;
+      const currentCount = Math.max(studentQ, agentQ, markQ);
+
       const socraticKey = getStudentStorageKey('critic_socratic_count_inquire', moduleId);
       const stored = parseInt(localStorage.getItem(socraticKey) || '0', 10);
-      const updated = Math.max(agentCount, stored);
+      const updated = Math.max(currentCount, stored);
       localStorage.setItem(socraticKey, String(updated));
       window.dispatchEvent(new Event('critic_socratic_sync'));
     }
@@ -286,7 +292,12 @@ export default function InquireEvaluateStagePage() {
     await submitMessage();
   };
 
-  const agentCount = messages.filter((m) => m.sender === 'agent').length;
+  const studentQuestions = messages.filter((m) => m.sender === 'student').length;
+  const agentQuestions = messages.filter(
+    (m) => m.sender === 'agent' && !m.id.startsWith('msg_err')
+  ).length;
+  const questionMarksCount = messages.filter((m) => m.text && m.text.includes('?')).length;
+
   const storedSocratic =
     typeof window !== 'undefined'
       ? parseInt(
@@ -296,7 +307,13 @@ export default function InquireEvaluateStagePage() {
           10
         )
       : 0;
-  const socraticCount = Math.max(agentCount, storedSocratic);
+
+  const socraticCount = Math.max(
+    studentQuestions,
+    agentQuestions,
+    questionMarksCount,
+    storedSocratic
+  );
 
   return (
     <div className={styles.container}>

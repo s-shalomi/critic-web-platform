@@ -51,8 +51,17 @@ export const StageProgressionNudge: React.FC<StageProgressionNudgeProps> = ({
 
   useEffect(() => {
     setMounted(true);
+
+    // Clean up any stale permanent dismissal from localStorage
     try {
-      const storedDismiss = sessionStorage.getItem(dismissKey) || localStorage.getItem(dismissKey);
+      localStorage.removeItem(dismissKey);
+      localStorage.removeItem(`critic_nudge_dismissed_${currentStage}`);
+    } catch {
+      // Ignore storage access error
+    }
+
+    try {
+      const storedDismiss = sessionStorage.getItem(dismissKey);
       if (storedDismiss === 'true') {
         setDismissed(true);
       }
@@ -77,7 +86,7 @@ export const StageProgressionNudge: React.FC<StageProgressionNudgeProps> = ({
       window.removeEventListener('critic_socratic_sync', readStoredCount);
       window.removeEventListener('storage', readStoredCount);
     };
-  }, [dismissKey, socraticKey]);
+  }, [dismissKey, socraticKey, currentStage]);
 
   const effectiveCount = propQuestionCount !== undefined ? propQuestionCount : internalCount;
 

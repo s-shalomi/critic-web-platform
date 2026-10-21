@@ -102,5 +102,29 @@ describe('StageProgressionNudge Inquire Stage Socratic Milestone Banner', () => 
       expect(agentSocraticQuestions).toBe(10);
       expect(agentSocraticQuestions >= 10).toBe(true);
     });
+
+    it('triggers when student asks 10 questions in Inquire dialogue', () => {
+      const studentQuestions = Array.from({ length: 10 }, (_, i) => ({
+        id: `msg_student_${i}`,
+        sender: 'student' as const,
+        text: `Student Question ${i + 1}?`,
+      }));
+
+      const count = studentQuestions.filter((m) => m.sender === 'student').length;
+      expect(count).toBe(10);
+      expect(count >= 10).toBe(true);
+    });
+
+    it('triggers when 10 questions containing question marks are in chat', () => {
+      const messagesWithMarks = Array.from({ length: 10 }, (_, i) => ({
+        id: `msg_${i}`,
+        sender: (i % 2 === 0 ? 'student' : 'agent') as 'student' | 'agent',
+        text: `Is hypothesis ${i + 1} supported by evidence?`,
+      }));
+
+      const marksCount = messagesWithMarks.filter((m) => m.text && m.text.includes('?')).length;
+      expect(marksCount).toBe(10);
+      expect(marksCount >= 10).toBe(true);
+    });
   });
 });

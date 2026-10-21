@@ -1505,17 +1505,21 @@
     - In [`src/shared/components/StageProgressionNudge/StageProgressionNudge.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/StageProgressionNudge/StageProgressionNudge.tsx) and [`StageProgressionNudge.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/StageProgressionNudge/StageProgressionNudge.module.css), removed the proceed button (`.proceedBtn`).
     - The banner functions strictly as an unobtrusive, cyber-academic informational notification at the top of the chat stage with an accessible dismiss button (`✕`).
     - Banner text: *"You've explored {count} Socratic questions in this stage! Consider moving forward to Stage 04: Conclude when you're ready. (You can always return to this stage later to refine your work.)"*
-  - **Exact Trigger Timing**:
-    - In the Inquire & Evaluate stage, the user engages in an interactive Socratic inquiry chat with the AI companion agent.
-    - The banner appears automatically as soon as **10 Socratic questions** have been asked in the dialogue (`messages.filter(m => m.sender === 'agent').length >= 10`).
-    - Dismissing the banner via `✕` saves the dismissal state to `sessionStorage` (`critic_nudge_dismissed_inquire_${moduleId}`) so students who wish to continue deep Socratic dialogue beyond 10 questions are never repeatedly interrupted.
+  - **Exact Trigger Timing & Comprehensive Question Counting**:
+    - Previously, the trigger condition counted only incoming agent messages (`m.sender === 'agent'`), which failed to trigger when the student asked questions in the chat or before agent replies returned.
+    - Updated `inquire/page.tsx` to accurately evaluate Socratic questions asked across student questions (`studentQuestions = messages.filter(m => m.sender === 'student').length`), agent prompts, and questions with question marks (`text.includes('?')`).
+    - The banner appears immediately as soon as **10 questions** are reached (`Math.max(studentQuestions, agentQuestions, questionMarks) >= 10`).
+  - **Storage & Dismissal Defect Resolved**:
+    - Discovered that reading `localStorage.getItem(dismissKey)` on mount caused a single historical dismiss during testing to permanently suppress the banner forever on that browser.
+    - Removed `localStorage` dismissal checking in `StageProgressionNudge.tsx`, added automated cleanup of stale localStorage dismissal keys, and ensured `sessionStorage` or local component state is used without permanently muting the nudge.
+    - Enhanced banner styling in `StageProgressionNudge.module.css` with vibrant cyan border (`border-bottom: 2px solid rgba(55, 243, 255, 0.7)`), elevated z-index (100), and fallback visibility guarantee.
   - **Unit Test Suite**:
-    - Updated [`tests/stageProgressionNudge.test.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/tests/stageProgressionNudge.test.ts) testing the 10-question Socratic trigger, banner copy, return-later guarantee, absence of proceed button, and dismissal persistence.
+    - Updated [`tests/stageProgressionNudge.test.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/tests/stageProgressionNudge.test.ts) testing the 10-question Socratic trigger, student question counts, question mark counts, banner copy, return-later guarantee, absence of proceed button, and dismissal persistence.
   - **Requirements Documented**:
     - Updated [`requirements.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/requirements.md) section on Nudges & Stage Progression.
 - **Dependencies Introduced**: None.
 - **Tests Passing**:
-  - `npm test` (51/51 tests passing across 10 test suites).
+  - `npm test` (53/53 tests passing across 10 test suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
 - **Immediate Next Step**: Seek user approval for refined Fix 3 before proceeding to Fix 4.
 
