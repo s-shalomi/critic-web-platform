@@ -18,6 +18,24 @@ export async function GET(
   }
 }
 
+export async function PUT(
+  request: Request,
+  { params }: { params: { moduleId: string } }
+) {
+  try {
+    const body = await request.json();
+    const text = body.synthesisText !== undefined ? body.synthesisText : (body.synthesisDraft !== undefined ? body.synthesisDraft : '');
+    memorySynthesisStore.set(params.moduleId, String(text));
+    return NextResponse.json({
+      success: true,
+      saved: true,
+      synthesisDraft: text,
+    });
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to save synthesis draft' }, { status: 500 });
+  }
+}
+
 export async function POST(
   request: Request,
   { params }: { params: { moduleId: string } }

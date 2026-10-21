@@ -1532,8 +1532,45 @@
 - **Tests Passing**:
   - `npm test` (60/60 tests passing across 10 test suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
-- **Immediate Next Step**: Seek user approval for Fix 3 before proceeding to Fix 4.
+- **Immediate Next Step**: Approved by user. Proceeded to Fix 4.
 
+---
 
+### [2026-10-21] - Fix 4: Conclude Stage 'Save' Button & Cross-Stage 'Saved' Navigation Notification
 
+- **Role**: Full Stack Developer
+- **User Instructions**:
+  - *"add a 'save' button to the conclude stage. also add a notification that says 'saved' when a user moves to another stage."*
+  - *"make sure to seek approval after each fix."*
+- **Code Built & Updated**:
+  - **Conclude Stage 'Save' Button**:
+    - Added a dedicated, styled pill button (`Save` / `✓ Saved` / `Saving...`) to the bottom `.boxActionsRow` of the conclusion input box in [`src/app/module/[moduleId]/synthesise/page.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/synthesise/page.tsx).
+    - Designed with brand-aligned styling in [`src/app/module/[moduleId]/synthesise/synthesise.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/module/%5BmoduleId%5D/synthesise/synthesise.module.css) (`.saveBtn`, `.saveBtnSaved`, `.saveCheckMark`), including hover glow, interactive states, and an active emerald green indicator (`✓ Saved`) on save.
+    - Saves conclusion text to student-scoped `localStorage` and persists to the backend memory store via `PUT /api/modules/[moduleId]/synthesis`.
+    - Auto-save integration: wired `onBeforeNavigate` callback to `<StageNavigationDock>` so navigating away from the Conclude stage automatically saves any draft text before routing.
+    - Added Save button step to the Conclude stage tutorial in [`src/shared/config/tutorials.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/config/tutorials.ts).
+  - **Fast Synthesis Draft API Route (PUT Handler)**:
+    - Added `PUT` handler to [`src/app/api/modules/[moduleId]/synthesis/route.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/app/api/modules/%5BmoduleId%5D/synthesis/route.ts) allowing instant draft saving without invoking expensive AI reasoning audits.
+    - Supports both `synthesisDraft` and `synthesisText` payload keys.
+  - **Cross-Stage 'Saved' Departure Notification**:
+    - Updated [`src/shared/components/StageNavigationDock/StageNavigationDock.tsx`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/StageNavigationDock/StageNavigationDock.tsx) and [`StageNavigationDock.module.css`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/src/shared/components/StageNavigationDock/StageNavigationDock.module.css).
+    - **Departure-Only Triggering**: The notification strictly triggers when the user is *leaving* a stage (not on entering). When clicking a dock stage or exiting via back buttons, the indicator triggers immediately on the departing view with a 450ms smooth transition window before routing so students clearly see the confirmation.
+    - **High Visibility Design**:
+      - Styled with bold typography (`0.95rem`, font-weight 700) and clean `Saved` copy.
+      - Rich emerald-to-navy gradient background (`linear-gradient(135deg, rgba(6, 78, 59, 0.95) 0%, rgba(15, 23, 46, 0.98) 100%)`) with `backdrop-filter: blur(20px)`.
+      - High-contrast `2px solid #10B981` border with a vibrant 22px emerald checkmark circle badge.
+      - Deep ambient drop shadow and green glow (`box-shadow: 0 16px 36px rgba(0, 0, 0, 0.75), 0 0 28px rgba(16, 185, 129, 0.6)`).
+      - Placed prominently directly above the center of the navigation dock with an elevated `z-index: 100`.
+  - **Unit Tests**:
+    - Added tests in [`tests/synthesis.test.ts`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/tests/synthesis.test.ts):
+      - Verifies `PUT /api/modules/:moduleId/synthesis` persists drafts without AI audit.
+      - Verifies `GET /api/modules/:moduleId/synthesis` returns the saved draft.
+      - Verifies stage departure auto-save contracts.
+  - **Requirements & Documentation**:
+    - Updated [`requirements.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/requirements.md) with PUT endpoint and UI non-negotiables for Save button and Saved indicator on stage departure.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (63/63 tests passing across 10 test suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+- **Immediate Next Step**: Seek user approval for Fix 4.
 

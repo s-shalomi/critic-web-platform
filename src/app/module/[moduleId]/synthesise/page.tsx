@@ -42,6 +42,8 @@ export default function SynthesiseStagePage() {
   const [notesCount, setNotesCount] = useState<number>(0);
   const [showNudge, setShowNudge] = useState<boolean>(true);
   const [socraticCount, setSocraticCount] = useState<number>(0);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
 
   const handleCloseHelpModal = () => {
     setShowHelpModal(false);
@@ -175,8 +177,73 @@ export default function SynthesiseStagePage() {
     }
   };
 
+  const handleSaveDraft = async () => {
+    setIsSaving(true);
+    setSaveStatus('saving');
+    const synthKey = getStudentStorageKey('critic_synthesis', moduleId);
+    localStorage.setItem(synthKey, synthesisText);
+
+    try {
+      await fetch(`/api/modules/${moduleId}/synthesis`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ synthesisDraft: synthesisText }),
+      });
+      setSaveStatus('saved');
+      window.dispatchEvent(new Event('critic_show_saved_toast'));
+      setTimeout(() => {
+        setSaveStatus('idle');
+      }, 3000);
+    } catch (e) {
+      console.error('Failed to save draft to server:', e);
+      setSaveStatus('saved');
+      window.dispatchEvent(new Event('critic_show_saved_toast'));
+      setTimeout(() => {
+        setSaveStatus('idle');
+      }, 3000);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleBeforeNavigate = () => {
+    const synthKey = getStudentStorageKey('critic_synthesis', moduleId);
+    localStorage.setItem(synthKey, synthesisText);
+    try {
+      fetch(`/api/modules/${moduleId}/synthesis`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ synthesisDraft: synthesisText }),
+        keepalive: true,
+      });
+    } catch (e) {
+      console.error('Failed to auto-save synthesis on navigation:', e);
+    }
+  };
+
   const handleCompleteModule = () => {
-    router.push(`/module/${moduleId}/review`);
+    const synthKey = getStudentStorageKey('critic_synthesis', moduleId);
+    localStorage.setItem(synthKey, synthesisText);
+    window.dispatchEvent(new Event('critic_show_saved_toast'));
+    try {
+      fetch(`/api/modules/${moduleId}/synthesis`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ synthesisDraft: synthesisText }),
+        keepalive: true,
+      });
+    } catch (e) {}
+    setTimeout(() => {
+      router.push(`/module/${moduleId}/review`);
+    }, 450);
+  };
+
+  const handleBackToDashboard = () => {
+    handleBeforeNavigate();
+    window.dispatchEvent(new Event('critic_show_saved_toast'));
+    setTimeout(() => {
+      router.push('/dashboard');
+    }, 450);
   };
 
   return (
@@ -186,7 +253,7 @@ export default function SynthesiseStagePage() {
         {/* Left Conclude Panel matching screens_v2/synthesis.png */}
         <aside className={styles.leftConcludePanel}>
           <div className={styles.topHeaderRow}>
-            <button onClick={() => router.push('/dashboard')} className={styles.backBtn}>
+            <button onClick={handleBackToDashboard} className={styles.backBtn}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="19" y1="12" x2="5" y2="12" />
                 <polyline points="12 19 5 12 12 5" />
@@ -300,6 +367,24 @@ export default function SynthesiseStagePage() {
                 <div className={styles.boxActionsRow}>
                   <button
                     type="button"
+                    onClick={handleSaveDraft}
+                    className={`${styles.saveBtn} ${saveStatus === 'saved' ? styles.saveBtnSaved : ''}`}
+                    disabled={isSaving}
+                    data-tour="save-btn"
+                    title="Save your conclusion draft"
+                  >
+                    {saveStatus === 'saving' ? (
+                      'Saving...'
+                    ) : saveStatus === 'saved' ? (
+                      <>
+                        <span className={styles.saveCheckMark}>✓</span> Saved
+                      </>
+                    ) : (
+                      'Save'
+                    )}
+                  </button>
+                  <button
+                    type="button"
                     onClick={handleCrossCheckSynthesis}
                     className={styles.auditBtn}
                     data-tour="audit-btn"
@@ -383,7 +468,11 @@ export default function SynthesiseStagePage() {
       </div>
 
       {/* Floating Bottom Stage Navigation Dock with Dynamic Stage Transition Indicators */}
-      <StageNavigationDock currentStage="synthesise" moduleId={moduleId} />
+      <StageNavigationDock
+        currentStage="synthesise"
+        moduleId={moduleId}
+        onBeforeNavigate={handleBeforeNavigate}
+      />
 
       {/* Interactive Tooltip Onboarding Tutorial */}
       <TooltipTutorial

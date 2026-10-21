@@ -123,6 +123,13 @@ export const STAGE_TUTORIAL_STEPS: Record<StageKey, TutorialStep[]> = {
       placement: 'right',
     },
     {
+      targetSelector: '[data-tour="save-btn"]',
+      title: 'Save Progress',
+      content:
+        "Click 'Save' at any time to save your conclusion draft. Your work also auto-saves whenever you navigate between stages.",
+      placement: 'top',
+    },
+    {
       targetSelector: '[data-tour="audit-btn"]',
       title: 'AI Reasoning Audit',
       content:

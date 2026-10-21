@@ -271,6 +271,7 @@ This is only a baseline and not exhaustive.
 | GET          | /api/modules/:moduleId/inquire             | Chat history and stage state for the Inquire/Evaluate stage.                                |
 | POST         | /api/modules/:moduleId/inquire/messages    | Send a student message; returns the agent's Socratic/Devil's Advocate reply                 |
 | GET          | /api/modules/:moduleId/synthesis           | Existing synthesis draft, if any, and stage state.                                          |
+| PUT          | /api/modules/:moduleId/synthesis           | Save conclusion draft without invoking AI cross-check audit                                 |
 | POST         | /api/modules/:moduleId/synthesis           | Submit or update the synthesis draft; triggers the agent's cross-check against prior stages |
 | POST         | /api/modules/:moduleId/agent/hint          | Requests a Socratic hint from the avatar in the Familiarise/Conceptualise stages            |
 | GET          | /api/modules/:moduleId/review              | Retrieve review stats and summary if already generated.                                     |
@@ -289,6 +290,8 @@ UI non-negotiables:
 - All UI MUST be accessible and comply with WCAG standards. 
 - All interactive elements must have state transitions when hovered over or clicked on.
 - The dock on the bottom should be clearly highlighted to indicate navigation (to next and previous stages).
+- The Conclude (Synthesis) stage includes a dedicated 'Save' button allowing students to manually persist their draft conclusion without triggering an AI audit.
+- Moving between stages displays a high-visibility '✓ Saved' notification pill above the navigation dock when leaving a stage (not on entering) confirming progress persistence.
 
 Note that the UI is subject to change, so implement it with the flexibility to be changed later on.
 

@@ -79,6 +79,28 @@
             "authorName": "Teacher Added",
             "text": "Updated Text Content"
           }
+        },
+        {
+          "id": "source_1792584501327_z7ggc",
+          "topicId": "climate-change",
+          "orderIndex": 7,
+          "title": "Teacher Supplementary Report",
+          "content": {
+            "type": "article",
+            "authorName": "Dr. Jane Smith",
+            "text": "Supplementary findings on Arctic sea ice extent trends."
+          }
+        },
+        {
+          "id": "source_1792584501343_crz6t",
+          "topicId": "climate-change",
+          "orderIndex": 8,
+          "title": "Updated Title",
+          "content": {
+            "type": "article",
+            "authorName": "Teacher Added",
+            "text": "Updated Text Content"
+          }
         }
       ]
     ],
@@ -98,7 +120,7 @@
         "id": "code-1",
         "code": "CLIMATE2026",
         "teacherId": "teacher-demo",
-        "createdAt": "2026-10-06T15:13:03.136Z"
+        "createdAt": "2026-10-21T11:07:27.486Z"
       }
     ],
     [
@@ -107,27 +129,27 @@
         "id": "code-2",
         "code": "STUDENT123",
         "teacherId": "teacher-demo",
-        "createdAt": "2026-10-06T15:13:03.138Z"
+        "createdAt": "2026-10-21T11:07:27.489Z"
       }
     ],
     [
       "CLASS_B_2026",
       {
-        "id": "code_1792568453841",
+        "id": "code_1792584868540",
         "code": "CLASS_B_2026",
         "teacherId": "teacher-123",
-        "createdAt": "2026-10-21T07:40:53.841Z",
-        "expiresAt": "2026-11-20T07:40:53.841Z"
+        "createdAt": "2026-10-21T12:14:28.540Z",
+        "expiresAt": "2026-11-20T12:14:28.540Z"
       }
     ],
     [
       "EXP_CHEM_2026",
       {
-        "id": "code_1792568454502",
+        "id": "code_1792584869005",
         "code": "EXP_CHEM_2026",
         "teacherId": "teacher-demo",
-        "createdAt": "2026-10-21T07:40:54.502Z",
-        "expiresAt": "2026-11-20T07:40:54.502Z"
+        "createdAt": "2026-10-21T12:14:29.005Z",
+        "expiresAt": "2026-11-20T12:14:29.005Z"
       }
     ],
     [
@@ -211,7 +233,7 @@
         "topicTitle": "Climate Change",
         "currentStage": "synthesise",
         "status": "in_progress",
-        "lastActive": "2026-10-21T07:40:53.850Z"
+        "lastActive": "2026-10-21T12:14:28.551Z"
       }
     ],
     [
@@ -231,9 +253,9 @@
         "studentId": "student_434c494d4154",
         "accessCode": "CLIMATE2026",
         "topicTitle": "Climate Change",
-        "currentStage": "conceptualise",
+        "currentStage": "synthesise",
         "status": "in_progress",
-        "lastActive": "2026-10-21T07:33:02.562Z"
+        "lastActive": "2026-10-21T12:10:50.494Z"
       }
     ],
     [
@@ -385,7 +407,7 @@
           "noteText": "this is accurate but elon musk makes it seem like fossil fuels are the only source of climate change",
           "convertedToNode": true,
           "createdAt": "2026-10-20T03:00:32.945Z",
-          "updatedAt": "2026-10-21T07:32:33.765Z"
+          "updatedAt": "2026-10-21T07:47:06.790Z"
         }
       ]
     ],
@@ -712,6 +734,36 @@
           "updatedAt": "2026-10-21T07:22:29.171Z"
         }
       ]
+    ],
+    [
+      "mod_convert_1792582744014",
+      [
+        {
+          "id": "note_1792582744015_dgu3w",
+          "moduleId": "mod_convert_1792582744014",
+          "sourceId": "source-1",
+          "highlightedText": "polar vortex",
+          "noteText": "Polar vortex instability caused by Arctic warming",
+          "convertedToNode": true,
+          "createdAt": "2026-10-21T11:39:04.015Z",
+          "updatedAt": "2026-10-21T11:39:04.018Z"
+        }
+      ]
+    ],
+    [
+      "mod_convert_1792584501238",
+      [
+        {
+          "id": "note_1792584501238_ooyku",
+          "moduleId": "mod_convert_1792584501238",
+          "sourceId": "source-1",
+          "highlightedText": "polar vortex",
+          "noteText": "Polar vortex instability caused by Arctic warming",
+          "convertedToNode": true,
+          "createdAt": "2026-10-21T12:08:21.238Z",
+          "updatedAt": "2026-10-21T12:08:21.245Z"
+        }
+      ]
     ]
   ],
   "conceptNodes": [
@@ -833,6 +885,14 @@
     [
       "mod_climate-change_student_4a4552494341",
       []
+    ],
+    [
+      "mod_clean_canvas_1792582744004",
+      []
+    ],
+    [
+      "mod_clean_canvas_1792584501228",
+      []
     ]
   ],
   "conceptLinks": [
@@ -870,6 +930,14 @@
     ],
     [
       "mod_climate-change_student_4a4552494341",
+      []
+    ],
+    [
+      "mod_clean_canvas_1792582744004",
+      []
+    ],
+    [
+      "mod_clean_canvas_1792584501228",
       []
     ]
   ],
@@ -1406,6 +1474,16 @@
         "agentAppearance": "crimson",
         "avatarName": "Blaze",
         "updatedAt": "2026-10-14T05:08:51.106Z"
+      }
+    ],
+    [
+      "student_434c494d4154",
+      {
+        "studentId": "student_434c494d4154",
+        "agentPersonality": "Witty Challenger",
+        "agentAppearance": "violet",
+        "avatarName": "Nova",
+        "updatedAt": "2026-10-21T11:22:25.717Z"
       }
     ]
   ]

@@ -35,6 +35,21 @@ export const StageNavigationDock: React.FC<StageNavigationDockProps> = ({
 }) => {
   const router = useRouter();
   const [navigatingStage, setNavigatingStage] = useState<StageId | null>(null);
+  const [showSavedToast, setShowSavedToast] = useState<boolean>(false);
+
+  // Listen for explicit live save events
+  useEffect(() => {
+    const handleTrigger = () => {
+      setShowSavedToast(true);
+      const timer = setTimeout(() => {
+        setShowSavedToast(false);
+      }, 2500);
+      return () => clearTimeout(timer);
+    };
+
+    window.addEventListener('critic_show_saved_toast', handleTrigger);
+    return () => window.removeEventListener('critic_show_saved_toast', handleTrigger);
+  }, []);
 
   // Pre-fetch all stage chunks in advance for instantaneous transitions
   useEffect(() => {
@@ -55,6 +70,9 @@ export const StageNavigationDock: React.FC<StageNavigationDockProps> = ({
 
     setNavigatingStage(stage.id);
 
+    // Show saved indicator immediately on leaving current stage (not on entering)
+    setShowSavedToast(true);
+
     if (onBeforeNavigate) {
       try {
         onBeforeNavigate(stage.id);
@@ -69,11 +87,27 @@ export const StageNavigationDock: React.FC<StageNavigationDockProps> = ({
       // Safe fallback
     }
 
-    router.push(`/module/${moduleId}/${stage.path}`);
+    // Brief delay so student visibly sees the "Progress Saved" confirmation before routing away
+    setTimeout(() => {
+      router.push(`/module/${moduleId}/${stage.path}`);
+    }, 450);
   };
 
   return (
     <div className={`${styles.stageNavWrapper} ${className}`} data-tour="stage-dock">
+      {/* 'Saved' Floating Notification Toast */}
+      {showSavedToast && (
+        <div
+          className={styles.savedNotification}
+          role="status"
+          aria-live="polite"
+          data-testid="saved-notification"
+        >
+          <span className={styles.savedIcon}>✓</span>
+          <span>Saved</span>
+        </div>
+      )}
+
       <nav className={styles.stageNavBar} aria-label="Module stages navigation dock">
         {/* Animated Top Progress Bar when jumping stages */}
         {navigatingStage && (
