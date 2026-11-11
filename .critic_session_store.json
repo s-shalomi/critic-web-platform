@@ -69,21 +69,21 @@
     [
       "CLASS_B_2026",
       {
-        "id": "code_1792584868540",
+        "id": "code_1794407716570",
         "code": "CLASS_B_2026",
         "teacherId": "teacher-123",
-        "createdAt": "2026-10-21T12:14:28.540Z",
-        "expiresAt": "2026-11-20T12:14:28.540Z"
+        "createdAt": "2026-11-11T14:35:16.570Z",
+        "expiresAt": "2026-12-11T14:35:16.570Z"
       }
     ],
     [
       "EXP_CHEM_2026",
       {
-        "id": "code_1792584869005",
+        "id": "code_1794407717299",
         "code": "EXP_CHEM_2026",
         "teacherId": "teacher-demo",
-        "createdAt": "2026-10-21T12:14:29.005Z",
-        "expiresAt": "2026-11-20T12:14:29.005Z"
+        "createdAt": "2026-11-11T14:35:17.299Z",
+        "expiresAt": "2026-12-11T14:35:17.299Z"
       }
     ],
     [
@@ -165,6 +165,16 @@
         "createdAt": "2026-10-21T14:26:29.593Z",
         "expiresAt": "2026-11-20T14:26:29.593Z"
       }
+    ],
+    [
+      "PRAC2",
+      {
+        "id": "code_1792594822351",
+        "code": "PRAC2",
+        "teacherId": "teacher-demo",
+        "createdAt": "2026-10-21T15:00:22.351Z",
+        "expiresAt": "2026-11-20T15:00:22.351Z"
+      }
     ]
   ],
   "studentProgress": [
@@ -187,7 +197,7 @@
         "topicTitle": "Climate Change",
         "currentStage": "synthesise",
         "status": "in_progress",
-        "lastActive": "2026-10-21T12:14:28.551Z"
+        "lastActive": "2026-11-11T14:35:16.579Z"
       }
     ],
     [
@@ -207,9 +217,9 @@
         "studentId": "student_434c494d4154",
         "accessCode": "CLIMATE2026",
         "topicTitle": "Climate Change",
-        "currentStage": "synthesise",
-        "status": "in_progress",
-        "lastActive": "2026-10-21T12:10:50.494Z"
+        "currentStage": "review",
+        "status": "completed",
+        "lastActive": "2026-11-04T05:28:31.067Z"
       }
     ],
     [
@@ -288,6 +298,28 @@
         "status": "in_progress",
         "lastActive": "2026-10-21T14:58:32.833Z"
       }
+    ],
+    [
+      "PRAC2",
+      {
+        "studentId": "student_5052414332",
+        "accessCode": "PRAC2",
+        "topicTitle": "Climate Change",
+        "currentStage": "familiarise",
+        "status": "in_progress",
+        "lastActive": "2026-10-22T01:05:08.498Z"
+      }
+    ],
+    [
+      "DEMO",
+      {
+        "studentId": "student_44454d4f",
+        "accessCode": "DEMO",
+        "topicTitle": "Climate Change",
+        "currentStage": "review",
+        "status": "completed",
+        "lastActive": "2026-10-22T01:16:27.631Z"
+      }
     ]
   ],
   "notes": [
@@ -355,24 +387,24 @@
           "updatedAt": "2026-10-20T02:58:33.744Z"
         },
         {
-          "id": "note_1792465192963_cyivz",
+          "id": "note_1793769837283_htg6r",
           "moduleId": "mod_climate-change_student_434c494d4154",
           "sourceId": "source_1791954012810_4ia3m",
           "highlightedText": "(eg farming) has no meaningful impact on climate change",
-          "noteText": "misleading claim - farming releases methane",
+          "noteText": "misleading claim, farming releases methane",
           "convertedToNode": true,
-          "createdAt": "2026-10-20T02:59:52.963Z",
-          "updatedAt": "2026-10-21T07:33:50.396Z"
+          "createdAt": "2026-11-04T05:23:57.283Z",
+          "updatedAt": "2026-11-04T05:25:13.519Z"
         },
         {
-          "id": "note_1792465232945_eb3fx",
+          "id": "note_1793769960360_spbv5",
           "moduleId": "mod_climate-change_student_434c494d4154",
           "sourceId": "source_1791954012810_4ia3m",
           "highlightedText": "Overwhelmingly, the risk of climate change is due to moving billions of tons of carbon from deep underground into the atmosphere",
           "noteText": "this is accurate but elon musk makes it seem like fossil fuels are the only source of climate change",
-          "convertedToNode": true,
-          "createdAt": "2026-10-20T03:00:32.945Z",
-          "updatedAt": "2026-10-21T07:47:06.790Z"
+          "convertedToNode": false,
+          "createdAt": "2026-11-04T05:26:00.360Z",
+          "updatedAt": "2026-11-04T05:26:00.360Z"
         }
       ]
     ],
@@ -764,6 +796,31 @@
           "updatedAt": "2026-10-21T14:48:32.159Z"
         }
       ]
+    ],
+    [
+      "mod_climate-change_student_44454d4f",
+      [
+        {
+          "id": "note_1792631512278_2nbax",
+          "moduleId": "mod_climate-change_student_44454d4f",
+          "sourceId": "source_1791954012810_4ia3m",
+          "highlightedText": "eg farming",
+          "noteText": "releases methane",
+          "convertedToNode": true,
+          "createdAt": "2026-10-22T01:11:52.278Z",
+          "updatedAt": "2026-10-22T01:12:41.617Z"
+        },
+        {
+          "id": "note_1792631555844_n03rn",
+          "moduleId": "mod_climate-change_student_44454d4f",
+          "sourceId": "source_1791954012810_4ia3m",
+          "highlightedText": "meaningful impac",
+          "noteText": "elon musk cant decide whats meaningful",
+          "convertedToNode": true,
+          "createdAt": "2026-10-22T01:12:35.844Z",
+          "updatedAt": "2026-10-22T01:13:25.012Z"
+        }
+      ]
     ]
   ],
   "conceptNodes": [
@@ -897,6 +954,10 @@
     [
       "mod_climate-change_student_505241435449",
       []
+    ],
+    [
+      "mod_climate-change_student_44454d4f",
+      []
     ]
   ],
   "conceptLinks": [
@@ -946,6 +1007,10 @@
     ],
     [
       "mod_climate-change_student_505241435449",
+      []
+    ],
+    [
+      "mod_climate-change_student_44454d4f",
       []
     ]
   ],
@@ -1529,6 +1594,122 @@
           }
         ]
       }
+    ],
+    [
+      "mod_climate-change_student_44454d4f",
+      {
+        "moduleId": "mod_climate-change_student_44454d4f",
+        "conceptsIdentified": 2,
+        "assumptionsChallenged": 2,
+        "questionsAsked": 2,
+        "misinformationEvaluations": 0,
+        "criticalThinkingScore": 74,
+        "synthesisScore": 66,
+        "mbtiPersonalityTitle": "The Empiricist Investigator (E-S-R-T)",
+        "mbtiPersonalitySummary": "You approach complex claims with rigorous empirical scrutiny. Rather than accepting rhetoric at face value, you systematically map conceptual links, interrogate underlying assumptions, and demand verified evidence before forming conclusions.",
+        "badges": [
+          {
+            "id": "badge-concepts",
+            "title": "Master Conceptualizer",
+            "description": "Identified 2 concept nodes",
+            "icon": "🧠",
+            "unlocked": true
+          },
+          {
+            "id": "badge-assumptions",
+            "title": "Assumption Slayer",
+            "description": "Challenged 2 implicit biases",
+            "icon": "🛡️",
+            "unlocked": true
+          },
+          {
+            "id": "badge-questions",
+            "title": "Socratic Inquirer",
+            "description": "Asked 2 probing questions",
+            "icon": "❓",
+            "unlocked": true
+          },
+          {
+            "id": "badge-misinfo",
+            "title": "Truth Auditor",
+            "description": "Evaluated 0 counter-claims",
+            "icon": "🔍",
+            "unlocked": true
+          },
+          {
+            "id": "badge-critical",
+            "title": "High-Velocity Reasoner",
+            "description": "Critical Thinking Score: 74/100",
+            "icon": "⚡",
+            "unlocked": true
+          },
+          {
+            "id": "badge-synthesis",
+            "title": "Synthesis Master",
+            "description": "Synthesis Quality Score: 66/100",
+            "icon": "🏆",
+            "unlocked": true
+          }
+        ]
+      }
+    ],
+    [
+      "mod_climate-change_student_434c494d4154",
+      {
+        "moduleId": "mod_climate-change_student_434c494d4154",
+        "conceptsIdentified": 2,
+        "assumptionsChallenged": 3,
+        "questionsAsked": 72,
+        "misinformationEvaluations": 12,
+        "criticalThinkingScore": 100,
+        "synthesisScore": 65,
+        "mbtiPersonalityTitle": "The Socratic Questioner (S-Q-P-I)",
+        "mbtiPersonalitySummary": "You use targeted inquiry as your primary tool for discovery. Unafraid to challenge assumptions or probe counter-arguments, you uncover underlying truths by asking relentless, clarifying questions.",
+        "badges": [
+          {
+            "id": "badge-concepts",
+            "title": "Master Conceptualizer",
+            "description": "Identified 2 concept nodes",
+            "icon": "🧠",
+            "unlocked": true
+          },
+          {
+            "id": "badge-assumptions",
+            "title": "Assumption Slayer",
+            "description": "Challenged 3 implicit biases",
+            "icon": "🛡️",
+            "unlocked": true
+          },
+          {
+            "id": "badge-questions",
+            "title": "Socratic Inquirer",
+            "description": "Asked 72 probing questions",
+            "icon": "❓",
+            "unlocked": true
+          },
+          {
+            "id": "badge-misinfo",
+            "title": "Truth Auditor",
+            "description": "Evaluated 12 counter-claims",
+            "icon": "🔍",
+            "unlocked": true
+          },
+          {
+            "id": "badge-critical",
+            "title": "High-Velocity Reasoner",
+            "description": "Critical Thinking Score: 100/100",
+            "icon": "⚡",
+            "unlocked": true
+          },
+          {
+            "id": "badge-synthesis",
+            "title": "Synthesis Master",
+            "description": "Synthesis Quality Score: 65/100",
+            "icon": "🏆",
+            "unlocked": true
+          }
+        ]
+      }
     ]
   ],
   "agentPreferences": [
@@ -1547,9 +1728,9 @@
       {
         "studentId": "student_434c494d4154",
         "agentPersonality": "Witty Challenger",
-        "agentAppearance": "violet",
-        "avatarName": "Nova",
-        "updatedAt": "2026-10-21T11:22:25.717Z"
+        "agentAppearance": "emerald",
+        "avatarName": "Echo",
+        "updatedAt": "2026-11-04T05:17:14.270Z"
       }
     ],
     [
@@ -1560,6 +1741,26 @@
         "agentAppearance": "violet",
         "avatarName": "Nova",
         "updatedAt": "2026-10-21T14:42:38.075Z"
+      }
+    ],
+    [
+      "student_5052414332",
+      {
+        "studentId": "student_5052414332",
+        "agentPersonality": "Friendly",
+        "agentAppearance": "aria",
+        "avatarName": "Aria",
+        "updatedAt": "2026-10-21T15:01:46.437Z"
+      }
+    ],
+    [
+      "student_44454d4f",
+      {
+        "studentId": "student_44454d4f",
+        "agentPersonality": "Friendly",
+        "agentAppearance": "emerald",
+        "avatarName": "Echo",
+        "updatedAt": "2026-10-22T01:10:19.864Z"
       }
     ]
   ]

@@ -1611,5 +1611,31 @@
 - **Tests Passing**:
   - `npm test` (68/68 tests passing across 11 test suites).
   - `npx tsc --noEmit` (clean typecheck, 0 errors).
-- **Immediate Next Step**: Seek user approval for this fix before committing and pushing.
+- **Immediate Next Step**: Approved and pushed to `feat/iteration-3`. Proceeded to new access code stage initialization fix (commit `0bf66b8`).
+
+---
+
+### [2026-11-12] - Main Branch & Production Root README Deployment
+
+- **Role**: Full Stack Developer
+- **User Instruction**:
+  - *"create a main branch as the default branh on remote. make sure the latest version of the app is on the main branch. ensure a root readme that shows a user how to run and use the app exists"*
+- **Code Built & Updated**:
+  - **Comprehensive Root README.md**:
+    - Enhanced root [`README.md`](file:///c:/Users/sshal/OneDrive/Documents/uq/5th%20year/thesis/critic%20app/README.md) with comprehensive guides on running and using the app.
+    - Added step-by-step Quick Start instructions (cloning, dependency installation, `.env` setup, `npm run dev`, and `npm run build`).
+    - Added detailed walkthroughs for both user roles:
+      - **Student Journey**: Access code authentication, topic selection, persona customization (avatar & tone), Stage 01 Annotate, Stage 02 Mind Map (with note-to-node conversion & link growth), Stage 03 Challenge (Socratic AI & milestone progression nudges), Stage 04 Conclude (draft saving & AI reasoning audit), Stage 05 Review & Case Debrief (metrics, badges, exportable MBTI card).
+      - **Teacher Portal**: Teacher credential login, custom access code generation, real-time classroom progress tracking, and dynamic source CRUD management.
+    - Documented default test credentials (`CLIMATE2026`, `STUDENT123`, `teacher@school.edu` / `TeacherPass2026!`).
+    - Added testing and type-checking verification instructions (`npm test`, `npx tsc --noEmit`).
+  - **Branch Synchronization (`main`)**:
+    - Fast-forwarded local `main` branch to match `feat/iteration-3` containing all accumulated features, bug fixes, automated test suites, and documentation.
+    - Pushed `main` to remote `origin`.
+- **Dependencies Introduced**: None.
+- **Tests Passing**:
+  - `npm test` (68/68 tests passing across 11 test suites).
+  - `npx tsc --noEmit` (clean typecheck, 0 errors).
+- **Immediate Next Step**: Verify remote main branch and guide user on default branch configuration on GitHub.
+
 
